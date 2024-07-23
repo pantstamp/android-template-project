@@ -17,6 +17,7 @@ class LibraryCorePlugin : Plugin<Project> {
 
             with(pluginManager) {
                 apply(libs.findPlugin("android.library").get().get().pluginId)
+                apply(libs.findPlugin("kotlin.android").get().get().pluginId)
                 apply(KotlinBasePlugin::class.java)
                 apply(LintPlugin::class.java)
             }

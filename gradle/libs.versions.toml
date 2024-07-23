@@ -1,4 +1,7 @@
 [versions]
+
+java-version = "17"
+
 android-gradlePlugin = "8.4.2"
 androidx-activityCompose = "1.9.0"
 androidx-annotation = "1.8.0"
@@ -6,10 +9,12 @@ androidx-core-ktx = "1.13.1"
 androidx-datastore = "1.1.1"
 androidx-lifecycle = "2.8.3"
 androidx-navigation = "2.8.0-beta05"
+
+koin = "3.6.0-Beta4"
+
 benManesVersions = "0.51.0"
 buildkonfig = "0.15.1"
 compose = "2024.06.00"
-java-version = "17"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
@@ -19,7 +24,7 @@ firebasePerfPlugin = "1.4.2"
 firebaseCrashlyticsPlugin = "3.0.2"
 truth = "1.4.2"
 kermit = "2.0.3"
-koin = "3.6.0-Beta4"
+
 konsist = "0.15.1"
 kotlin = "2.0.0"
 kotlinx-collections-immutable = "0.3.7"
@@ -36,6 +41,14 @@ sqlDelight = "2.0.2"
 turbine = "1.1.0"
 
 [libraries]
+
+# Koin
+koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
+koin-core = { group = "io.insert-koin", name = "koin-core" }
+koin-test = { group = "io.insert-koin", name = "koin-test" }
+koin-android = { group = "io.insert-koin", name = "koin-android" }
+koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
+
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradlePlugin" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activityCompose" }
 androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "androidx-annotation" }
@@ -44,33 +57,36 @@ androidx-datastore-preferences-core = { group = "androidx.datastore", name = "da
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidx-navigation" }
-compose-animation = { group = "androidx.compose.animation", name = "animation" }
+
+# Compose
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose" }
+
+compose-animation = { group = "androidx.compose.animation", name = "animation" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
+
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
+
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 kermit = { group = "co.touchlab", name = "kermit", version.ref = "kermit" }
 kermit-test = { group = "co.touchlab", name = "kermit-test", version.ref = "kermit" }
-koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
-koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
-koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
-koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
+
 konsist = { group = "com.lemonappdev", name = "konsist", version.ref = "konsist" }
 kotlin-compose-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -115,8 +131,10 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqlDelight" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-android-application-compose = { id = "com.pantelisstampoulis.android.application.compose" }
-android-application-core = { id = "com.pantelisstampoulis.android.application.core" }
+
+# Custom Plugins
+application-core = { id = "com.pantelisstampoulis.application.core" }
+application-compose = { id = "com.pantelisstampoulis.application.compose" }
 library-core = { id = "com.pantelisstampoulis.library.core" }
 library-feature = { id = "com.pantelisstampoulis.library.feature" }
 library-koin = { id = "com.pantelisstampoulis.library.koin" }
@@ -129,4 +147,11 @@ compose-common = [
     "compose-material3",
     "compose-runtime",
     "compose-ui",
+]
+
+koin-common = [
+    "koin-core",
+    "koin-test",
+    "koin-android",
+    "koin-androidx-compose",
 ]

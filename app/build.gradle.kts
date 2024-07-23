@@ -1,5 +1,5 @@
 plugins {
-    id(libs.plugins.android.application.compose.get().pluginId)
+    id(libs.plugins.application.compose.get().pluginId)
 }
 
 android {
@@ -34,6 +34,10 @@ android {
 }
 
 dependencies {
+
+    implementation(projects.core.di)
+
+    implementation(platform(libs.koin.bom))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
