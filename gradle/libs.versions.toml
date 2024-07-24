@@ -1,8 +1,14 @@
 [versions]
-
 java-version = "17"
 
+kotlin = "2.0.0"
+kotlinx-collections-immutable = "0.3.7"
+kotlinx-coroutines = "1.9.0-RC"
+kotlinx-datetime = "0.6.0"
+kotlinx-serialization = "1.7.0"
+
 android-gradlePlugin = "8.4.2"
+
 androidx-activityCompose = "1.9.0"
 androidx-annotation = "1.8.0"
 androidx-core-ktx = "1.13.1"
@@ -11,6 +17,8 @@ androidx-lifecycle = "2.8.3"
 androidx-navigation = "2.8.0-beta05"
 
 koin = "3.6.0-Beta4"
+retrofit = "2.11.0"
+
 
 benManesVersions = "0.51.0"
 buildkonfig = "0.15.1"
@@ -24,13 +32,7 @@ firebasePerfPlugin = "1.4.2"
 firebaseCrashlyticsPlugin = "3.0.2"
 truth = "1.4.2"
 kermit = "2.0.3"
-
 konsist = "0.15.1"
-kotlin = "2.0.0"
-kotlinx-collections-immutable = "0.3.7"
-kotlinx-coroutines = "1.9.0-RC"
-kotlinx-datetime = "0.6.0"
-kotlinx-serialization = "1.7.0"
 kover = "0.8.0"
 ksp = "2.0.0-1.0.22"
 ktlint = "1.1.1"
@@ -40,6 +42,7 @@ spotless = "6.25.0"
 sqlDelight = "2.0.2"
 turbine = "1.1.0"
 
+
 [libraries]
 
 # Koin
@@ -48,6 +51,10 @@ koin-core = { group = "io.insert-koin", name = "koin-core" }
 koin-test = { group = "io.insert-koin", name = "koin-test" }
 koin-android = { group = "io.insert-koin", name = "koin-android" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
+
+#Retrofit
+retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-kotlin-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradlePlugin" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activityCompose" }
