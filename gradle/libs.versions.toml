@@ -18,7 +18,7 @@ androidx-navigation = "2.8.0-beta05"
 
 koin = "3.6.0-Beta4"
 retrofit = "2.11.0"
-
+okhttp = "4.12.0"
 
 benManesVersions = "0.51.0"
 buildkonfig = "0.15.1"
@@ -55,6 +55,8 @@ koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compos
 #Retrofit
 retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-kotlin-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
+okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+
 
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradlePlugin" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activityCompose" }

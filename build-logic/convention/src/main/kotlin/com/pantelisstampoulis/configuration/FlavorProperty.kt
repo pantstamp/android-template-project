@@ -21,7 +21,7 @@ enum class FlavorProperty(
     Network(
         value = NetworkPropertyValue,
         modulePrefix = NetworkModulePrefix,
-        variations = listOf(NetworkKtorFlavor, NoopFlavor),
+        variations = listOf(NetworkRetrofitFlavor, NoopFlavor),
     ),
 
     Preferences(

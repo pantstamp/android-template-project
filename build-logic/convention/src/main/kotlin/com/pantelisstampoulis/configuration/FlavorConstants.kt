@@ -13,7 +13,7 @@ internal const val LoggingKermitFlavor = "kermit"
 // network
 internal const val NetworkPropertyValue = "configuration.flavor.network"
 internal const val NetworkModulePrefix = ":core:network:"
-internal const val NetworkKtorFlavor = "ktor"
+internal const val NetworkRetrofitFlavor = "retrofit"
 
 // preferences
 internal const val PreferencesPropertyValue = "configuration.flavor.preferences"

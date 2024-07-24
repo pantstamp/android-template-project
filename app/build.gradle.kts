@@ -1,3 +1,8 @@
+import com.pantelisstampoulis.configuration.FlavorProperty
+import com.pantelisstampoulis.utils.getFlavoredModule
+import java.util.Properties
+
+
 plugins {
     id(libs.plugins.custom.application.compose.get().pluginId)
 }
@@ -36,6 +41,7 @@ android {
 dependencies {
 
     implementation(projects.core.di)
+    implementation(getFlavoredModule(property = FlavorProperty.Network))
 
     implementation(platform(libs.koin.bom))
 

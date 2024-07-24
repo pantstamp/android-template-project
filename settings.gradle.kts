@@ -30,4 +30,5 @@ include(":core:di")
 include(
     ":core:network:api",
     ":core:network:noop",
+    ":core:network:retrofit",
 )
