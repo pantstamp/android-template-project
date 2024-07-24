@@ -28,5 +28,6 @@ rootProject.name = "AndroidTemplateProject"
 include(":app")
 include(":core:di")
 include(
-    ":core:network:api"
+    ":core:network:api",
+    ":core:network:noop",
 )

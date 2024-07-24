@@ -1,24 +1,14 @@
-import com.sregs.utils.namespaceWithProjectPackage
+import com.pantelisstampoulis.utils.namespaceWithProjectPackage
 
 plugins {
-    id(libs.plugins.kmm.library.core.get().pluginId)
-    id(libs.plugins.kmm.library.koin.get().pluginId)
-    id(libs.plugins.kotlinx.kover.get().pluginId)
-}
-
-kotlin {
-    sourceSets {
-        commonMain.dependencies {
-            // projects
-            implementation(projects.core.network.api)
-        }
-        commonTest.dependencies {
-            // libraries
-            implementation(libs.kotlin.test)
-        }
-    }
+    id(libs.plugins.custom.library.core.get().pluginId)
+    id(libs.plugins.custom.koin.get().pluginId)
 }
 
 android {
     namespace = namespaceWithProjectPackage(suffix = "network.noop")
+}
+
+dependencies {
+    implementation(projects.core.network.api)
 }
