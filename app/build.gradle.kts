@@ -1,5 +1,5 @@
 plugins {
-    id(libs.plugins.application.compose.get().pluginId)
+    id(libs.plugins.custom.application.compose.get().pluginId)
 }
 
 android {

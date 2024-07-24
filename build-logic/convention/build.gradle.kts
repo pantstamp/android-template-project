@@ -32,9 +32,9 @@ gradlePlugin {
             implementationClass = "com.pantelisstampoulis.plugin.KoinPlugin"
         }
 
-        register("librarySerialization") {
-            id = "com.pantelisstampoulis.library.serialization"
-            implementationClass = "com.pantelisstampoulis.plugin.SerializationPlugin"
+        register("libraryKotlinSerialization") {
+            id = "com.pantelisstampoulis.library.kotlin.serialization"
+            implementationClass = "com.pantelisstampoulis.plugin.KotlinSerializationPlugin"
         }
 
         register("lint") {

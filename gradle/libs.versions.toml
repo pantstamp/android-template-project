@@ -140,12 +140,12 @@ sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqlDelight" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 
 # Custom Plugins
-application-core = { id = "com.pantelisstampoulis.application.core" }
-application-compose = { id = "com.pantelisstampoulis.application.compose" }
-library-core = { id = "com.pantelisstampoulis.library.core" }
-library-feature = { id = "com.pantelisstampoulis.library.feature" }
-library-koin = { id = "com.pantelisstampoulis.library.koin" }
-library-serialization = { id = "com.pantelisstampoulis.library.serialization" }
+custom-application-core = { id = "com.pantelisstampoulis.application.core" }
+custom-application-compose = { id = "com.pantelisstampoulis.application.compose" }
+custom-library-core = { id = "com.pantelisstampoulis.library.core" }
+custom-library-feature = { id = "com.pantelisstampoulis.library.feature" }
+custom-koin = { id = "com.pantelisstampoulis.library.koin" }
+custom-kotlin-serialization = { id = "com.pantelisstampoulis.library.kotlin.serialization" }
 
 [bundles]
 compose-common = [

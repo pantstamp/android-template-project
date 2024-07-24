@@ -1,8 +1,8 @@
 import com.pantelisstampoulis.utils.namespaceWithProjectPackage
 
 plugins {
-    id(libs.plugins.library.core.get().pluginId)
-    id(libs.plugins.library.koin.get().pluginId)
+    id(libs.plugins.custom.library.core.get().pluginId)
+    id(libs.plugins.custom.koin.get().pluginId)
 }
 
 android {
