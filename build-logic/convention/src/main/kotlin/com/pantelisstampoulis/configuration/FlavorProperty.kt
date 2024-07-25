@@ -15,7 +15,7 @@ enum class FlavorProperty(
     Logging(
         value = LoggingPropertyValue,
         modulePrefix = LoggingModulePrefix,
-        variations = listOf(LoggingKermitFlavor, NoopFlavor),
+        variations = listOf(NoopFlavor),
     ),
 
     Network(

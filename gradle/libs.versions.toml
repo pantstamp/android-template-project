@@ -26,7 +26,6 @@ ksp = "2.0.0-1.0.22"
 
 
 benManesVersions = "0.51.0"
-buildkonfig = "0.15.1"
 compose = "2024.06.00"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -139,7 +138,6 @@ android-application = { id = "com.android.application", version.ref = "android-g
 android-library = { id = "com.android.library", version.ref = "android-gradlePlugin" }
 android-lint = { id = "com.android.lint" }
 benManes-versions = { id = "com.github.ben-manes.versions", version.ref = "benManesVersions" }
-buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -151,6 +149,7 @@ spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqlDelight" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 androidx-room = { id = "androidx.room", version.ref = "room" }
+
 
 
 # Custom Plugins

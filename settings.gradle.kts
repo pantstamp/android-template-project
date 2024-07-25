@@ -38,4 +38,39 @@ include(
     ":core:database:noop",
     ":core:database:room"
 )
+include(":core:domain")
+
+include(
+    ":core:logging:api",
+    ":core:logging:noop",
+)
+
+include(
+    ":core:dispatcher:api",
+    ":core:dispatcher:impl",
+    ":core:dispatcher:test",
+)
+
+include(
+    ":utils:koin"
+)
+
+include(
+    ":architecture:mapper"
+)
+
+include(
+    ":presentation:mvi",
+    ":presentation:viewmodel"
+)
+
+include(":core:data")
+
+include(
+    ":core:preferences:api",
+    ":core:preferences:datastore",
+    ":core:preferences:noop",
+)
+
+
 

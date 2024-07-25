@@ -43,6 +43,12 @@ dependencies {
     implementation(projects.core.di)
     implementation(getFlavoredModule(property = FlavorProperty.Network))
     implementation(getFlavoredModule(property = FlavorProperty.Database))
+    implementation(projects.core.domain)
+    implementation(projects.core.logging.api)
+    implementation(getFlavoredModule(property = FlavorProperty.Logging))
+    implementation(projects.presentation.mvi)
+    implementation(projects.presentation.viewmodel)
+    implementation(projects.core.data)
 
     implementation(platform(libs.koin.bom))
 
