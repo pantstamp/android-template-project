@@ -32,3 +32,5 @@ include(
     ":core:network:noop",
     ":core:network:retrofit",
 )
+include(":core:model")
+
