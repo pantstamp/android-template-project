@@ -42,6 +42,7 @@ dependencies {
 
     implementation(projects.core.di)
     implementation(getFlavoredModule(property = FlavorProperty.Network))
+    implementation(getFlavoredModule(property = FlavorProperty.Database))
 
     implementation(platform(libs.koin.bom))
 

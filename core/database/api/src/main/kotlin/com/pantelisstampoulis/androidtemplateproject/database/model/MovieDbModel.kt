@@ -1,10 +1,10 @@
-package com.pantelisstampoulis.androidtemplateproject.model.movies
+package com.pantelisstampoulis.androidtemplateproject.database.model
 
-data class Movie(
+data class MovieDbModel(
     val id: Int,
     val adult: Boolean,
     val backdropPath: String,
-    val genreIds: List<Int>,
+    val genreId: Int,
     val originalLanguage: String,
     val originalTitle: String,
     val overview: String,

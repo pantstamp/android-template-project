@@ -9,7 +9,7 @@ enum class FlavorProperty(
     Database(
         value = DatabasePropertyValue,
         modulePrefix = DatabaseModulePrefix,
-        variations = listOf(DatabaseSqlDelightFlavor, NoopFlavor),
+        variations = listOf(DatabaseRoomFlavor, NoopFlavor),
     ),
 
     Logging(

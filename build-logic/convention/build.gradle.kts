@@ -41,6 +41,11 @@ gradlePlugin {
             id = "com.pantelisstampoulis.lint"
             implementationClass = "com.pantelisstampoulis.plugin.LintPlugin"
         }
+
+        register("libraryRoom") {
+            id = "com.pantelisstampoulis.library.room"
+            implementationClass = "com.pantelisstampoulis.plugin.RoomPlugin"
+        }
     }
 }
 
@@ -52,6 +57,8 @@ dependencies {
     compileOnly(libs.android.gradlePlugin)
     compileOnly(libs.kotlin.compose.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
+    compileOnly(libs.room.gradlePlugin)
+    compileOnly(libs.ksp.gradlePlugin)
 }
 
 tasks {

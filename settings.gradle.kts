@@ -33,4 +33,9 @@ include(
     ":core:network:retrofit",
 )
 include(":core:model")
+include(
+    ":core:database:api",
+    ":core:database:noop",
+    ":core:database:room"
+)
 
