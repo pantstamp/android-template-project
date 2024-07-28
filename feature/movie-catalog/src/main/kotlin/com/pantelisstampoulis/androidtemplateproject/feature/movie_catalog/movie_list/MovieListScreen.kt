@@ -1,4 +1,4 @@
-package com.pantelisstampoulis.androidtemplateproject.feature.movie_list
+package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.movie_list
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -23,7 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import androidx.navigation.NavController
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import kotlinx.collections.immutable.ImmutableList
@@ -33,11 +32,11 @@ import org.koin.core.qualifier.named
 import kotlin.coroutines.CoroutineContext
 
 @Composable
-internal fun MovieListScreen(
+fun MovieListScreen(
     state: MovieListUiState,
     effect: Flow<MovieListSideEffect>,
     onEvent: (MovieListEvent) -> Unit,
-    navController: NavController,
+    //navController: NavController,
 ) {
     val context = LocalContext.current
 

@@ -13,14 +13,20 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.logging.HttpLoggingInterceptor
 
 
 val networkModule: Module = module {
 
     // Provide OkHttpClient as a singleton
     single {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            this.level = HttpLoggingInterceptor.Level.BODY
+        }
+
         OkHttpClient.Builder()
             .addInterceptor(HeaderInterceptor())
+            .addInterceptor(loggingInterceptor)
             .build()
     }
 

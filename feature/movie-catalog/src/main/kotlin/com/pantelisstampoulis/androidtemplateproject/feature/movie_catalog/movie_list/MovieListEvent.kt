@@ -1,4 +1,4 @@
-package com.pantelisstampoulis.androidtemplateproject.feature.movie_list
+package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.movie_list
 
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.Event
 

@@ -1,7 +1,7 @@
-package com.pantelisstampoulis.androidtemplateproject.feature.di
+package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.di
 
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_list.MovieListViewModel
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_list.mapper.MovieUiMapper
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.movie_list.MovieListViewModel
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.movie_list.mapper.MovieUiMapper
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
 import org.koin.dsl.module

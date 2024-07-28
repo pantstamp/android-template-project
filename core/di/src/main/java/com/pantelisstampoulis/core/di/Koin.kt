@@ -10,7 +10,7 @@ fun initKoin(
 ): KoinApplication = startKoin {
     androidLogger()
     modules(
-        sharedModule,
+        appModule,
         *modules.toTypedArray(),
     )
 }
