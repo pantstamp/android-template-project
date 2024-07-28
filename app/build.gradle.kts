@@ -41,17 +41,20 @@ android {
 dependencies {
 
     implementation(projects.core.di)
+    implementation(projects.core.domain)
+    implementation(projects.core.data)
     implementation(getFlavoredModule(property = FlavorProperty.Network))
     implementation(getFlavoredModule(property = FlavorProperty.Database))
-    implementation(projects.core.domain)
+
     implementation(projects.core.logging.api)
     implementation(getFlavoredModule(property = FlavorProperty.Logging))
     implementation(projects.presentation.mvi)
     implementation(projects.presentation.viewmodel)
-    implementation(projects.core.data)
+    
+    // features
+    implementation(projects.feature.movieCatalog)
 
     implementation(platform(libs.koin.bom))
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

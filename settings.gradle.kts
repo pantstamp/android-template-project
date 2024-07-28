@@ -72,5 +72,9 @@ include(
     ":core:preferences:noop",
 )
 
+include(
+    ":feature:movie-catalog",
+)
+
 
 

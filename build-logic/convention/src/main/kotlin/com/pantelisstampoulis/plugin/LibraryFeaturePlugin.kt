@@ -33,6 +33,7 @@ class LibraryFeaturePlugin : Plugin<Project> {
                 "implementation"(libs.findBundle("compose.common").get())
                 "implementation"(libs.findLibrary("androidx.lifecycle.runtime.compose").get())
                 "implementation"(libs.findLibrary("androidx.navigation.compose").get())
+                "implementation"(libs.findLibrary("kotlinx.collections.immutable").get())
             }
         }
     }
