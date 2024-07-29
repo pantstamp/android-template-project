@@ -2,7 +2,7 @@ package com.pantelisstampoulis.androidtemplateproject.data.mapper
 
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
-import com.sregs.architecture.mapper.DbToDomainMapper
+import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.DbToDomainMapper
 
 internal class MovieDomainMapper:
     DbToDomainMapper<MovieDbModel, Movie> {

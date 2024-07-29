@@ -8,10 +8,3 @@ plugins {
 android {
     namespace = namespaceWithProjectPackage(suffix = "feature.moviecatalog")
 }
-
-dependencies {
-    implementation(projects.presentation.mvi)
-    implementation(projects.core.dispatcher.api)
-    implementation(projects.core.domain)
-    implementation(projects.architecture.mapper)
-}

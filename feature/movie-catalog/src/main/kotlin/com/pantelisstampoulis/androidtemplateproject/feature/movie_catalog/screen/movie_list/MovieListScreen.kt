@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import kotlinx.collections.immutable.ImmutableList
@@ -36,10 +37,8 @@ fun MovieListScreen(
     state: MovieListUiState,
     effect: Flow<MovieListSideEffect>,
     onEvent: (MovieListEvent) -> Unit,
-    //navController: NavController,
 ) {
     val context = LocalContext.current
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -73,6 +72,7 @@ fun MovieListScreen(
         ObserveEffects(
             effect = effect,
             coroutineContext = getKoin().get<CoroutineContext>(named(CoroutinesDispatchers.MainImmediate)),
+            lifecycleOwner = LocalLifecycleOwner.current
         ) { sideEffect ->
             when (sideEffect) {
                 is MovieListSideEffect.ShowToast ->
@@ -143,3 +143,5 @@ fun MovieRow(
         }
     }
 }
+
+

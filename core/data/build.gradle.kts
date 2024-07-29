@@ -10,9 +10,11 @@ android {
 }
 
 dependencies {
-    // clean architecture layers
+    // architecture layers
     implementation(projects.core.model)
     implementation(projects.core.domain)
+
+    // projects
     implementation(projects.core.database.api)
     implementation(projects.core.network.api)
 
@@ -21,7 +23,7 @@ dependencies {
     implementation(projects.core.preferences.api)
     implementation(projects.architecture.mapper)
 
-    // 3rd party libraries
+    // libraries
     implementation(projects.utils.koin)
     implementation(libs.kotlinx.datetime)
     implementation(libs.androidx.annotation)

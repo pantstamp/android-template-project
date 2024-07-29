@@ -8,6 +8,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.project
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
 
 @Suppress("unused")
@@ -18,22 +19,15 @@ class LibraryFeaturePlugin : Plugin<Project> {
 
             with(pluginManager) {
                 apply(LibraryCorePlugin::class.java)
-                apply(libs.findPlugin("compose-compiler").get().get().pluginId)
+                apply(ComposePlugin::class.java)
             }
-
-            extensions.configure(LibraryExtension::class.java) {
-                configureAndroidCompose()
-            }
-
-            val composeExtension = extensions.getByType<ComposeCompilerGradlePluginExtension>()
-            configureCompose(extension = composeExtension)
 
             dependencies {
-                "implementation"(dependencies.platform(libs.findLibrary("compose.bom").get()))
-                "implementation"(libs.findBundle("compose.common").get())
-                "implementation"(libs.findLibrary("androidx.lifecycle.runtime.compose").get())
-                "implementation"(libs.findLibrary("androidx.navigation.compose").get())
-                "implementation"(libs.findLibrary("kotlinx.collections.immutable").get())
+                // architecture layers
+                "implementation"(project(":core:presentation:mvi"))
+                "implementation"(project(":core:dispatcher:api"))
+                "implementation"(project(":core:domain"))
+                "implementation"(project(":architecture:mapper"))
             }
         }
     }

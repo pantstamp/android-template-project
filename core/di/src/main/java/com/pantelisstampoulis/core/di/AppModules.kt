@@ -13,12 +13,12 @@ import org.koin.dsl.module
 val appModule: Module = module {
     includes(
         // core
-        databaseModule,
-        dispatcherModule,
-        loggingModule,
-        networkModule,
         domainModule,
         dataModule,
+        databaseModule,
+        networkModule,
+        dispatcherModule,
+        loggingModule,
 
         // feature
         featureMovieCatalogModule

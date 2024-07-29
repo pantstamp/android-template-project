@@ -2,7 +2,7 @@ package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.scre
 
 import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_list.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
-import com.sregs.architecture.mapper.DomainToUiMapper
+import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.DomainToUiMapper
 
 class MovieUiMapper: DomainToUiMapper<Movie, MovieUiModel> {
 

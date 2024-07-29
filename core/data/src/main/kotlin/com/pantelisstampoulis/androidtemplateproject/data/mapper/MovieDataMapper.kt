@@ -2,7 +2,7 @@ package com.pantelisstampoulis.androidtemplateproject.data.mapper
 
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.network.model.MovieApiModel
-import com.sregs.architecture.mapper.ApiToDbMapper
+import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.ApiToDbMapper
 
 internal class MovieDataMapper: ApiToDbMapper<MovieApiModel, MovieDbModel> {
 

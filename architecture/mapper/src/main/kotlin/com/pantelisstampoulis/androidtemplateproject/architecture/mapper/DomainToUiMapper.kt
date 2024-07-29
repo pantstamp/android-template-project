@@ -1,4 +1,4 @@
-package com.sregs.architecture.mapper
+package com.pantelisstampoulis.androidtemplateproject.architecture.mapper
 
 interface DomainToUiMapper<DomainModel, UiModel> {
 

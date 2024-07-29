@@ -46,6 +46,11 @@ gradlePlugin {
             id = "com.pantelisstampoulis.library.room"
             implementationClass = "com.pantelisstampoulis.plugin.RoomPlugin"
         }
+
+        register("libraryCompose") {
+            id = "com.pantelisstampoulis.library.compose"
+            implementationClass = "com.pantelisstampoulis.plugin.ComposePlugin"
+        }
     }
 }
 

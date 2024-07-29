@@ -24,9 +24,10 @@ okhttp = "4.12.0"
 room = "2.6.1"
 ksp = "2.0.0-1.0.22"
 
+compose = "2024.06.00"
+
 
 benManesVersions = "0.51.0"
-compose = "2024.06.00"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
@@ -78,15 +79,14 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 
 # Compose
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose" }
-
 compose-animation = { group = "androidx.compose.animation", name = "animation" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
-
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -151,7 +151,6 @@ jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = 
 androidx-room = { id = "androidx.room", version.ref = "room" }
 
 
-
 # Custom Plugins
 custom-application-core = { id = "com.pantelisstampoulis.application.core" }
 custom-application-compose = { id = "com.pantelisstampoulis.application.compose" }
@@ -160,6 +159,8 @@ custom-library-feature = { id = "com.pantelisstampoulis.library.feature" }
 custom-koin = { id = "com.pantelisstampoulis.library.koin" }
 custom-kotlin-serialization = { id = "com.pantelisstampoulis.library.kotlin.serialization" }
 custom-room = { id = "com.pantelisstampoulis.library.room" }
+custom-compose = { id = "com.pantelisstampoulis.library.compose" }
+
 
 
 [bundles]
@@ -169,6 +170,8 @@ compose-common = [
     "compose-material3",
     "compose-runtime",
     "compose-ui",
+    "androidx-lifecycle-runtime-compose",
+    "androidx-navigation-compose",
 ]
 
 koin-common = [

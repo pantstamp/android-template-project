@@ -60,8 +60,8 @@ include(
 )
 
 include(
-    ":presentation:mvi",
-    ":presentation:viewmodel"
+    ":core:presentation:mvi",
+    ":core:presentation:viewmodel"
 )
 
 include(":core:data")

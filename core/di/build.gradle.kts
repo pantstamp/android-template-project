@@ -20,8 +20,8 @@ dependencies {
 
     implementation(projects.core.logging.api)
     implementation(getFlavoredModule(property = FlavorProperty.Logging))
-    implementation(projects.presentation.mvi)
-    implementation(projects.presentation.viewmodel)
+    implementation(projects.core.presentation.mvi)
+    implementation(projects.core.presentation.viewmodel)
 
     // features
     implementation(projects.feature.movieCatalog)

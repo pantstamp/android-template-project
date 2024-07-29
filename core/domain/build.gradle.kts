@@ -10,8 +10,11 @@ android {
 }
 
 dependencies {
+    // architecture layers
     api(projects.core.model)
-    implementation(projects.core.logging.api)
+
+    // utilities
     implementation(projects.utils.koin)
+    implementation(projects.core.logging.api)
     implementation(projects.core.dispatcher.api)
 }
