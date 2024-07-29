@@ -1,8 +1,3 @@
-import com.pantelisstampoulis.configuration.FlavorProperty
-import com.pantelisstampoulis.utils.getFlavoredModule
-import java.util.Properties
-
-
 plugins {
     id(libs.plugins.custom.application.compose.get().pluginId)
 }
@@ -40,33 +35,6 @@ android {
 
 dependencies {
 
-    implementation(projects.core.di)
-    implementation(projects.core.domain)
-    implementation(projects.core.data)
-    implementation(getFlavoredModule(property = FlavorProperty.Network))
-    implementation(getFlavoredModule(property = FlavorProperty.Database))
-
-    implementation(projects.core.logging.api)
-    implementation(getFlavoredModule(property = FlavorProperty.Logging))
-    implementation(projects.core.presentation.mvi)
-    implementation(projects.core.presentation.viewmodel)
-    
     // features
     implementation(projects.feature.movieCatalog)
-
-    implementation(platform(libs.koin.bom))
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
 }
