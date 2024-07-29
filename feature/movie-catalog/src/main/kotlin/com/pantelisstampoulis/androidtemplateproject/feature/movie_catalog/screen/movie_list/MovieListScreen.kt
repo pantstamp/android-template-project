@@ -1,4 +1,4 @@
-package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.movie_list
+package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_list
 
 import android.widget.Toast
 import androidx.compose.foundation.background

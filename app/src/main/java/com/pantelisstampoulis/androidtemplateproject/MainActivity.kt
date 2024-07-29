@@ -10,8 +10,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.movie_list.MovieListScreen
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.movie_list.MovieListViewModel
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_list.MovieListScreen
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_list.MovieListViewModel
 import com.pantelisstampoulis.androidtemplateproject.ui.theme.AndroidTemplateProjectTheme
 import org.koin.androidx.compose.koinViewModel
 
