@@ -1,4 +1,4 @@
-package com.pantelisstampoulis.core.di
+package com.pantelisstampoulis.core.bridge_di
 
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.KoinApplication

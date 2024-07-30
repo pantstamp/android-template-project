@@ -39,7 +39,7 @@ class AndroidApplicationCorePlugin : Plugin<Project> {
 
             dependencies {
                 // architecture layers
-                "implementation"(project(":core:di"))
+                "implementation"(project(":core:bridge-di"))
                 "implementation"(project(":core:domain"))
                 "implementation"(project(":core:presentation:mvi"))
                 "implementation"(project(":core:dispatcher:api"))

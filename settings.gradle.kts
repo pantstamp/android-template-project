@@ -26,13 +26,17 @@ dependencyResolutionManagement {
 
 rootProject.name = "AndroidTemplateProject"
 include(":app")
-include(":core:di")
+
+include(":core:bridge-di")
+
 include(
     ":core:network:api",
     ":core:network:noop",
     ":core:network:retrofit",
 )
+
 include(":core:model")
+
 include(
     ":core:database:api",
     ":core:database:noop",

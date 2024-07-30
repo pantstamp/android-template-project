@@ -1,4 +1,4 @@
-package com.pantelisstampoulis.core.di
+package com.pantelisstampoulis.core.bridge_di
 
 import com.pantelisstampoulis.androidtemplateproject.data.di.dataModule
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.di.dispatcherModule

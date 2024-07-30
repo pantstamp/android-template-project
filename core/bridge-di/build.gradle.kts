@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = namespaceWithProjectPackage(suffix = "di")
+    namespace = namespaceWithProjectPackage(suffix = "bridge.di")
 }
 
 dependencies {
