@@ -9,12 +9,12 @@ kotlinx-serialization = "1.7.0"
 
 android-gradlePlugin = "8.4.2"
 
-androidx-activityCompose = "1.9.0"
-androidx-annotation = "1.8.0"
+androidx-activityCompose = "1.9.1"
+androidx-annotation = "1.8.1"
 androidx-core-ktx = "1.13.1"
 androidx-datastore = "1.1.1"
-androidx-lifecycle = "2.8.3"
-androidx-navigation = "2.8.0-beta05"
+androidx-lifecycle = "2.8.4"
+androidx-navigation = "2.8.0-beta06"
 
 koin = "3.6.0-Beta4"
 
