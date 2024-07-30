@@ -12,17 +12,12 @@ android {
 }
 
 dependencies {
+    // clean architecture layers
     implementation(projects.core.domain)
     implementation(projects.core.data)
-    implementation(getFlavoredModule(property = FlavorProperty.Network))
-    implementation(getFlavoredModule(property = FlavorProperty.Database))
-    implementation(projects.core.dispatcher.impl)
 
+    // utilities
+    implementation(projects.core.dispatcher.impl)
     implementation(projects.core.logging.api)
     implementation(getFlavoredModule(property = FlavorProperty.Logging))
-    implementation(projects.core.presentation.mvi)
-    implementation(projects.core.presentation.viewmodel)
-
-    // features
-    implementation(projects.feature.movieCatalog)
 }

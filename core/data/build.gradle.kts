@@ -1,3 +1,5 @@
+import com.pantelisstampoulis.configuration.FlavorProperty
+import com.pantelisstampoulis.utils.getFlavoredModule
 import com.pantelisstampoulis.utils.namespaceWithProjectPackage
 
 plugins {
@@ -17,6 +19,8 @@ dependencies {
     // projects
     implementation(projects.core.database.api)
     implementation(projects.core.network.api)
+    implementation(getFlavoredModule(property = FlavorProperty.Network))
+    implementation(getFlavoredModule(property = FlavorProperty.Database))
 
     // utilities
     implementation(projects.core.logging.api)
