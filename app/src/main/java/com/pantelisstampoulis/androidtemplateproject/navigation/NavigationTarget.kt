@@ -1,0 +1,3 @@
+package com.pantelisstampoulis.androidtemplateproject.navigation
+
+sealed interface NavigationTarget

@@ -14,6 +14,7 @@ class LibraryFeaturePlugin : Plugin<Project> {
             with(pluginManager) {
                 apply(LibraryCorePlugin::class.java)
                 apply(ComposePlugin::class.java)
+                apply(KotlinSerializationPlugin::class.java)
             }
 
             dependencies {

@@ -1,5 +1,6 @@
 plugins {
     id(libs.plugins.custom.application.compose.get().pluginId)
+    id(libs.plugins.custom.kotlin.serialization.get().pluginId)
 }
 
 android {
