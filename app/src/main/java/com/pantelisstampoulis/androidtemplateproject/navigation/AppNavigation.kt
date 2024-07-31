@@ -7,30 +7,35 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.navigation.movieCatalogGraph
 import com.pantelisstampoulis.androidtemplateproject.ui.screen.HomeScreen
-import kotlinx.serialization.Serializable
+import org.koin.compose.getKoin
+import org.koin.compose.koinInject
 
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier,
     startDestination: Any,
 ) {
+    // Injecting the NavController into Koin
     val mainNavController = rememberNavController()
+    getKoin().setProperty(NavigationConstants.NAVIGATION_CONTROLLER, mainNavController)
+
+    // inject navigator
+    val navigator: Navigator = koinInject()
+
     NavHost(
         modifier = modifier,
         navController = mainNavController,
         startDestination = startDestination,
     ) {
 
-        composable<HomeScreenDestination> {
-            HomeScreen(mainNavController)
+        composable<AppDestination.HomeScreenDestination> {
+            HomeScreen(navigator)
         }
 
         // add feature Graphs here
-        movieCatalogGraph(mainNavController)
+        movieCatalogGraph(navigator)
     }
 }
 
 
-@Serializable
-object HomeScreenDestination
 

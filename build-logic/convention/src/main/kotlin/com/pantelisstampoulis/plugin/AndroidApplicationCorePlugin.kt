@@ -44,6 +44,7 @@ class AndroidApplicationCorePlugin : Plugin<Project> {
                 "implementation"(project(":core:presentation:mvi"))
                 "implementation"(project(":core:dispatcher:api"))
                 "implementation"(project(":architecture:mapper"))
+                "implementation"(project(":core:navigation:api"))
 
                 // libraries
                 "implementation"(libs.findLibrary("material").get())

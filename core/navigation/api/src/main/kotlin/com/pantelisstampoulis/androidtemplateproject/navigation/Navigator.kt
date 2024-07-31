@@ -1,3 +1,5 @@
 package com.pantelisstampoulis.androidtemplateproject.navigation
 
-sealed interface NavigationTarget
+interface Navigator {
+    fun navigateTo(destination: Any)
+}

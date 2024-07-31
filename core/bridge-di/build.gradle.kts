@@ -20,4 +20,6 @@ dependencies {
     implementation(projects.core.dispatcher.impl)
     implementation(projects.core.logging.api)
     implementation(getFlavoredModule(property = FlavorProperty.Logging))
+    implementation(projects.core.navigation.api)
+    implementation(getFlavoredModule(property = FlavorProperty.Navigation))
 }

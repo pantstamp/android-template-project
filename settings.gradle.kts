@@ -78,6 +78,11 @@ include(
 )
 
 include(
+    ":core:navigation:api",
+    ":core:navigation:navigation-compose",
+)
+
+include(
     ":feature:movie-catalog",
 )
 

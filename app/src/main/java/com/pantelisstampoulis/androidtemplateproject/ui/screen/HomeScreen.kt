@@ -9,19 +9,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.navigation.MovieListDestination
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.navigation.MovieCatalogDestination
+import com.pantelisstampoulis.androidtemplateproject.navigation.Navigator
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navigator: Navigator) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = {
-            navController.navigate(MovieListDestination)
+            navigator.navigateTo(MovieCatalogDestination.MovieListDestination)
         }) {
             Text(text = "Go to Movie List")
         }

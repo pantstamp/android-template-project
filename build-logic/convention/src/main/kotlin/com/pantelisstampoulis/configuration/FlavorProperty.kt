@@ -24,6 +24,12 @@ enum class FlavorProperty(
         variations = listOf(NetworkRetrofitFlavor, NoopFlavor),
     ),
 
+    Navigation(
+        value = NavigationPropertyValue,
+        modulePrefix = NavigationModulePrefix,
+        variations = listOf(NavigationComposeFlavor),
+    ),
+
     Preferences(
         value = PreferencesPropertyValue,
         modulePrefix = PreferencesModulePrefix,
