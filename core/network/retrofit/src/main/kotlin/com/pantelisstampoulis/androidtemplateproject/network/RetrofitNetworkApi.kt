@@ -7,5 +7,5 @@ const val BASE_URL = "https://api.themoviedb.org/3/"
 
 interface RetrofitNetworkApi {
     @GET(value = "discover/movie")
-    suspend fun getMovies(): NetworkResponse<List<MovieApiModel>>
+    suspend fun getMovies(): NetworkResult<ApiResponse<List<MovieApiModel>>>
 }

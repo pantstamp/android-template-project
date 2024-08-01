@@ -4,6 +4,7 @@ import com.pantelisstampoulis.androidtemplateproject.network.BASE_URL
 import com.pantelisstampoulis.androidtemplateproject.network.NetworkDataSource
 import com.pantelisstampoulis.androidtemplateproject.network.RetrofitNetworkApi
 import com.pantelisstampoulis.androidtemplateproject.network.RetrofitNetworkDataSource
+import com.pantelisstampoulis.androidtemplateproject.network.adapter.NetworkResultCallAdapterFactory
 import com.pantelisstampoulis.androidtemplateproject.network.interceptor.HeaderInterceptor
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -45,6 +46,7 @@ val networkModule: Module = module {
             .client(okHttpClient)
             .addConverterFactory(networkJson.asConverterFactory("application/json; charset=UTF-8"
                 .toMediaType()))
+            .addCallAdapterFactory(NetworkResultCallAdapterFactory.create())
             .build()
             .create(RetrofitNetworkApi::class.java)
     }

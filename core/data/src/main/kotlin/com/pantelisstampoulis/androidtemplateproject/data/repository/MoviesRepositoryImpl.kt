@@ -5,6 +5,8 @@ import com.pantelisstampoulis.androidtemplateproject.domain.repository.MoviesRep
 import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
 import com.pantelisstampoulis.androidtemplateproject.network.NetworkDataSource
 import com.pantelisstampoulis.androidtemplateproject.data.mapper.Mappers
+import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
+import com.pantelisstampoulis.androidtemplateproject.network.NetworkResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -16,14 +18,24 @@ internal class MoviesRepositoryImpl(
 
     override fun getMovies(ignoreCache: Boolean): Flow<List<Movie>> = flow {
         val movieEntityList = databaseDataSource.getMovies()
-        val movieList = if (movieEntityList.isEmpty() || ignoreCache) {
-
-            val movieList = networkDataSource.getMovies().map { movie ->
-                mappers.movieDataMapper.fromApiToDb(apiModel = movie)
+        val movieList: List<MovieDbModel> = if (movieEntityList.isEmpty() || ignoreCache) {
+            when (val movieApiModelList = networkDataSource.getMovies()) {
+                is NetworkResult.Success -> {
+                    val movieList = movieApiModelList.data.map { movie ->
+                        mappers.movieDataMapper.fromApiToDb(apiModel = movie)
+                    }
+                    databaseDataSource.deleteAndInsertMovies(movies = movieList)
+                    movieList
+                }
+                is NetworkResult.Error -> {
+                    // todo handle error
+                    emptyList()
+                }
+                is NetworkResult.Exception -> {
+                    // todo handle error
+                    emptyList()
+                }
             }
-
-            databaseDataSource.deleteAndInsertMovies(movies = movieList)
-            movieList
         } else {
             movieEntityList
         }
