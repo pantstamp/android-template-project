@@ -2,9 +2,9 @@ package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.scre
 
 
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetMoviesUseCase
-import com.pantelisstampoulis.androidtemplateproject.domain.usecase.onError
-import com.pantelisstampoulis.androidtemplateproject.domain.usecase.onLoading
-import com.pantelisstampoulis.androidtemplateproject.domain.usecase.onSuccess
+import com.pantelisstampoulis.androidtemplateproject.domain.onError
+import com.pantelisstampoulis.androidtemplateproject.domain.onLoading
+import com.pantelisstampoulis.androidtemplateproject.domain.onSuccess
 import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_list.mapper.MovieUiMapper
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.MviViewModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.UiState
@@ -23,8 +23,8 @@ class MovieListViewModel(
         when (event) {
             is MovieListEvent.Init -> {
                 viewModelScope.launch {
-                    getMoviesUseCase(input = Unit).collect { useCaseState ->
-                        useCaseState
+                    getMoviesUseCase(input = Unit).collect { resultState ->
+                        resultState
                             .onLoading { setState { this.copy(isLoading = true) } }
                             .onSuccess {
                                 setState {
@@ -36,11 +36,11 @@ class MovieListViewModel(
                                     )
                                 }
                             }
-                            .onError { throwable ->
+                            .onError { error ->
                                 setState {
                                     this.copy(
                                         isLoading = false,
-                                        errorMessage = throwable.message,
+                                        errorMessage = error.message,
                                     )
                                 }
                             }

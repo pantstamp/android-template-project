@@ -1,7 +1,8 @@
 package com.pantelisstampoulis.androidtemplateproject.data.di
 
-import com.pantelisstampoulis.androidtemplateproject.data.mapper.MovieDataMapper
-import com.pantelisstampoulis.androidtemplateproject.data.mapper.MovieDomainMapper
+import com.pantelisstampoulis.androidtemplateproject.data.mapper.ErrorDomainMapper
+import com.pantelisstampoulis.androidtemplateproject.data.mapper.movie.MovieDataMapper
+import com.pantelisstampoulis.androidtemplateproject.data.mapper.movie.MovieDomainMapper
 import com.pantelisstampoulis.androidtemplateproject.data.mapper.Mappers
 import com.pantelisstampoulis.androidtemplateproject.data.repository.MoviesRepositoryImpl
 import com.pantelisstampoulis.androidtemplateproject.database.di.databaseModule
@@ -16,6 +17,7 @@ internal val mappersModule = module {
         Mappers(
             movieDataMapper = MovieDataMapper(),
             movieDomainMapper = MovieDomainMapper(),
+            errorDomainMapper = ErrorDomainMapper(),
         )
     }
 }

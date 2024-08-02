@@ -1,4 +1,4 @@
-package com.pantelisstampoulis.androidtemplateproject.data.mapper
+package com.pantelisstampoulis.androidtemplateproject.data.mapper.movie
 
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie

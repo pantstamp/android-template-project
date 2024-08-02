@@ -13,6 +13,5 @@ internal class RetrofitNetworkDataSource(private val networkApi: RetrofitNetwork
                 is NetworkResult.Exception -> result
             }
         }
-
     }
 }
