@@ -8,6 +8,8 @@ import com.pantelisstampoulis.androidtemplateproject.data.mapper.Mappers
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.domain.ResultState
 import com.pantelisstampoulis.androidtemplateproject.network.NetworkResult
+import com.pantelisstampoulis.androidtemplateproject.network.isSuccess
+import com.pantelisstampoulis.androidtemplateproject.network.request.RateMovieRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
@@ -27,6 +29,16 @@ internal class MoviesRepositoryImpl(
         } else {
             // fetch movies from network
             fetchMoviesFromNetwork()
+        }
+    }
+
+    override fun rateMovie(movieId: Int, rating: Float): Flow<ResultState<Unit>> = flow {
+        val networkResult = networkDataSource.rateMovie(movieId, RateMovieRequest(rating))
+        if (networkResult.isSuccess()) {
+            emit(ResultState.Success(Unit))
+        } else {
+            val errorModel = mappers.errorDomainMapper.mapNetworkResultToErrorModel(networkResult)
+            errorModel?.let { emit(ResultState.Error(it)) }
         }
     }
 

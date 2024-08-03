@@ -1,6 +1,8 @@
 package com.pantelisstampoulis.androidtemplateproject.network
 
 import com.pantelisstampoulis.androidtemplateproject.network.model.MovieApiModel
+import com.pantelisstampoulis.androidtemplateproject.network.request.RateMovieRequest
+import com.pantelisstampoulis.androidtemplateproject.network.response.ApiResultResponse
 
 internal class RetrofitNetworkDataSource(private val networkApi: RetrofitNetworkApi)
     : NetworkDataSource {
@@ -14,4 +16,9 @@ internal class RetrofitNetworkDataSource(private val networkApi: RetrofitNetwork
             }
         }
     }
+
+    override suspend fun rateMovie(
+        movieId: Int,
+        request: RateMovieRequest
+    ): NetworkResult<ApiResultResponse> = networkApi.rateMovie(movieId, request)
 }
