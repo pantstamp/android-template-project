@@ -1,6 +1,6 @@
-package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.mapper
+package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.mapper
 
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.ui_model.MovieUiModel
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.ui_model.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
 import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.DomainToUiMapper
 

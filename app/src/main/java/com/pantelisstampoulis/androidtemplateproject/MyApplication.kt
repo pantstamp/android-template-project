@@ -1,7 +1,7 @@
 package com.pantelisstampoulis.androidtemplateproject
 
 import android.app.Application
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.di.featureMovieCatalogModule
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.di.featureMovieCatalogPresentationModule
 import com.pantelisstampoulis.core.bridge_di.initKoin
 import org.koin.android.ext.koin.androidContext
 
@@ -12,7 +12,7 @@ class MyApplication : Application() {
 
         // add here all the feature modules of the app
         val featureModules = listOf(
-            featureMovieCatalogModule
+            featureMovieCatalogPresentationModule
         )
 
         initKoin(

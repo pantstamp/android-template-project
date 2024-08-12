@@ -1,18 +1,21 @@
-package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_details
+package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.screen.movie_details
 
 
 import com.pantelisstampoulis.androidtemplateproject.domain.onError
 import com.pantelisstampoulis.androidtemplateproject.domain.onLoading
 import com.pantelisstampoulis.androidtemplateproject.domain.onSuccess
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetMovieUseCase
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.ui_model.MovieUiModel
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.mapper.MovieUiMapper
+import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.RateMovieUseCase
+import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.RateMovieUseCaseInput
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.ui_model.MovieUiModel
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.mapper.MovieUiMapper
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.MviViewModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.UiState
 import kotlinx.coroutines.launch
 
 class MovieDetailsViewModel(
     private val getMovieUseCase: GetMovieUseCase,
+    private val rateMovieUseCase: RateMovieUseCase,
     private val mapper: MovieUiMapper
 ) : MviViewModel<MovieDetailsEvent, MovieDetailsUiState, MovieDetailsSideEffect>(
     initialState = MovieDetailsUiState(),
@@ -44,6 +47,28 @@ class MovieDetailsViewModel(
                             }
                     }
                 }
+            }
+
+            is MovieDetailsEvent.RateMovie -> {
+                viewModelScope.launch {
+                    rateMovieUseCase.invoke(RateMovieUseCaseInput(
+                        event.movieId,
+                        event.rating
+                    )).collect { resultState ->
+                        resultState
+                            .onSuccess {
+                                setEffect {
+                                    MovieDetailsSideEffect.ShowToast("Movie rated successfully")
+                                }
+                            }
+                            .onError { error ->
+                                setEffect {
+                                    MovieDetailsSideEffect.ShowToast("Error while rating Movie: ${error.message}")
+                                }
+                            }
+                    }
+                }
+
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_list
+package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.screen.movie_list
 
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.SideEffect
 

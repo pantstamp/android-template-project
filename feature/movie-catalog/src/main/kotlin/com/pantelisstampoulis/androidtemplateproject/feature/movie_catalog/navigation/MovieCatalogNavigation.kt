@@ -6,10 +6,10 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_details.MovieDetailsScreen
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_details.MovieDetailsViewModel
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_list.MovieListScreen
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_list.MovieListViewModel
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.screen.movie_details.MovieDetailsScreen
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.screen.movie_details.MovieDetailsViewModel
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.screen.movie_list.MovieListScreen
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.screen.movie_list.MovieListViewModel
 import com.pantelisstampoulis.androidtemplateproject.navigation.Navigator
 import org.koin.androidx.compose.koinViewModel
 

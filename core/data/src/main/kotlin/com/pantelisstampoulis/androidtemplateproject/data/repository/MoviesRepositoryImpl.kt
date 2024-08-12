@@ -13,6 +13,7 @@ import com.pantelisstampoulis.androidtemplateproject.network.isSuccess
 import com.pantelisstampoulis.androidtemplateproject.network.request.RateMovieRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEmpty
 
@@ -35,20 +36,18 @@ internal class MoviesRepositoryImpl(
     }
 
     override fun getMovies(ignoreCache: Boolean): Flow<ResultState<List<Movie>>> = flow {
-        databaseDataSource.getMovies()
-            .onEmpty {
-                // The flow is empty, fetch movies from the network
+        val movies = databaseDataSource.getMovies().firstOrNull() // Collect the first emission or null
+        if (movies.isNullOrEmpty()) {
+            // No movies in the database, fetch from network
+            fetchMoviesFromNetwork()
+        } else {
+            // Movies are present in the database
+            if (!ignoreCache) {
+                emitMoviesFromDb(movies)
+            } else {
                 fetchMoviesFromNetwork()
             }
-            .collect { movieDbModelList ->
-                // If the flow is not empty and cache is not ignored, emit movies from the database
-                if (!ignoreCache) {
-                    emitMoviesFromDb(movieDbModelList)
-                } else {
-                    // If cache is ignored, still fetch from network
-                    fetchMoviesFromNetwork()
-                }
-            }
+        }
     }
 
     override fun rateMovie(movieId: Int, rating: Float): Flow<ResultState<Unit>> = flow {

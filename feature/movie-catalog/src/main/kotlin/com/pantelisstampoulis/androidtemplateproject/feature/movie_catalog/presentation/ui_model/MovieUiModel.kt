@@ -1,4 +1,4 @@
-package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.ui_model
+package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.ui_model
 
 data class MovieUiModel(
     val id: Int,

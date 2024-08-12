@@ -1,12 +1,12 @@
-package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_list
+package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.screen.movie_list
 
 
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetMoviesUseCase
 import com.pantelisstampoulis.androidtemplateproject.domain.onError
 import com.pantelisstampoulis.androidtemplateproject.domain.onLoading
 import com.pantelisstampoulis.androidtemplateproject.domain.onSuccess
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.ui_model.MovieUiModel
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.mapper.MovieUiMapper
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.ui_model.MovieUiModel
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.mapper.MovieUiMapper
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.MviViewModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.UiState
 import kotlinx.coroutines.launch

@@ -172,6 +172,9 @@ compose-common = [
     "compose-ui",
     "androidx-lifecycle-runtime-compose",
     "androidx-navigation-compose",
+    "compose-ui-tooling",
+    "compose-ui-tooling-preview",
+
 ]
 
 koin-common = [

@@ -1,4 +1,4 @@
-package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_list
+package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.screen.movie_list
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -26,7 +26,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
 import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.navigation.MovieCatalogDestination
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.ui_model.MovieUiModel
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.ui_model.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.navigation.Navigator
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import kotlinx.collections.immutable.ImmutableList

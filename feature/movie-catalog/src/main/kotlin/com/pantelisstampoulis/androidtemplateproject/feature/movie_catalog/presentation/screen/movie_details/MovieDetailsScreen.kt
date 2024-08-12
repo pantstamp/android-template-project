@@ -1,18 +1,24 @@
-package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_details
+package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.screen.movie_details
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -22,7 +28,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.ui_model.MovieUiModel
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.navigation.MovieCatalogDestination
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.screen.movie_list.MovieListSideEffect
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.ui_components.UserRatingBar
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.ui_model.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.getKoin
@@ -59,6 +68,7 @@ fun MovieDetailsScreen(
                 MovieDetails(
                     movie = state.data,
                     modifier = Modifier.padding(horizontal = 16.dp),
+                    onEvent = onEvent
                 )
             }
         }
@@ -72,7 +82,10 @@ fun MovieDetailsScreen(
             coroutineContext = getKoin().get<CoroutineContext>(named(CoroutinesDispatchers.MainImmediate)),
             lifecycleOwner = LocalLifecycleOwner.current
         ) { sideEffect ->
-           // do nothing
+            when (sideEffect) {
+                is MovieDetailsSideEffect.ShowToast ->
+                    Toast.makeText(context, sideEffect.text, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
@@ -81,6 +94,7 @@ fun MovieDetailsScreen(
 fun MovieDetails(
     movie: MovieUiModel,
     modifier: Modifier = Modifier,
+    onEvent: (MovieDetailsEvent) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -106,8 +120,12 @@ fun MovieDetails(
             text = movie.voteAverage.toString(),
         )
 
+        Spacer(modifier = Modifier.height(16.dp))
+
         RateMovie(
-            modifier = modifier
+            modifier = modifier,
+            onEvent = onEvent,
+            movie = movie
         )
     }
 
@@ -115,10 +133,29 @@ fun MovieDetails(
 
 @Composable
 fun RateMovie(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onEvent: (MovieDetailsEvent) -> Unit,
+    movie: MovieUiModel,
 ) {
-    Button(onClick = { /*TODO*/ }) {
-        Text(text = "Rate")
+    val ratingState = remember { mutableIntStateOf(0) }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentSize(), // Wrap the content size to center horizontally
+        verticalArrangement = Arrangement.spacedBy(16.dp), // Space between items
+        horizontalAlignment = Alignment.CenterHorizontally // Center the items horizontally
+    ) {
+        UserRatingBar(
+            ratingState = ratingState,
+            size = 28.dp,
+        )
+
+        Button(onClick = {
+            onEvent(MovieDetailsEvent.RateMovie(movie.id, ratingState.intValue.toFloat()))
+        }) {
+            Text(text = "Rate")
+        }
     }
 }
 
