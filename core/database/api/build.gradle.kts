@@ -7,3 +7,8 @@ plugins {
 android {
     namespace = namespaceWithProjectPackage(suffix = "database")
 }
+
+dependencies {
+    implementation(libs.kotlinx.coroutines.core)
+
+}

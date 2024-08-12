@@ -9,4 +9,7 @@ sealed interface MovieCatalogDestination {
 
     @Serializable
     data object MovieListDestination: MovieCatalogDestination
+
+    @Serializable
+    data class MovieDetailsDestination(val movieId: Int): MovieCatalogDestination
 }

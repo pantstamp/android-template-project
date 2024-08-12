@@ -1,30 +1,28 @@
-package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_list
+package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_details
 
 
-import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetMoviesUseCase
 import com.pantelisstampoulis.androidtemplateproject.domain.onError
 import com.pantelisstampoulis.androidtemplateproject.domain.onLoading
 import com.pantelisstampoulis.androidtemplateproject.domain.onSuccess
+import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetMovieUseCase
 import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.ui_model.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.mapper.MovieUiMapper
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.MviViewModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.UiState
 import kotlinx.coroutines.launch
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 
-class MovieListViewModel(
-    private val getMoviesUseCase: GetMoviesUseCase,
+class MovieDetailsViewModel(
+    private val getMovieUseCase: GetMovieUseCase,
     private val mapper: MovieUiMapper
-) : MviViewModel<MovieListEvent, MovieListUiState, MovieListSideEffect>(
-    initialState = MovieListUiState(),
+) : MviViewModel<MovieDetailsEvent, MovieDetailsUiState, MovieDetailsSideEffect>(
+    initialState = MovieDetailsUiState(),
 ) {
 
-    override fun handleEvents(event: MovieListEvent) {
+    override fun handleEvents(event: MovieDetailsEvent) {
         when (event) {
-            is MovieListEvent.Init -> {
+            is MovieDetailsEvent.Init -> {
                 viewModelScope.launch {
-                    getMoviesUseCase(input = Unit).collect { resultState ->
+                    getMovieUseCase(input = event.movieId).collect { resultState ->
                         resultState
                             .onLoading { setState { this.copy(isLoading = true) } }
                             .onSuccess {
@@ -32,8 +30,7 @@ class MovieListViewModel(
                                     this.copy(
                                         isLoading = false,
                                         errorMessage = null,
-                                        data = it.map { mapper.fromDomainToUi(it) }
-                                            .toImmutableList(),
+                                        data = mapper.fromDomainToUi(it)
                                     )
                                 }
                             }
@@ -48,15 +45,12 @@ class MovieListViewModel(
                     }
                 }
             }
-            is MovieListEvent.ShowMovieDetails -> setEffect {
-                MovieListSideEffect.NavigateToMovieDetails(event.movieId)
-            }
         }
     }
 }
 
-data class MovieListUiState(
+data class MovieDetailsUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val data: ImmutableList<MovieUiModel>? = null,
+    val data: MovieUiModel? = null,
 ) : UiState

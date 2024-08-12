@@ -18,10 +18,10 @@ interface MovieDao {
         WHERE id = :movieId
     """,
     )
-    fun getMovieEntity(movieId: Int): Flow<MovieEntity>
+    fun getMovieEntity(movieId: Int): MovieEntity?
 
     @Query(value = "SELECT * FROM movies")
-    fun getMovieEntities(): List<MovieEntity>
+    fun getMovieEntities(): Flow<List<MovieEntity>>
 
     /**
      * Inserts [movieEntities] into the db if they don't exist, and replaces those that do

@@ -5,6 +5,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_details.MovieDetailsScreen
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_details.MovieDetailsViewModel
 import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_list.MovieListScreen
 import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.screen.movie_list.MovieListViewModel
 import com.pantelisstampoulis.androidtemplateproject.navigation.Navigator
@@ -17,6 +20,7 @@ fun NavGraphBuilder.movieCatalogGraph(
         startDestination = MovieCatalogDestination.MovieListDestination
     ) {
         addMovieListScreen(navigator)
+        addMovieDetailsScreen(navigator)
     }
 }
 
@@ -29,7 +33,24 @@ private fun NavGraphBuilder.addMovieListScreen(
         MovieListScreen(
             state = state,
             effect = viewModel.effect,
-            onEvent = viewModel::setEvent
+            onEvent = viewModel::setEvent,
+            navigator = navigator
+        )
+    }
+}
+
+private fun NavGraphBuilder.addMovieDetailsScreen(
+    navigator: Navigator,
+) {
+    composable<MovieCatalogDestination.MovieDetailsDestination> {
+        val args = it.toRoute<MovieCatalogDestination.MovieDetailsDestination>()
+        val viewModel = koinViewModel<MovieDetailsViewModel>()
+        val state by viewModel.viewState.collectAsStateWithLifecycle()
+        MovieDetailsScreen(
+            state = state,
+            effect = viewModel.effect,
+            onEvent = viewModel::setEvent,
+            movieId = args.movieId
         )
     }
 }

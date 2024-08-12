@@ -7,12 +7,14 @@ import com.pantelisstampoulis.androidtemplateproject.network.NetworkDataSource
 import com.pantelisstampoulis.androidtemplateproject.data.mapper.Mappers
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.domain.ResultState
+import com.pantelisstampoulis.androidtemplateproject.model.error.ErrorModel
 import com.pantelisstampoulis.androidtemplateproject.network.NetworkResult
 import com.pantelisstampoulis.androidtemplateproject.network.isSuccess
 import com.pantelisstampoulis.androidtemplateproject.network.request.RateMovieRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEmpty
 
 internal class MoviesRepositoryImpl(
     private val networkDataSource: NetworkDataSource,
@@ -20,16 +22,33 @@ internal class MoviesRepositoryImpl(
     private val mappers: Mappers,
 ) : MoviesRepository {
 
-    override fun getMovies(ignoreCache: Boolean): Flow<ResultState<List<Movie>>> = flow {
-        // fetch movies from database
-        val movieDbModelList = databaseDataSource.getMovies()
+    override fun getMovie(movieId: Int): Flow<ResultState<Movie>> = flow {
+        // fetch movie from database
+        val movieDbModel = databaseDataSource.getMovie(movieId)
 
-        if (movieDbModelList.isNotEmpty() && !ignoreCache) {
-            emitMoviesFromDb(movieDbModelList)
-        } else {
-            // fetch movies from network
-            fetchMoviesFromNetwork()
+        movieDbModel?.let {
+            val movie = mappers.movieDomainMapper.fromDbToDomain(movieDbModel)
+            emit(ResultState.Success(movie))
+        } ?: run {
+            emit(ResultState.Error(ErrorModel.NotFound()))
         }
+    }
+
+    override fun getMovies(ignoreCache: Boolean): Flow<ResultState<List<Movie>>> = flow {
+        databaseDataSource.getMovies()
+            .onEmpty {
+                // The flow is empty, fetch movies from the network
+                fetchMoviesFromNetwork()
+            }
+            .collect { movieDbModelList ->
+                // If the flow is not empty and cache is not ignored, emit movies from the database
+                if (!ignoreCache) {
+                    emitMoviesFromDb(movieDbModelList)
+                } else {
+                    // If cache is ignored, still fetch from network
+                    fetchMoviesFromNetwork()
+                }
+            }
     }
 
     override fun rateMovie(movieId: Int, rating: Float): Flow<ResultState<Unit>> = flow {

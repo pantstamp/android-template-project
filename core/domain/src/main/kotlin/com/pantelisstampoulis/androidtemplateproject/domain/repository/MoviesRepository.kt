@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface MoviesRepository {
 
+    fun getMovie(movieId: Int): Flow<ResultState<Movie>>
+
     fun getMovies(ignoreCache: Boolean = false): Flow<ResultState<List<Movie>>>
 
     fun rateMovie(movieId: Int, rating: Float): Flow<ResultState<Unit>>

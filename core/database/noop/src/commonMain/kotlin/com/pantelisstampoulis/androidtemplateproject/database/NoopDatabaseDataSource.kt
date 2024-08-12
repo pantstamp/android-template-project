@@ -6,5 +6,7 @@ internal class NoopDatabaseDataSource : DatabaseDataSource {
         /* empty implementation */
     }
 
-    override suspend fun getMovies(): List<MovieDbModel> = emptyList()
+    override suspend fun getMovies(): Flow<List<MovieDbModel>> = flowOf(emptyList())
+
+    override suspend fun getMovie(movieId: Int): MovieDbModel? = null
 }

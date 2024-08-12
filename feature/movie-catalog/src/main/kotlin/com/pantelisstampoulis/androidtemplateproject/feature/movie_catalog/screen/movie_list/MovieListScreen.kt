@@ -25,6 +25,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.navigation.MovieCatalogDestination
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.ui_model.MovieUiModel
+import com.pantelisstampoulis.androidtemplateproject.navigation.Navigator
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
@@ -37,6 +40,7 @@ fun MovieListScreen(
     state: MovieListUiState,
     effect: Flow<MovieListSideEffect>,
     onEvent: (MovieListEvent) -> Unit,
+    navigator: Navigator
 ) {
     val context = LocalContext.current
     Box(
@@ -79,7 +83,9 @@ fun MovieListScreen(
                     Toast.makeText(context, sideEffect.text, Toast.LENGTH_SHORT).show()
 
                 is MovieListSideEffect.NavigateToMovieDetails -> {
-                    //navController.navigate(Routes.accountDetailsRoute(sideEffect.accountId))
+                    navigator.navigateTo(
+                        MovieCatalogDestination.MovieDetailsDestination(sideEffect.movieId)
+                    )
                 }
             }
         }
