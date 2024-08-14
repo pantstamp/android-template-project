@@ -25,6 +25,7 @@ room = "2.6.1"
 ksp = "2.0.0-1.0.22"
 
 compose = "2024.06.00"
+coil = "2.7.0"
 
 
 benManesVersions = "0.51.0"
@@ -86,6 +87,9 @@ compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+
+coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
@@ -161,8 +165,6 @@ custom-kotlin-serialization = { id = "com.pantelisstampoulis.library.kotlin.seri
 custom-room = { id = "com.pantelisstampoulis.library.room" }
 custom-compose = { id = "com.pantelisstampoulis.library.compose" }
 
-
-
 [bundles]
 compose-common = [
     "compose-animation",
@@ -174,7 +176,7 @@ compose-common = [
     "androidx-navigation-compose",
     "compose-ui-tooling",
     "compose-ui-tooling-preview",
-
+    "coil-compose",
 ]
 
 koin-common = [

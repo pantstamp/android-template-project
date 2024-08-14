@@ -9,24 +9,30 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import coil.compose.AsyncImage
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
 import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.navigation.MovieCatalogDestination
 import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.ui_model.MovieUiModel
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
 import com.pantelisstampoulis.androidtemplateproject.navigation.Navigator
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import kotlinx.collections.immutable.ImmutableList
@@ -116,13 +122,15 @@ fun MovieList(
     }
 }
 
-// @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MovieRow(
     movie: MovieUiModel,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val DefaultPadding = 16.dp
+    val StarColor = Color(0xFFFFD700)
+
     Card(
         modifier = modifier,
         onClick = onClick,
@@ -130,24 +138,48 @@ fun MovieRow(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(all = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(space = 6.dp),
+                .padding(all = DefaultPadding),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.Start,
             ) {
-                Text(
-                    text = movie.title,
-                    fontWeight = FontWeight.Bold,
+                AsyncImage(
+                    model = movie.posterPath,
+                    contentDescription = null,
+                    modifier = Modifier.size(128.dp)
                 )
-            }
 
-            Text(
-                text = movie.voteAverage.toString(),
-            )
+                Column(
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = movie.title,
+                        fontWeight = FontWeight.Bold,
+                    )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_star),
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp),
+                            tint = StarColor
+                        )
+
+                        Text(
+                            text = movie.voteAverage.toString(),
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }
-
 

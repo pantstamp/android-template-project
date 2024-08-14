@@ -3,6 +3,7 @@ package com.pantelisstampoulis.androidtemplateproject.data.mapper.movie
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.network.model.MovieApiModel
 import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.ApiToDbMapper
+import com.pantelisstampoulis.androidtemplateproject.network.IMAGE_URL
 
 internal class MovieDataMapper: ApiToDbMapper<MovieApiModel, MovieDbModel> {
 
@@ -17,7 +18,7 @@ internal class MovieDataMapper: ApiToDbMapper<MovieApiModel, MovieDbModel> {
         originalTitle = apiModel.originalTitle,
         overview = apiModel.overview,
         popularity = apiModel.popularity,
-        posterPath = apiModel.posterPath,
+        posterPath = IMAGE_URL + apiModel.posterPath,
         releaseDate = apiModel.releaseDate,
         title = apiModel.title,
         video = apiModel.video,
