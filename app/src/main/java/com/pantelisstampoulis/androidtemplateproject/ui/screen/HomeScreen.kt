@@ -46,23 +46,24 @@ fun HomeScreen(navigator: Navigator) {
                     style = MaterialTheme.typography.labelMedium
                 )
             }
-        }
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = stringResource(id = R.string.powered_by))
-            Spacer(modifier = Modifier.height(8.dp))
-            Image(
-                imageVector = ImageVector.vectorResource(id = R.drawable.tmdb_logo),
-                contentDescription = "logo",
+            Spacer(modifier = Modifier.height(48.dp))
+
+            Column(
                 modifier = Modifier
-                    .height(48.dp) // Set just the height to maintain the aspect ratio
-            )
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = stringResource(id = R.string.powered_by))
+                Spacer(modifier = Modifier.height(8.dp))
+                Image(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.tmdb_logo),
+                    contentDescription = "logo",
+                    modifier = Modifier
+                        .height(48.dp)
+                )
+            }
         }
     }
 }

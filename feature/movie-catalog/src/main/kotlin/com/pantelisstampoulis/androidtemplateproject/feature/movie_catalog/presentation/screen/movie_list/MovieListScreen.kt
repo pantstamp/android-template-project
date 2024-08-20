@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,10 +22,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -123,61 +123,111 @@ fun MovieList(
     }
 }
 
+/*@Composable
+fun MovieRow(
+    movie: MovieUiModel,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier.height(150.dp),
+        onClick = onClick,
+
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start,
+        ) {
+
+            AsyncImage(
+                model = movie.posterPath,
+                contentDescription = null,
+                modifier = Modifier.fillMaxHeight()
+            )
+
+            Column(
+                modifier = Modifier
+                    .padding(all = 16.dp)
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+            ) {
+                Text(
+                    text = movie.title,
+                    style = MaterialTheme.typography.titleSmall
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_star),
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp),
+                        tint = StarYellow
+                    )
+
+                    Text(
+                        text = movie.voteAverage.toString(),
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                }
+            }
+
+        }
+
+    }
+}*/
+
 @Composable
 fun MovieRow(
     movie: MovieUiModel,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val DefaultPadding = 16.dp
-
     Card(
-        modifier = modifier,
+        modifier = modifier.height(150.dp),
         onClick = onClick,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(all = DefaultPadding),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start,
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
+            AsyncImage(
+                model = movie.posterPath,
+                contentDescription = null,
+                modifier = Modifier.fillMaxHeight()
+            )
+
+            Column(
+                modifier = Modifier
+                    .padding(all = 16.dp)
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.SpaceBetween // Ensures space between title and rating
             ) {
-                AsyncImage(
-                    model = movie.posterPath,
-                    contentDescription = null,
-                    modifier = Modifier.size(128.dp)
+                Text(
+                    text = movie.title,
+                    style = MaterialTheme.typography.titleSmall
                 )
 
-                Column(
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.SpaceBetween
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End, // Aligns items to the end of the Row
+                    modifier = Modifier.fillMaxWidth() // Ensures the Row takes the full width
                 ) {
-                    Text(
-                        text = movie.title,
-                        style = MaterialTheme.typography.titleSmall
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_star),
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp),
+                        tint = StarYellow
                     )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_star),
-                            contentDescription = null,
-                            modifier = Modifier.size(28.dp),
-                            tint = StarYellow
-                        )
-
-                        Text(
-                            text = movie.voteAverage.toString(),
-                            style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.padding(start = 4.dp)
-                        )
-                    }
+                    Text(
+                        text = movie.voteAverage.toString(),
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
                 }
             }
         }

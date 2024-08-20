@@ -7,14 +7,14 @@ kotlinx-coroutines = "1.9.0-RC"
 kotlinx-datetime = "0.6.0"
 kotlinx-serialization = "1.7.0"
 
-android-gradlePlugin = "8.4.2"
+android-gradlePlugin = "8.5.2"
 
 androidx-activityCompose = "1.9.1"
-androidx-annotation = "1.8.1"
+androidx-annotation = "1.8.2"
 androidx-core-ktx = "1.13.1"
 androidx-datastore = "1.1.1"
 androidx-lifecycle = "2.8.4"
-androidx-navigation = "2.8.0-beta06"
+androidx-navigation = "2.8.0-beta07"
 
 koin = "3.6.0-Beta4"
 

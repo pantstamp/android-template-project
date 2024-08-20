@@ -22,7 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -167,7 +167,7 @@ fun RateMovie(
     onEvent: (MovieDetailsEvent) -> Unit,
     movie: MovieUiModel,
 ) {
-    val ratingState = remember { mutableIntStateOf(0) }
+    val ratingState = rememberSaveable { mutableIntStateOf(0) }
 
     Column(
         modifier = modifier
@@ -183,7 +183,9 @@ fun RateMovie(
 
         Button(onClick = {
             onEvent(MovieDetailsEvent.RateMovie(movie.id, ratingState.intValue.toFloat()))
-        }) {
+        },
+            enabled = ratingState.intValue >= 1
+        ) {
             Text(
                 text = stringResource(id = R.string.label_rate),
                 style = MaterialTheme.typography.labelMedium
