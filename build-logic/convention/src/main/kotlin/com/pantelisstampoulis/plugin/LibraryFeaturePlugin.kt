@@ -22,6 +22,7 @@ class LibraryFeaturePlugin : Plugin<Project> {
                 "implementation"(project(":core:domain"))
                 "implementation"(project(":core:presentation:mvi"))
                 "implementation"(project(":core:presentation:theme"))
+                "implementation"(project(":core:presentation:common-ui"))
                 "implementation"(project(":core:dispatcher:api"))
                 "implementation"(project(":architecture:mapper"))
                 "implementation"(project(":core:navigation:api"))

@@ -22,9 +22,9 @@ class MovieListViewModel(
 
     override fun handleEvents(event: MovieListEvent) {
         when (event) {
-            is MovieListEvent.Init -> {
+            is MovieListEvent.GetMovies -> {
                 viewModelScope.launch {
-                    getMoviesUseCase(input = Unit).collect { resultState ->
+                    getMoviesUseCase(input = event.ignoreCache).collect { resultState ->
                         resultState
                             .onLoading { setState { this.copy(isLoading = true) } }
                             .onSuccess {
@@ -40,9 +40,12 @@ class MovieListViewModel(
                             .onError { error ->
                                 setState {
                                     this.copy(
-                                        isLoading = false,
-                                        errorMessage = error.message,
+                                        isLoading = false
                                     )
+                                }
+                                setEffect {
+                                    val errorMessage = error.message ?: "An error occurred"
+                                    MovieListSideEffect.ShowToast(errorMessage)
                                 }
                             }
                     }

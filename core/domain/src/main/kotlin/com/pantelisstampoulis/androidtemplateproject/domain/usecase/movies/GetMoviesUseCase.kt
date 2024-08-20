@@ -9,7 +9,7 @@ import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
 import kotlinx.coroutines.flow.Flow
 import kotlin.coroutines.CoroutineContext
 
-interface GetMoviesUseCase : UseCase<Unit, List<Movie>>
+interface GetMoviesUseCase : UseCase<Boolean, List<Movie>>
 
 internal class GetMoviesUseCaseImpl(
     private val moviesRepository: MoviesRepository,
@@ -17,7 +17,7 @@ internal class GetMoviesUseCaseImpl(
     private val logger: Logger,
 ) : GetMoviesUseCase {
 
-    override operator fun invoke(input: Unit): Flow<ResultState<List<Movie>>> =
-        moviesRepository.getMovies()
+    override operator fun invoke(ignoreCache: Boolean): Flow<ResultState<List<Movie>>> =
+        moviesRepository.getMovies(ignoreCache)
             .onStartCatch(coroutineContext = coroutineContext, logger = logger)
 }

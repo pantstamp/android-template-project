@@ -20,6 +20,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +33,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
+import com.pantelisstampoulis.androidtemplateproject.common.ui.composable.PullToRefreshLazyColumn
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
 import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.navigation.MovieCatalogDestination
 import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.ui_model.MovieUiModel
@@ -77,7 +82,7 @@ fun MovieListScreen(
         }
 
         LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
-            onEvent(MovieListEvent.Init)
+            onEvent(MovieListEvent.GetMovies())
         }
 
         ObserveEffects(
@@ -105,13 +110,13 @@ fun MovieList(
     onEvent: (MovieListEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LazyColumn(
-        modifier = modifier,
-    ) {
-        items(
-            items = movies,
-            key = { movie -> movie.id },
-        ) { movie ->
+    var isRefreshing by remember {
+        mutableStateOf(false)
+    }
+
+    PullToRefreshLazyColumn(
+        items = movies,
+        content = { movie ->
             MovieRow(
                 movie = movie,
                 onClick = {
@@ -119,65 +124,13 @@ fun MovieList(
                 },
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             )
+        },
+        isRefreshing = isRefreshing,
+        onRefresh = {
+            onEvent(MovieListEvent.GetMovies(ignoreCache = true))
         }
-    }
+    )
 }
-
-/*@Composable
-fun MovieRow(
-    movie: MovieUiModel,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier = modifier.height(150.dp),
-        onClick = onClick,
-
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
-        ) {
-
-            AsyncImage(
-                model = movie.posterPath,
-                contentDescription = null,
-                modifier = Modifier.fillMaxHeight()
-            )
-
-            Column(
-                modifier = Modifier
-                    .padding(all = 16.dp)
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-            ) {
-                Text(
-                    text = movie.title,
-                    style = MaterialTheme.typography.titleSmall
-                )
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_star),
-                        contentDescription = null,
-                        modifier = Modifier.size(28.dp),
-                        tint = StarYellow
-                    )
-
-                    Text(
-                        text = movie.voteAverage.toString(),
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.padding(start = 4.dp)
-                    )
-                }
-            }
-
-        }
-
-    }
-}*/
 
 @Composable
 fun MovieRow(

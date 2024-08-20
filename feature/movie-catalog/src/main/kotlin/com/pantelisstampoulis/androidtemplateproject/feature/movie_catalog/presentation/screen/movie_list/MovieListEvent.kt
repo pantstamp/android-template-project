@@ -5,6 +5,6 @@ import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.Event
 
 sealed interface MovieListEvent : Event {
 
-    data object Init : MovieListEvent
+    data class GetMovies(val ignoreCache: Boolean = false) : MovieListEvent
     data class ShowMovieDetails(val movieId: Int) : MovieListEvent
 }
