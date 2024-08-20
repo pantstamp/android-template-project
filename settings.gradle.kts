@@ -66,7 +66,8 @@ include(
 include(
     ":core:presentation:common-ui",
     ":core:presentation:mvi",
-    ":core:presentation:viewmodel"
+    ":core:presentation:viewmodel",
+    ":core:presentation:theme"
 )
 
 include(":core:data")

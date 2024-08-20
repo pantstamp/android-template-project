@@ -41,7 +41,10 @@ fun HomeScreen(navigator: Navigator) {
             Button(onClick = {
                 navigator.navigateTo(MovieCatalogDestination.MovieListDestination)
             }) {
-                Text(text = stringResource(id = R.string.label_discover_movies))
+                Text(
+                    text = stringResource(id = R.string.label_discover_movies),
+                    style = MaterialTheme.typography.labelMedium
+                )
             }
         }
 

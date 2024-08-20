@@ -35,6 +35,7 @@ import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.prese
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
 import com.pantelisstampoulis.androidtemplateproject.navigation.Navigator
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
+import com.pantelisstampoulis.androidtemplateproject.theme.StarYellow
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.getKoin
@@ -129,7 +130,6 @@ fun MovieRow(
     modifier: Modifier = Modifier,
 ) {
     val DefaultPadding = 16.dp
-    val StarColor = Color(0xFFFFD700)
 
     Card(
         modifier = modifier,
@@ -159,7 +159,7 @@ fun MovieRow(
                 ) {
                     Text(
                         text = movie.title,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleSmall
                     )
 
                     Row(
@@ -169,11 +169,12 @@ fun MovieRow(
                             painter = painterResource(id = R.drawable.ic_star),
                             contentDescription = null,
                             modifier = Modifier.size(28.dp),
-                            tint = StarColor
+                            tint = StarYellow
                         )
 
                         Text(
                             text = movie.voteAverage.toString(),
+                            style = MaterialTheme.typography.labelMedium,
                             modifier = Modifier.padding(start = 4.dp)
                         )
                     }
