@@ -11,7 +11,7 @@ import retrofit2.http.Path
 
 const val BASE_URL = "https://api.themoviedb.org/3/"
 
-const val IMAGE_URL = "https://image.tmdb.org/t/p/w300"
+const val IMAGE_URL = "https://image.tmdb.org/t/p/w500"
 
 interface RetrofitNetworkApi {
     @GET(value = "discover/movie")

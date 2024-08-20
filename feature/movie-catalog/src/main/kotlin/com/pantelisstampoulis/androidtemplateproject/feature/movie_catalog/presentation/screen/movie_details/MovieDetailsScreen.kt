@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -105,15 +106,15 @@ fun MovieDetails(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(all = 16.dp),
-            //.verticalScroll(rememberScrollState()),
+            .padding(all = 16.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(space = 6.dp),
-
     ) {
 
         AsyncImage(
             model = movie.posterPath,
             contentDescription = null,
+            contentScale = ContentScale.FillWidth,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -157,6 +158,8 @@ fun MovieDetails(
     }
 
 }
+
+
 
 @Composable
 fun RateMovie(
