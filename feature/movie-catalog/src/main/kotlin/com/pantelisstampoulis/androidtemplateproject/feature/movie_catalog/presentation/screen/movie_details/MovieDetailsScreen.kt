@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -35,7 +36,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.ui_components.UserRatingBar
+import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.ui_component.UserRatingBar
 import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.ui_model.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
@@ -131,22 +132,45 @@ fun MovieDetails(
             style = MaterialTheme.typography.bodyMedium
         )
 
-        Row(
+        Row (
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_star),
-                contentDescription = null,
-                modifier = Modifier.size(28.dp),
-                tint = StarYellow
-            )
 
             Text(
-                text = movie.voteAverage.toString(),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(start = 4.dp)
+                text = stringResource(id = movie.genreStringId),
+                style = MaterialTheme.typography.labelMedium
             )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(
+                text = movie.releaseYear,
+                style = MaterialTheme.typography.labelMedium
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_star),
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp),
+                    tint = StarYellow
+                )
+
+                Text(
+                    text = movie.voteAverage.toString(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
         }
+
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
