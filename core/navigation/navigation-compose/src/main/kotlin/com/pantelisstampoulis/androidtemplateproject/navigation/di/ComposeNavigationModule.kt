@@ -10,9 +10,9 @@ import org.koin.dsl.module
 
 val navigationModule: Module = module {
 
-    single<NavHostController> { getProperty(NavigationConstants.NAVIGATION_CONTROLLER) }
+    factory <NavHostController> { getProperty(NavigationConstants.NAVIGATION_CONTROLLER) }
 
-    single {
+    factory {
         AndroidComposeNavigator(get())
     } bind Navigator::class
 }
