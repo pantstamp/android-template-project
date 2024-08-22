@@ -1,4 +1,4 @@
-package com.pantelisstampoulis.androidtemplateproject.common.ui.composable
+package com.pantelisstampoulis.androidtemplateproject.common.ui.ui_component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

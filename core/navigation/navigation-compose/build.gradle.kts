@@ -1,5 +1,4 @@
 import com.pantelisstampoulis.utils.namespaceWithProjectPackage
-import java.util.Properties
 
 plugins {
     id(libs.plugins.custom.library.core.get().pluginId)

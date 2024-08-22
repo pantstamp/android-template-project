@@ -25,6 +25,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "AndroidTemplateProject"
+
 include(":app")
 
 include(":core:bridge-di")

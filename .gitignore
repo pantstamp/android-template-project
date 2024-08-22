@@ -47,6 +47,7 @@ captures/
 # Kotlin
 .kotlin
 
+# Miscellaneus
 /local.properties
 /.idea/caches
 /.idea/libraries

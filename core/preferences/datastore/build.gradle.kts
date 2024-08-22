@@ -25,6 +25,7 @@ dependencies {
     // projects
     implementation(projects.core.dispatcher.api)
     implementation(projects.core.preferences.api)
+
     // libraries
     implementation(libs.androidx.datastore.preferences.core)
 }

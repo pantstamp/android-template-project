@@ -14,6 +14,7 @@ const val BASE_URL = "https://api.themoviedb.org/3/"
 const val IMAGE_URL = "https://image.tmdb.org/t/p/w500"
 
 interface RetrofitNetworkApi {
+
     @GET(value = "discover/movie")
     suspend fun getMovies(): NetworkResult<ApiDataResponse<List<MovieApiModel>>>
 

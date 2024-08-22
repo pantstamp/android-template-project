@@ -9,8 +9,6 @@ android {
 }
 
 dependencies {
-    // projects
-    //api(projects.core.presentation.viewmodel)
     // libraries
     implementation(libs.androidx.annotation)
 }

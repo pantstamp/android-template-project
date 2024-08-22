@@ -15,7 +15,6 @@ import kotlin.coroutines.CoroutineContext
 
 val preferencesModule: Module = module {
 
-    // todo revisit this
     single {
         val coroutineContext = get<CoroutineContext>(qualifier = named(CoroutinesDispatchers.IO))
         PreferenceDataStoreFactory.createWithPath(

@@ -10,7 +10,6 @@ import org.koin.dsl.module
 
 val coreModule: Module = module {
     includes(
-        // core
         domainModule,
         dataModule,
         dispatcherModule,

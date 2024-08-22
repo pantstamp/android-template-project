@@ -3,8 +3,6 @@ package com.pantelisstampoulis.androidtemplateproject.database
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
 import kotlinx.coroutines.flow.Flow
 
-
-
 interface DatabaseDataSource {
 
     suspend fun deleteAndInsertMovies(

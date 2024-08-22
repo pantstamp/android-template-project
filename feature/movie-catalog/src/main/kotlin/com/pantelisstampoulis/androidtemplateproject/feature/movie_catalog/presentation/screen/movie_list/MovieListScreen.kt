@@ -34,7 +34,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
-import com.pantelisstampoulis.androidtemplateproject.common.ui.composable.PullToRefreshLazyColumn
+import com.pantelisstampoulis.androidtemplateproject.common.ui.ui_component.PullToRefreshLazyColumn
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
 import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.navigation.MovieCatalogDestination
 import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.ui_model.MovieUiModel

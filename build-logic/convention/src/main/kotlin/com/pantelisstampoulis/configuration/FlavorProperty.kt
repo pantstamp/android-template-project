@@ -28,12 +28,6 @@ enum class FlavorProperty(
         value = NavigationPropertyValue,
         modulePrefix = NavigationModulePrefix,
         variations = listOf(NavigationComposeFlavor),
-    ),
-
-    Preferences(
-        value = PreferencesPropertyValue,
-        modulePrefix = PreferencesModulePrefix,
-        variations = listOf(PreferencesDatastoreFlavor, NoopFlavor),
     );
 
     internal fun getFlavoredModule(flavor: String): String {
