@@ -117,6 +117,9 @@ fun MovieList(
 
     PullToRefreshLazyColumn(
         items = movies,
+        key = { movie ->
+            movie.id
+        },
         content = { movie ->
             MovieRow(
                 movie = movie,

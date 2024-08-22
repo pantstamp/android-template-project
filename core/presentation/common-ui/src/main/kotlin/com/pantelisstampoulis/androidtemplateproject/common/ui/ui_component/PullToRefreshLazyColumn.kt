@@ -26,6 +26,7 @@ fun <T> PullToRefreshLazyColumn(
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
+    key: ((item: T) -> Any)? = null,
     lazyListState: LazyListState = rememberLazyListState()
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
@@ -40,7 +41,10 @@ fun <T> PullToRefreshLazyColumn(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(items) {
+            items(
+                items = items,
+                key = key
+            ) {
                 content(it)
             }
         }

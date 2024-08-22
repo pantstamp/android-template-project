@@ -1,5 +1,8 @@
 package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.ui_model
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class MovieUiModel(
     val id: Int,
     val adult: Boolean,
