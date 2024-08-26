@@ -31,13 +31,16 @@ okhttp = "4.12.0"
 room = "2.6.1"
 ksp = "2.0.0-1.0.22"
 coil = "2.7.0"
+
 # testing
 junit = "4.13.2"
 junitVersion = "1.2.1"
+androidxTestRunner = "1.6.2"
 espressoCore = "3.6.1"
 truth = "1.4.2"
 mockative = "2.2.2"
 turbine = "1.1.0"
+
 # Quality
 konsist = "0.15.1"
 kover = "0.8.0"
@@ -106,6 +109,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
 
 # Quality
 konsist = { group = "com.lemonappdev", name = "konsist", version.ref = "konsist" }
@@ -149,10 +153,12 @@ custom-application-core = { id = "com.pantelisstampoulis.application.core" }
 custom-application-compose = { id = "com.pantelisstampoulis.application.compose" }
 custom-library-core = { id = "com.pantelisstampoulis.library.core" }
 custom-library-feature = { id = "com.pantelisstampoulis.library.feature" }
-custom-koin = { id = "com.pantelisstampoulis.library.koin" }
-custom-kotlin-serialization = { id = "com.pantelisstampoulis.library.kotlin.serialization" }
-custom-room = { id = "com.pantelisstampoulis.library.room" }
-custom-compose = { id = "com.pantelisstampoulis.library.compose" }
+custom-koin = { id = "com.pantelisstampoulis.koin" }
+custom-kotlin-serialization = { id = "com.pantelisstampoulis.kotlin.serialization" }
+custom-room = { id = "com.pantelisstampoulis.room" }
+custom-compose = { id = "com.pantelisstampoulis.compose" }
+custom-testing = { id = "com.pantelisstampoulis.testing" }
+
 
 [bundles]
 compose-common = [

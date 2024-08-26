@@ -27,13 +27,13 @@ gradlePlugin {
             implementationClass = "com.pantelisstampoulis.plugin.LibraryFeaturePlugin"
         }
 
-        register("libraryKoin") {
-            id = "com.pantelisstampoulis.library.koin"
+        register("koin") {
+            id = "com.pantelisstampoulis.koin"
             implementationClass = "com.pantelisstampoulis.plugin.KoinPlugin"
         }
 
-        register("libraryKotlinSerialization") {
-            id = "com.pantelisstampoulis.library.kotlin.serialization"
+        register("kotlinSerialization") {
+            id = "com.pantelisstampoulis.kotlin.serialization"
             implementationClass = "com.pantelisstampoulis.plugin.KotlinSerializationPlugin"
         }
 
@@ -42,14 +42,19 @@ gradlePlugin {
             implementationClass = "com.pantelisstampoulis.plugin.LintPlugin"
         }
 
-        register("libraryRoom") {
-            id = "com.pantelisstampoulis.library.room"
+        register("room") {
+            id = "com.pantelisstampoulis.room"
             implementationClass = "com.pantelisstampoulis.plugin.RoomPlugin"
         }
 
-        register("libraryCompose") {
-            id = "com.pantelisstampoulis.library.compose"
+        register("compose") {
+            id = "com.pantelisstampoulis.compose"
             implementationClass = "com.pantelisstampoulis.plugin.ComposePlugin"
+        }
+
+        register("testing") {
+            id = "com.pantelisstampoulis.testing"
+            implementationClass = "com.pantelisstampoulis.plugin.TestingPlugin"
         }
     }
 }

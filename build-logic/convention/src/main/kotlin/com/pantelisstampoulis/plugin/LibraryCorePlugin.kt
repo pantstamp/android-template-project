@@ -8,6 +8,8 @@ import com.pantelisstampoulis.utils.libs
 import com.pantelisstampoulis.utils.requiredIntProperty
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.kotlin
 
 @Suppress("unused")
 class LibraryCorePlugin : Plugin<Project> {
@@ -34,6 +36,8 @@ class LibraryCorePlugin : Plugin<Project> {
                     javaVersion = javaVersionFromLibs,
                 )
                 defaultConfig.targetSdk = targetSdk
+                defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+                testOptions.animationsDisabled = true
             }
         }
     }

@@ -4,6 +4,7 @@ plugins {
     id(libs.plugins.custom.library.core.get().pluginId)
     id(libs.plugins.custom.koin.get().pluginId)
     id(libs.plugins.custom.room.get().pluginId)
+    id(libs.plugins.custom.testing.get().pluginId)
 }
 
 android {
