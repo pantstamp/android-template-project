@@ -11,7 +11,7 @@ internal class RoomDataSource(
 ) : DatabaseDataSource {
 
     override suspend fun deleteAndInsertMovies(movies: List<MovieDbModel>) {
-        db.movieDao().insertAndReplaceMovies(movies.map { mappers.movieDbMapper.toDb(it) })
+        db.movieDao().insertMovies(movies.map { mappers.movieDbMapper.toDb(it) })
     }
 
     override suspend fun getMovies(): Flow<List<MovieDbModel>> {

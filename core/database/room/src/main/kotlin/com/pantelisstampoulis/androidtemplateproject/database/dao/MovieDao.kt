@@ -12,6 +12,13 @@ import kotlinx.coroutines.flow.Flow
  */
 @Dao
 interface MovieDao {
+
+    /**
+     * Inserts [movieEntities] into the db if they don't exist, and replaces those that do
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMovies(movieEntities: List<MovieEntity>): List<Long>
+
     @Query(
         value = """
         SELECT * FROM movies
@@ -22,10 +29,5 @@ interface MovieDao {
 
     @Query(value = "SELECT * FROM movies")
     fun getMovieEntities(): Flow<List<MovieEntity>>
-
-    /**
-     * Inserts [movieEntities] into the db if they don't exist, and replaces those that do
-     */
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAndReplaceMovies(movieEntities: List<MovieEntity>): List<Long>
 }
+
