@@ -69,7 +69,7 @@ internal class MoviesRepositoryImpl(
             is NetworkResult.Success -> {
                 val movieList = moviesNetworkResult.data.map(mappers.movieDataMapper::fromApiToDb)
                 // save movies to database
-                databaseDataSource.deleteAndInsertMovies(movieList)
+                databaseDataSource.insertMovies(movieList)
                 emitMoviesFromDb(movieList)
             }
             is NetworkResult.Error, is NetworkResult.Exception -> {

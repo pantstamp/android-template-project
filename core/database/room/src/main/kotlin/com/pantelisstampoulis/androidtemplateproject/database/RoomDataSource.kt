@@ -10,7 +10,7 @@ internal class RoomDataSource(
     private val mappers: Mappers,
 ) : DatabaseDataSource {
 
-    override suspend fun deleteAndInsertMovies(movies: List<MovieDbModel>) {
+    override suspend fun insertMovies(movies: List<MovieDbModel>) {
         db.movieDao().insertMovies(movies.map { mappers.movieDbMapper.toDb(it) })
     }
 

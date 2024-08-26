@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface DatabaseDataSource {
 
-    suspend fun deleteAndInsertMovies(
+    suspend fun insertMovies(
         movies: List<MovieDbModel>,
     )
 
