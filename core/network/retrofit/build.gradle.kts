@@ -5,6 +5,7 @@ plugins {
     id(libs.plugins.custom.library.core.get().pluginId)
     id(libs.plugins.custom.koin.get().pluginId)
     id(libs.plugins.custom.kotlin.serialization.get().pluginId)
+    id(libs.plugins.custom.testing.get().pluginId)
 }
 
 android {
@@ -35,4 +36,6 @@ dependencies {
     implementation(libs.retrofit.core)
     implementation(libs.okhttp.logging)
     implementation(libs.retrofit.kotlin.serialization)
+
+    testImplementation(libs.mockwebserver)
 }
