@@ -5,7 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.pantelisstampoulis.androidtemplateproject.database.AppDatabase
-import com.pantelisstampoulis.androidtemplateproject.database.DatabaseTestDoubleFactory
+import com.pantelisstampoulis.androidtemplateproject.database.doubles.RoomDatabaseTestDoubleFactory
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -30,14 +30,14 @@ class MovieDaoTest {
     }
 
     @After
-    fun teardown() {
+    fun tearDown() {
         database.close()
     }
 
     @Test
-    fun insertMovies() = runTest {
+    fun shouldInsertMoviesSuccessfully() = runTest {
         // Given
-        val movie = DatabaseTestDoubleFactory.provideMovieEntity()
+        val movie = RoomDatabaseTestDoubleFactory.provideMovieEntity()
 
         // When
         dao.insertMovies(listOf(movie))
@@ -48,10 +48,10 @@ class MovieDaoTest {
     }
 
     @Test
-    fun getMovieByID() = runTest {
+    fun shouldGetCorrectMovieWithId() = runTest {
         // Given
-        val movie1 = DatabaseTestDoubleFactory.provideMovieEntity()
-        val movie2 = DatabaseTestDoubleFactory.provideMovieEntity()
+        val movie1 = RoomDatabaseTestDoubleFactory.provideMovieEntity()
+        val movie2 = RoomDatabaseTestDoubleFactory.provideMovieEntity()
         dao.insertMovies(listOf(movie1, movie2))
 
         // When

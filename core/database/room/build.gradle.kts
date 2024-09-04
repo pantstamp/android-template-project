@@ -17,5 +17,7 @@ dependencies {
     implementation(libs.retrofit.core)
     implementation(libs.okhttp.logging)
     implementation(libs.retrofit.kotlin.serialization)
+
+    androidTestImplementation(projects.utils.random)
 }
 

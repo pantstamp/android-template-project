@@ -57,7 +57,8 @@ include(
 )
 
 include(
-    ":utils:koin"
+    ":utils:koin",
+    ":utils:random",
 )
 
 include(
@@ -86,6 +87,11 @@ include(
 
 include(
     ":feature:movie-catalog",
+)
+
+include(
+    ":test:doubles:database",
+    ":test:doubles:network",
 )
 
 

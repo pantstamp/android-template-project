@@ -6,6 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.pantelisstampoulis.androidtemplateproject.database.mapper.Mappers
 import com.pantelisstampoulis.androidtemplateproject.database.mapper.MovieDbMapper
+import com.pantelisstampoulis.androidtemplateproject.test.doubles.database.DatabaseTestDoubleFactory
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -33,12 +34,12 @@ class RoomDataSourceTest {
     }
 
     @After
-    fun teardown() {
+    fun tearDown() {
         database.close()
     }
 
     @Test
-    fun insertMovies() = runTest {
+    fun shouldInsertMoviesSuccessfully() = runTest {
         // Given
         val movie = DatabaseTestDoubleFactory.provideMovieDbModel()
 
@@ -51,7 +52,7 @@ class RoomDataSourceTest {
     }
 
     @Test
-    fun getMovieByID() = runTest {
+    fun shouldGetCorrectMovieWithId() = runTest {
         // Given
         val movie1 = DatabaseTestDoubleFactory.provideMovieDbModel()
         val movie2 = DatabaseTestDoubleFactory.provideMovieDbModel()
