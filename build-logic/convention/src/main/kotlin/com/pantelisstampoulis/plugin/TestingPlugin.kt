@@ -18,8 +18,9 @@ class TestingPlugin : Plugin<Project> {
             }
 
             dependencies {
-                "implementation"(project(":test:doubles:database"))
-                "implementation"(project(":test:doubles:network"))
+                "testImplementation"(project(":test:doubles:database"))
+                "testImplementation"(project(":test:doubles:network"))
+                "testImplementation"(project(":test:doubles:model"))
 
                 add("testImplementation", kotlin("test"))
                 add("testImplementation",libs.findLibrary("androidx.junit").get())

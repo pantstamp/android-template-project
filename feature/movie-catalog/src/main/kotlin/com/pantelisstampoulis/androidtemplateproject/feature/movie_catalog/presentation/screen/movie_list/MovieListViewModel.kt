@@ -1,6 +1,5 @@
 package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.screen.movie_list
 
-
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetMoviesUseCase
 import com.pantelisstampoulis.androidtemplateproject.domain.onError
 import com.pantelisstampoulis.androidtemplateproject.domain.onLoading
@@ -26,7 +25,9 @@ class MovieListViewModel(
                 viewModelScope.launch {
                     getMoviesUseCase(input = event.ignoreCache).collect { resultState ->
                         resultState
-                            .onLoading { setState { this.copy(isLoading = true) } }
+                            .onLoading {
+                                setState { this.copy(isLoading = true) }
+                            }
                             .onSuccess {
                                 setState {
                                     this.copy(

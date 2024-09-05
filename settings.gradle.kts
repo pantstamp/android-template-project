@@ -92,6 +92,7 @@ include(
 include(
     ":test:doubles:database",
     ":test:doubles:network",
+    ":test:doubles:model",
 )
 
 

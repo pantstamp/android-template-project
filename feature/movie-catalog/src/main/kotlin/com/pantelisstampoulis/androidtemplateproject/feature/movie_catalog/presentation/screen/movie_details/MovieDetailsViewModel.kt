@@ -1,6 +1,5 @@
 package com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.presentation.screen.movie_details
 
-
 import com.pantelisstampoulis.androidtemplateproject.domain.onError
 import com.pantelisstampoulis.androidtemplateproject.domain.onLoading
 import com.pantelisstampoulis.androidtemplateproject.domain.onSuccess
