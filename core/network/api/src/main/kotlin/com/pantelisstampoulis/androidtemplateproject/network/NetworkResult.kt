@@ -11,6 +11,4 @@ sealed class NetworkResult<out T : Any> {
  *
  * @return `true` if the [NetworkResult] is of type [NetworkResult.Success], `false` otherwise.
  */
-fun <T : Any> NetworkResult<T>.isSuccess(): Boolean {
-    return this is NetworkResult.Success
-}
+fun <T : Any> NetworkResult<T>.isSuccess(): Boolean = this is NetworkResult.Success

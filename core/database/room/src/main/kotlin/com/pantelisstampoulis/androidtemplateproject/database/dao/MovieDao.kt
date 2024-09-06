@@ -30,4 +30,3 @@ interface MovieDao {
     @Query(value = "SELECT * FROM movies")
     fun getMovieEntities(): Flow<List<MovieEntity>>
 }
-

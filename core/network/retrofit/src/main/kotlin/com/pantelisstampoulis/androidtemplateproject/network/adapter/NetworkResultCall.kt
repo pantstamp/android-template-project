@@ -2,13 +2,13 @@ package com.pantelisstampoulis.androidtemplateproject.network.adapter
 
 import com.pantelisstampoulis.androidtemplateproject.network.NetworkResult
 import okhttp3.Request
-import retrofit2.Callback
 import okio.Timeout
 import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Response
 
 class NetworkResultCall<T : Any>(
-    private val delegate: Call<T>
+    private val delegate: Call<T>,
 ) : Call<NetworkResult<T>> {
 
     override fun enqueue(callback: Callback<NetworkResult<T>>) {

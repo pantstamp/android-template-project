@@ -18,5 +18,5 @@ data class MovieApiModel(
     @SerialName("title") val title: String,
     @SerialName("video") val video: Boolean,
     @SerialName("vote_average") val voteAverage: Double,
-    @SerialName("vote_count") val voteCount: Int
+    @SerialName("vote_count") val voteCount: Int,
 )

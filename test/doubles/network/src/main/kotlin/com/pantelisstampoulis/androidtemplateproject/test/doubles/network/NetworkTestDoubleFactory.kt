@@ -12,7 +12,7 @@ object NetworkTestDoubleFactory {
         id = randomInt(from = 1, until = 1000),
         adult = randomBoolean(),
         backdropPath = randomString(),
-        genreIds = listOf(randomInt(from = 1, until = 100)) ,
+        genreIds = listOf(randomInt(from = 1, until = 100)),
         originalLanguage = randomString(),
         originalTitle = randomString(),
         overview = randomString(),
@@ -22,6 +22,6 @@ object NetworkTestDoubleFactory {
         title = randomString(),
         video = randomBoolean(),
         voteAverage = randomFloat(from = 0F, until = 10F).toDouble(),
-        voteCount = randomInt(from = 0)
+        voteCount = randomInt(from = 0),
     )
 }

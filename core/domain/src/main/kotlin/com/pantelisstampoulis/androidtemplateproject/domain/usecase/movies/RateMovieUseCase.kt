@@ -1,9 +1,9 @@
 package com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies
 
-import com.pantelisstampoulis.androidtemplateproject.domain.repository.MoviesRepository
-import com.pantelisstampoulis.androidtemplateproject.domain.usecase.UseCase
 import com.pantelisstampoulis.androidtemplateproject.domain.ResultState
 import com.pantelisstampoulis.androidtemplateproject.domain.onStartCatch
+import com.pantelisstampoulis.androidtemplateproject.domain.repository.MoviesRepository
+import com.pantelisstampoulis.androidtemplateproject.domain.usecase.UseCase
 import com.pantelisstampoulis.androidtemplateproject.logging.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlin.coroutines.CoroutineContext
@@ -22,5 +22,3 @@ internal class RateMovieUseCaseImpl(
         moviesRepository.rateMovie(input.movieId, input.rating)
             .onStartCatch(coroutineContext = coroutineContext, logger = logger)
 }
-
-

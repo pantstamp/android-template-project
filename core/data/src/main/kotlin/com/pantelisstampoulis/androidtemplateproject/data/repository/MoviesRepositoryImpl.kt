@@ -1,13 +1,13 @@
 package com.pantelisstampoulis.androidtemplateproject.data.repository
 
-import com.pantelisstampoulis.androidtemplateproject.database.DatabaseDataSource
-import com.pantelisstampoulis.androidtemplateproject.domain.repository.MoviesRepository
-import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
-import com.pantelisstampoulis.androidtemplateproject.network.NetworkDataSource
 import com.pantelisstampoulis.androidtemplateproject.data.mapper.Mappers
+import com.pantelisstampoulis.androidtemplateproject.database.DatabaseDataSource
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.domain.ResultState
+import com.pantelisstampoulis.androidtemplateproject.domain.repository.MoviesRepository
 import com.pantelisstampoulis.androidtemplateproject.model.error.ErrorModel
+import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
+import com.pantelisstampoulis.androidtemplateproject.network.NetworkDataSource
 import com.pantelisstampoulis.androidtemplateproject.network.NetworkResult
 import com.pantelisstampoulis.androidtemplateproject.network.isSuccess
 import com.pantelisstampoulis.androidtemplateproject.network.request.RateMovieRequest

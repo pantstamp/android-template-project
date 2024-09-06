@@ -39,7 +39,6 @@ class RetrofitNetworkDataSourceTest : KoinTest {
 
     @Test
     fun `test getMovies success`() = runTest {
-
         // Given
         val jsonResponse = loadFileText(this, "/json/tmdb_movie_discover_success.json")
         val mockResponse = MockResponse()
@@ -93,18 +92,18 @@ class RetrofitNetworkDataSourceTest : KoinTest {
 
     @Test
     fun `test getMovies malformed json`() = runTest {
-       // Given
-       val malformedJson = """{ "results": "this_should_be_a_list" }"""
-       val mockResponse = MockResponse()
-           .setResponseCode(200)
-           .setBody(malformedJson)
-       mockWebServer.enqueue(mockResponse)
+        // Given
+        val malformedJson = """{ "results": "this_should_be_a_list" }"""
+        val mockResponse = MockResponse()
+            .setResponseCode(200)
+            .setBody(malformedJson)
+        mockWebServer.enqueue(mockResponse)
 
-       // When
-       val result = dataSource.getMovies()
+        // When
+        val result = dataSource.getMovies()
 
-       // Then
-       assertThat(result).isInstanceOf(NetworkResult.Exception::class.java)
+        // Then
+        assertThat(result).isInstanceOf(NetworkResult.Exception::class.java)
     }
 
     @Test
@@ -141,7 +140,6 @@ class RetrofitNetworkDataSourceTest : KoinTest {
 
     @Test
     fun `test rateMovie success`() = runTest {
-
         // Given
         val jsonResponse = loadFileText(this, "/json/api_result_success.json")
         val mockResponse = MockResponse()
@@ -236,5 +234,4 @@ class RetrofitNetworkDataSourceTest : KoinTest {
         val error = result as NetworkResult.Error
         assertThat(error.code).isEqualTo(401)
     }
-
 }

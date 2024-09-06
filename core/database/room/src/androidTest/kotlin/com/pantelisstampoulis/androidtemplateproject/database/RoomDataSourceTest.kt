@@ -25,7 +25,7 @@ class RoomDataSourceTest {
     fun setup() {
         database = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
-            AppDatabase::class.java
+            AppDatabase::class.java,
         ).allowMainThreadQueries().build()
 
         mappers = Mappers(MovieDbMapper())

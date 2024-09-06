@@ -29,7 +29,6 @@ val preferencesModule: Module = module {
         )
     }
 
-
     single {
         DatastoreDataSource(
             dataStore = get(),

@@ -33,4 +33,3 @@ val databaseModule: Module = module {
         RoomDataSource(get(), get())
     } bind DatabaseDataSource::class
 }
-

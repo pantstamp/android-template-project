@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.navigation.movieCatalogGraph
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.navigation.movieCatalogGraph
 import com.pantelisstampoulis.androidtemplateproject.ui.screen.HomeScreen
 import org.koin.compose.getKoin
 import org.koin.compose.koinInject
@@ -27,7 +27,6 @@ fun AppNavHost(
         navController = mainNavController,
         startDestination = startDestination,
     ) {
-
         composable<AppDestination.HomeScreenDestination> {
             HomeScreen(navigator)
         }
@@ -36,6 +35,3 @@ fun AppNavHost(
         movieCatalogGraph(navigator)
     }
 }
-
-
-

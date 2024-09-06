@@ -22,6 +22,6 @@ object DomainTestDoubleFactory {
         title = randomString(),
         video = randomBoolean(),
         voteAverage = randomFloat(from = 0F, until = 10F).toDouble(),
-        voteCount = randomInt(from = 0)
+        voteCount = randomInt(from = 0),
     )
 }

@@ -13,7 +13,7 @@ val Typography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
+        letterSpacing = 0.5.sp,
     ),
 
     bodyMedium = TextStyle(
@@ -21,7 +21,7 @@ val Typography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         lineHeight = 18.sp,
-        letterSpacing = 0.5.sp
+        letterSpacing = 0.5.sp,
     ),
 
     bodySmall = TextStyle(
@@ -29,7 +29,7 @@ val Typography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 11.sp,
         lineHeight = 14.sp,
-        letterSpacing = 0.5.sp
+        letterSpacing = 0.5.sp,
     ),
 
     titleLarge = TextStyle(
@@ -37,7 +37,7 @@ val Typography = Typography(
         fontWeight = FontWeight.Bold,
         fontSize = 36.sp,
         lineHeight = 40.sp,
-        letterSpacing = 0.sp
+        letterSpacing = 0.sp,
     ),
 
     titleMedium = TextStyle(
@@ -45,7 +45,7 @@ val Typography = Typography(
         fontWeight = FontWeight.Bold,
         fontSize = 24.sp,
         lineHeight = 28.sp,
-        letterSpacing = 0.sp
+        letterSpacing = 0.sp,
     ),
 
     titleSmall = TextStyle(
@@ -53,7 +53,7 @@ val Typography = Typography(
         fontWeight = FontWeight.Bold,
         fontSize = 16.sp,
         lineHeight = 20.sp,
-        letterSpacing = 0.sp
+        letterSpacing = 0.sp,
     ),
 
     labelMedium = TextStyle(
@@ -61,7 +61,7 @@ val Typography = Typography(
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+        letterSpacing = 0.5.sp,
     ),
 
     labelSmall = TextStyle(
@@ -69,7 +69,7 @@ val Typography = Typography(
         fontWeight = FontWeight.Medium,
         fontSize = 11.sp,
         lineHeight = 14.sp,
-        letterSpacing = 0.5.sp
-    )
+        letterSpacing = 0.5.sp,
+    ),
 
 )

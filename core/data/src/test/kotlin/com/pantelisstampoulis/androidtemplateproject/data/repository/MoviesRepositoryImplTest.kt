@@ -83,7 +83,7 @@ class MoviesRepositoryImplTest : KoinTest {
         // Prepare mock data
         val mockMovieDbList = listOf(
             DatabaseTestDoubleFactory.provideMovieDbModel(),
-            DatabaseTestDoubleFactory.provideMovieDbModel()
+            DatabaseTestDoubleFactory.provideMovieDbModel(),
         )
         val mockMovieList = mockMovieDbList.map { dataMappers.movieDomainMapper.fromDbToDomain(it) }
 
@@ -104,14 +104,14 @@ class MoviesRepositoryImplTest : KoinTest {
         // Mock data in the database
         val mockMovieDbList = listOf(
             DatabaseTestDoubleFactory.provideMovieDbModel(),
-            DatabaseTestDoubleFactory.provideMovieDbModel()
+            DatabaseTestDoubleFactory.provideMovieDbModel(),
         )
         coEvery { databaseDataSource.getMovies() }.returns(flowOf(mockMovieDbList))
 
         // Mock network response
         val mockMovieListFromNetwork = listOf(
             NetworkTestDoubleFactory.provideMovieApiModel(),
-            NetworkTestDoubleFactory.provideMovieApiModel()
+            NetworkTestDoubleFactory.provideMovieApiModel(),
         )
         coEvery { networkDataSource.getMovies() }.returns(NetworkResult.Success(mockMovieListFromNetwork))
 

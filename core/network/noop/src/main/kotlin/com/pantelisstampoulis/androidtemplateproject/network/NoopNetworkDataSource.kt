@@ -10,7 +10,7 @@ internal class NoopNetworkDataSource : NetworkDataSource {
 
     override suspend fun rateMovie(
         movieId: Int,
-        request: RateMovieRequest
+        request: RateMovieRequest,
     ): NetworkResult<ApiResultResponse> =
         NetworkResult.Success(ApiResultResponse(success = true, statusCode = 200))
 }

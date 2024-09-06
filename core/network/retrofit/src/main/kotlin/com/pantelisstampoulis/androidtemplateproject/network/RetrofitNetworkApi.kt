@@ -19,6 +19,5 @@ interface RetrofitNetworkApi {
     suspend fun getMovies(): NetworkResult<ApiDataResponse<List<MovieApiModel>>>
 
     @POST(value = "movie/{movie_id}/rating")
-    suspend fun rateMovie(@Path("movie_id") movieId: Int, @Body request: RateMovieRequest):
-            NetworkResult<ApiResultResponse>
+    suspend fun rateMovie(@Path("movie_id") movieId: Int, @Body request: RateMovieRequest): NetworkResult<ApiResultResponse>
 }

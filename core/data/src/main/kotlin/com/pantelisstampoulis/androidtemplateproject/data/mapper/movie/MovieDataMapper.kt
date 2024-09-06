@@ -1,11 +1,11 @@
 package com.pantelisstampoulis.androidtemplateproject.data.mapper.movie
 
-import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
-import com.pantelisstampoulis.androidtemplateproject.network.model.MovieApiModel
 import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.ApiToDbMapper
+import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.network.IMAGE_URL
+import com.pantelisstampoulis.androidtemplateproject.network.model.MovieApiModel
 
-internal class MovieDataMapper: ApiToDbMapper<MovieApiModel, MovieDbModel> {
+internal class MovieDataMapper : ApiToDbMapper<MovieApiModel, MovieDbModel> {
 
     override fun fromApiToDb(
         apiModel: MovieApiModel,
@@ -23,6 +23,6 @@ internal class MovieDataMapper: ApiToDbMapper<MovieApiModel, MovieDbModel> {
         title = apiModel.title,
         video = apiModel.video,
         voteAverage = apiModel.voteAverage,
-        voteCount = apiModel.voteCount
+        voteCount = apiModel.voteCount,
     )
 }

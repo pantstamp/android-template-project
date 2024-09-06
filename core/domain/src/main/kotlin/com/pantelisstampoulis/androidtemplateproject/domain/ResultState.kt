@@ -52,9 +52,6 @@ fun <T> Flow<ResultState<T>>.onStartCatch(
     .cancellable()
     .flowOn(context = coroutineContext)
 
-
-
-
 /**
  * Extension function for [ResultState] to handle the success state.
  *

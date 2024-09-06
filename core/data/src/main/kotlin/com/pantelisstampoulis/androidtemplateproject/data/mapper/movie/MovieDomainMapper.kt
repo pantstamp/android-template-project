@@ -1,11 +1,10 @@
 package com.pantelisstampoulis.androidtemplateproject.data.mapper.movie
 
+import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.DbToDomainMapper
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
-import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.DbToDomainMapper
 
-internal class MovieDomainMapper:
-    DbToDomainMapper<MovieDbModel, Movie> {
+internal class MovieDomainMapper : DbToDomainMapper<MovieDbModel, Movie> {
 
     override fun fromDbToDomain(
         dbModel: MovieDbModel,
@@ -23,6 +22,6 @@ internal class MovieDomainMapper:
         title = dbModel.title,
         video = dbModel.video,
         voteAverage = dbModel.voteAverage,
-        voteCount = dbModel.voteCount
+        voteCount = dbModel.voteCount,
     )
 }

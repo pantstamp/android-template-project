@@ -15,7 +15,7 @@ fun AndroidTemplateProjectApp() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
         ) {
             AppNavHost(startDestination = AppDestination.HomeScreenDestination)
         }

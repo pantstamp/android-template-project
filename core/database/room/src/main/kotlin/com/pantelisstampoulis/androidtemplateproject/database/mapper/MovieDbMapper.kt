@@ -3,7 +3,6 @@ package com.pantelisstampoulis.androidtemplateproject.database.mapper
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieEntity
 
-
 class MovieDbMapper {
 
     internal fun toDb(

@@ -19,21 +19,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.pantelisstampoulis.androidtemplateproject.R
-import com.pantelisstampoulis.androidtemplateproject.feature.movie_catalog.navigation.MovieCatalogDestination
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.navigation.MovieCatalogDestination
 import com.pantelisstampoulis.androidtemplateproject.navigation.Navigator
 
 @Composable
 fun HomeScreen(navigator: Navigator) {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = stringResource(id = R.string.app_title),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -43,7 +43,7 @@ fun HomeScreen(navigator: Navigator) {
             }) {
                 Text(
                     text = stringResource(id = R.string.label_discover_movies),
-                    style = MaterialTheme.typography.labelMedium
+                    style = MaterialTheme.typography.labelMedium,
                 )
             }
 
@@ -53,7 +53,7 @@ fun HomeScreen(navigator: Navigator) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(text = stringResource(id = R.string.powered_by))
                 Spacer(modifier = Modifier.height(8.dp))
@@ -61,7 +61,7 @@ fun HomeScreen(navigator: Navigator) {
                     imageVector = ImageVector.vectorResource(id = R.drawable.tmdb_logo),
                     contentDescription = "logo",
                     modifier = Modifier
-                        .height(48.dp)
+                        .height(48.dp),
                 )
             }
         }

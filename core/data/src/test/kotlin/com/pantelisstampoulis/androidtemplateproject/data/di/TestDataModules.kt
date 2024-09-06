@@ -7,7 +7,7 @@ import org.koin.dsl.module
 
 val testDataModule = module {
     includes(
-        mappersModule
+        mappersModule,
     )
 
     single {

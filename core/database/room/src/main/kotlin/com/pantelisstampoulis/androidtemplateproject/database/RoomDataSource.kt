@@ -14,17 +14,13 @@ internal class RoomDataSource(
         db.movieDao().insertMovies(movies.map { mappers.movieDbMapper.toDb(it) })
     }
 
-    override suspend fun getMovies(): Flow<List<MovieDbModel>> {
-       return db.movieDao().getMovieEntities().map { movieEntityList ->
-           movieEntityList.map {
-               movieEntity -> mappers.movieDbMapper.mapFromDb(movieEntity)
-           }
-       }
-    }
-
-    override suspend fun getMovie(movieId: Int): MovieDbModel? {
-        return db.movieDao().getMovieEntity(movieId)?.let { movieEntity ->
+    override suspend fun getMovies(): Flow<List<MovieDbModel>> = db.movieDao().getMovieEntities().map { movieEntityList ->
+        movieEntityList.map { movieEntity ->
             mappers.movieDbMapper.mapFromDb(movieEntity)
         }
+    }
+
+    override suspend fun getMovie(movieId: Int): MovieDbModel? = db.movieDao().getMovieEntity(movieId)?.let { movieEntity ->
+        mappers.movieDbMapper.mapFromDb(movieEntity)
     }
 }

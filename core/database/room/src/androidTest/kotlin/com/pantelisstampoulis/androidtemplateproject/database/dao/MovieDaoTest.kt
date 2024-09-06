@@ -23,7 +23,7 @@ class MovieDaoTest {
     fun setup() {
         database = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
-            AppDatabase::class.java
+            AppDatabase::class.java,
         ).allowMainThreadQueries().build()
 
         dao = database.movieDao()
@@ -61,7 +61,4 @@ class MovieDaoTest {
         assertThat(movie).isNotNull()
         assertThat(movie?.id).isEqualTo(movie2.id)
     }
-
-
-
 }
