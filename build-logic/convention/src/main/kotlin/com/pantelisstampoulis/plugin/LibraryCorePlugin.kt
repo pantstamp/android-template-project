@@ -22,6 +22,7 @@ class LibraryCorePlugin : Plugin<Project> {
                 apply(libs.findPlugin("kotlin.android").get().get().pluginId)
                 apply(KotlinBasePlugin::class.java)
                 apply(LintPlugin::class.java)
+                apply(SpotlessPlugin::class.java)
             }
 
             val compileSdk = requiredIntProperty(property = ProjectProperty.AndroidCompileSdk)

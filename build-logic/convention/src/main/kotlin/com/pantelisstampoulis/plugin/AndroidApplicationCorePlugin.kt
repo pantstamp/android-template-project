@@ -21,6 +21,7 @@ class AndroidApplicationCorePlugin : Plugin<Project> {
                 apply(KotlinBasePlugin::class.java)
                 apply(LintPlugin::class.java)
                 apply(KoinPlugin::class.java)
+                apply(SpotlessPlugin::class.java)
             }
 
             val compileSdk = requiredIntProperty(property = ProjectProperty.AndroidCompileSdk)

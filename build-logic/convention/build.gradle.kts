@@ -56,6 +56,11 @@ gradlePlugin {
             id = "com.pantelisstampoulis.testing"
             implementationClass = "com.pantelisstampoulis.plugin.TestingPlugin"
         }
+
+        register("spotless") {
+            id = "com.pantelisstampoulis.spotless"
+            implementationClass = "com.pantelisstampoulis.plugin.SpotlessPlugin"
+        }
     }
 }
 
@@ -69,6 +74,7 @@ dependencies {
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.room.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
+    compileOnly(libs.spotless.gradlePlugin)
 }
 
 tasks {
