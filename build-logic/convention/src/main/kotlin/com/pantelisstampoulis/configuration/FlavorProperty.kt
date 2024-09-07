@@ -9,25 +9,25 @@ enum class FlavorProperty(
     Database(
         value = DatabasePropertyValue,
         modulePrefix = DatabaseModulePrefix,
-        variations = listOf(DatabaseSqlDelightFlavor, NoopFlavor),
+        variations = listOf(DatabaseRoomFlavor, NoopFlavor),
     ),
 
     Logging(
         value = LoggingPropertyValue,
         modulePrefix = LoggingModulePrefix,
-        variations = listOf(LoggingKermitFlavor, NoopFlavor),
+        variations = listOf(NoopFlavor),
     ),
 
     Network(
         value = NetworkPropertyValue,
         modulePrefix = NetworkModulePrefix,
-        variations = listOf(NetworkKtorFlavor, NoopFlavor),
+        variations = listOf(NetworkRetrofitFlavor, NoopFlavor),
     ),
 
-    Preferences(
-        value = PreferencesPropertyValue,
-        modulePrefix = PreferencesModulePrefix,
-        variations = listOf(PreferencesDatastoreFlavor, NoopFlavor),
+    Navigation(
+        value = NavigationPropertyValue,
+        modulePrefix = NavigationModulePrefix,
+        variations = listOf(NavigationComposeFlavor),
     );
 
     internal fun getFlavoredModule(flavor: String): String {

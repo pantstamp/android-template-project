@@ -1,14 +1,9 @@
 package com.pantelisstampoulis.plugin
 
-import com.android.build.gradle.LibraryExtension
-import com.pantelisstampoulis.utils.configureAndroidCompose
-import com.pantelisstampoulis.utils.configureCompose
-import com.pantelisstampoulis.utils.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.getByType
-import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.project
 
 @Suppress("unused")
 class LibraryFeaturePlugin : Plugin<Project> {
@@ -18,15 +13,20 @@ class LibraryFeaturePlugin : Plugin<Project> {
 
             with(pluginManager) {
                 apply(LibraryCorePlugin::class.java)
-                apply(libs.findPlugin("compose-compiler").get().get().pluginId)
+                apply(ComposePlugin::class.java)
+                apply(KotlinSerializationPlugin::class.java)
             }
 
-            extensions.configure(LibraryExtension::class.java) {
-                configureAndroidCompose()
+            dependencies {
+                // architecture layers
+                "implementation"(project(":core:domain"))
+                "implementation"(project(":core:presentation:mvi"))
+                "implementation"(project(":core:presentation:theme"))
+                "implementation"(project(":core:presentation:common-ui"))
+                "implementation"(project(":core:dispatcher:api"))
+                "implementation"(project(":architecture:mapper"))
+                "implementation"(project(":core:navigation:api"))
             }
-
-            val composeExtension = extensions.getByType<ComposeCompilerGradlePluginExtension>()
-            configureCompose(extension = composeExtension)
         }
     }
 }

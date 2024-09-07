@@ -1,42 +1,79 @@
 [versions]
-android-gradlePlugin = "8.4.2"
-androidx-activityCompose = "1.9.0"
-androidx-annotation = "1.8.0"
-androidx-core-ktx = "1.13.1"
-androidx-datastore = "1.1.1"
-androidx-lifecycle = "2.8.3"
-androidx-navigation = "2.8.0-beta05"
-benManesVersions = "0.51.0"
-buildkonfig = "0.15.1"
-compose = "2024.06.00"
 java-version = "17"
-junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
-appcompat = "1.7.0"
-material = "1.12.0"
-firebasePerfPlugin = "1.4.2"
-firebaseCrashlyticsPlugin = "3.0.2"
-truth = "1.4.2"
-kermit = "2.0.3"
-koin = "3.6.0-Beta4"
-konsist = "0.15.1"
+
+# Kotlin
 kotlin = "2.0.0"
 kotlinx-collections-immutable = "0.3.7"
 kotlinx-coroutines = "1.9.0-RC"
 kotlinx-datetime = "0.6.0"
 kotlinx-serialization = "1.7.0"
-kover = "0.8.0"
+
+# Gradle Plugin
+android-gradlePlugin = "8.5.2"
+
+# AndroidX
+androidx-activityCompose = "1.9.1"
+androidx-annotation = "1.8.2"
+androidx-core-ktx = "1.13.1"
+androidx-datastore = "1.1.1"
+androidx-lifecycle = "2.8.4"
+androidx-navigation = "2.8.0-beta07"
+appcompat = "1.7.0"
+material = "1.12.0"
+
+# Compose
+compose = "2024.06.00"
+
+# 3rd party libs
+koin = "3.6.0-Beta4"
+retrofit = "2.11.0"
+okhttp = "4.12.0"
+room = "2.6.1"
 ksp = "2.0.0-1.0.22"
-ktlint = "1.1.1"
-ktor = "3.0.0-beta-1"
+coil = "2.7.0"
+
+# testing
+junit = "4.13.2"
+junitVersion = "1.2.1"
+androidxTestRunner = "1.6.2"
+espressoCore = "3.6.1"
+truth = "1.4.2"
 mockative = "2.2.2"
-spotless = "6.25.0"
-sqlDelight = "2.0.2"
 turbine = "1.1.0"
 
+# Quality
+konsist = "0.15.1"
+kover = "0.8.0"
+ktlint = "1.3.1"
+spotless = "6.25.0"
+
+
+
 [libraries]
+# Koin
+koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
+koin-core = { group = "io.insert-koin", name = "koin-core" }
+koin-test = { group = "io.insert-koin", name = "koin-test" }
+koin-android = { group = "io.insert-koin", name = "koin-android" }
+koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
+
+# Retrofit
+retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-kotlin-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
+okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
+
+# Room
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
+ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+
+# Gradle Plugin
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradlePlugin" }
+
+# AndroidX
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activityCompose" }
 androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "androidx-annotation" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
@@ -44,34 +81,42 @@ androidx-datastore-preferences-core = { group = "androidx.datastore", name = "da
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidx-navigation" }
-compose-animation = { group = "androidx.compose.animation", name = "animation" }
-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose" }
-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
-compose-ui = { group = "androidx.compose.ui", name = "ui" }
-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
+
+# Compose
+compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose" }
+compose-animation = { group = "androidx.compose.animation", name = "animation" }
+compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
+compose-ui = { group = "androidx.compose.ui", name = "ui" }
+compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+
+# Coil
+coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+
+# Testing
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
-kermit = { group = "co.touchlab", name = "kermit", version.ref = "kermit" }
-kermit-test = { group = "co.touchlab", name = "kermit-test", version.ref = "kermit" }
-koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
-koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
-koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
-koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
+
+# Quality
 konsist = { group = "com.lemonappdev", name = "konsist", version.ref = "konsist" }
+spotless-gradlePlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
+
+# Kotlin
 kotlin-compose-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
@@ -81,46 +126,41 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
-ktor-bom = { group = "io.ktor", name = "ktor-bom", version.ref = "ktor" }
-ktor-client-auth = { group = "io.ktor", name = "ktor-client-auth" }
-ktor-client-core = { group = "io.ktor", name = "ktor-client-core" }
-ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation" }
-ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin" }
-ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging" }
-ktor-client-mock = { group = "io.ktor", name = "ktor-client-mock" }
-ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp" }
-ktor-client-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json" }
+
+# Testing
 mockative = { group = "io.mockative", name = "mockative", version.ref = "mockative" }
 mockative-processor = { group = "io.mockative", name = "mockative-processor", version.ref = "mockative" }
-spotless-gradlePlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
-sqlDelight-android = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqlDelight" }
-sqlDelight-native = { group = "app.cash.sqldelight", name = "native-driver", version.ref = "sqlDelight" }
-sqlDelight-sqlite = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqlDelight" }
-sqlDelight-primitive = { group = "app.cash.sqldelight", name = "primitive-adapters", version.ref = "sqlDelight" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "android-gradlePlugin" }
 android-lint = { id = "com.android.lint" }
-benManes-versions = { id = "com.github.ben-manes.versions", version.ref = "benManesVersions" }
-buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinx-kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
-sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqlDelight" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-android-application-compose = { id = "com.pantelisstampoulis.android.application.compose" }
-android-application-core = { id = "com.pantelisstampoulis.android.application.core" }
-library-core = { id = "com.pantelisstampoulis.library.core" }
-library-feature = { id = "com.pantelisstampoulis.library.feature" }
-library-koin = { id = "com.pantelisstampoulis.library.koin" }
-library-serialization = { id = "com.pantelisstampoulis.library.serialization" }
+androidx-room = { id = "androidx.room", version.ref = "room" }
+
+
+# Custom Plugins
+custom-application-core = { id = "com.pantelisstampoulis.application.core" }
+custom-application-compose = { id = "com.pantelisstampoulis.application.compose" }
+custom-library-core = { id = "com.pantelisstampoulis.library.core" }
+custom-library-feature = { id = "com.pantelisstampoulis.library.feature" }
+custom-koin = { id = "com.pantelisstampoulis.koin" }
+custom-kotlin-serialization = { id = "com.pantelisstampoulis.kotlin.serialization" }
+custom-room = { id = "com.pantelisstampoulis.room" }
+custom-compose = { id = "com.pantelisstampoulis.compose" }
+custom-testing = { id = "com.pantelisstampoulis.testing" }
+custom-spotless = { id = "com.pantelisstampoulis.spotless" }
+
 
 [bundles]
 compose-common = [
@@ -129,4 +169,16 @@ compose-common = [
     "compose-material3",
     "compose-runtime",
     "compose-ui",
+    "androidx-lifecycle-runtime-compose",
+    "androidx-navigation-compose",
+    "compose-ui-tooling",
+    "compose-ui-tooling-preview",
+    "coil-compose",
+]
+
+koin-common = [
+    "koin-core",
+    "koin-test",
+    "koin-android",
+    "koin-androidx-compose",
 ]

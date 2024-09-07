@@ -1,5 +1,6 @@
 plugins {
-    id(libs.plugins.android.application.compose.get().pluginId)
+    id(libs.plugins.custom.application.compose.get().pluginId)
+    id(libs.plugins.custom.kotlin.serialization.get().pluginId)
 }
 
 android {
@@ -35,18 +36,6 @@ android {
 
 dependencies {
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    // features
+    implementation(projects.feature.movieCatalog)
 }

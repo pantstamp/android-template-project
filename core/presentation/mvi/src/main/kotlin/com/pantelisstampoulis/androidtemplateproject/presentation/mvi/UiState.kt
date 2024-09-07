@@ -1,0 +1,3 @@
+package com.pantelisstampoulis.androidtemplateproject.presentation.mvi
+
+interface UiState

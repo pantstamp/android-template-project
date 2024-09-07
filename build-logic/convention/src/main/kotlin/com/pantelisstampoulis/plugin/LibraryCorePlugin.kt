@@ -8,6 +8,8 @@ import com.pantelisstampoulis.utils.libs
 import com.pantelisstampoulis.utils.requiredIntProperty
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.kotlin
 
 @Suppress("unused")
 class LibraryCorePlugin : Plugin<Project> {
@@ -17,8 +19,10 @@ class LibraryCorePlugin : Plugin<Project> {
 
             with(pluginManager) {
                 apply(libs.findPlugin("android.library").get().get().pluginId)
+                apply(libs.findPlugin("kotlin.android").get().get().pluginId)
                 apply(KotlinBasePlugin::class.java)
                 apply(LintPlugin::class.java)
+                apply(SpotlessPlugin::class.java)
             }
 
             val compileSdk = requiredIntProperty(property = ProjectProperty.AndroidCompileSdk)
@@ -33,6 +37,8 @@ class LibraryCorePlugin : Plugin<Project> {
                     javaVersion = javaVersionFromLibs,
                 )
                 defaultConfig.targetSdk = targetSdk
+                defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+                testOptions.animationsDisabled = true
             }
         }
     }
