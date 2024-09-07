@@ -25,7 +25,6 @@ dependencies {
 
     // utilities
     implementation(projects.core.logging.api)
-    implementation(projects.core.preferences.api)
     implementation(projects.architecture.mapper)
 
     // libraries

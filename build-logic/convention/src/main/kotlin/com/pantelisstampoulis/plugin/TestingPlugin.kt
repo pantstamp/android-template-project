@@ -22,6 +22,10 @@ class TestingPlugin : Plugin<Project> {
                 "testImplementation"(project(":test:doubles:network"))
                 "testImplementation"(project(":test:doubles:model"))
 
+                "androidTestImplementation"(project(":test:doubles:database"))
+                "androidTestImplementation"(project(":test:doubles:network"))
+                "androidTestImplementation"(project(":test:doubles:model"))
+
                 add("testImplementation", kotlin("test"))
                 add("testImplementation",libs.findLibrary("androidx.junit").get())
                 add("testImplementation",libs.findLibrary("kotlinx.coroutines.test").get())

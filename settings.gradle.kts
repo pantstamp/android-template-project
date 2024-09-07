@@ -75,12 +75,6 @@ include(
 include(":core:data")
 
 include(
-    ":core:preferences:api",
-    ":core:preferences:datastore",
-    ":core:preferences:noop",
-)
-
-include(
     ":core:navigation:api",
     ":core:navigation:navigation-compose",
 )

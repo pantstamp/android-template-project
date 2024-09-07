@@ -18,14 +18,8 @@ internal const val NavigationPropertyValue = "configuration.flavor.navigation"
 internal const val NavigationModulePrefix = ":core:navigation:"
 internal const val NavigationComposeFlavor = "navigation-compose"
 
-
 // logging
 internal const val LoggingPropertyValue = "configuration.flavor.logging"
 internal const val LoggingModulePrefix = ":core:logging:"
-
-// preferences
-internal const val PreferencesPropertyValue = "configuration.flavor.preferences"
-internal const val PreferencesModulePrefix = ":core:preferences:"
-internal const val PreferencesDatastoreFlavor = "datastore"
 
 

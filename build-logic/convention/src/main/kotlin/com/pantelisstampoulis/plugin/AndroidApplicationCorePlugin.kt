@@ -50,7 +50,6 @@ class AndroidApplicationCorePlugin : Plugin<Project> {
 
                 // libraries
                 "implementation"(libs.findLibrary("material").get())
-
             }
         }
     }
