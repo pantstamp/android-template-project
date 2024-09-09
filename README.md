@@ -16,7 +16,7 @@ To build this project, you'll need to have the following setup:
 This project uses the TMDB API for backend calls to fetch movie-related data. To use the API, you must register for an API key on the [TMDB Developer Portal](https://developer.themoviedb.org/docs/getting-started).
 
 - **Adding the API Key**:
-Once you have your TMDB API key, add the following line to your local.properties file (found in the root of your project): `TMDB_API_KEY=your_tmdb_api_key_here`
+Once you have your TMDB API key, add the **API Read Access Token** by adding this line to your local.properties file (found in the root of your project): `TMDB_API_KEY=your_tmdb_read_access_token_here`
 
 - **Build & Run**:
-After adding the API key, you can build and run the project as usual through Android Studio.
+After adding the API Read Access Token, you can build and run the project as usual through Android Studio.
