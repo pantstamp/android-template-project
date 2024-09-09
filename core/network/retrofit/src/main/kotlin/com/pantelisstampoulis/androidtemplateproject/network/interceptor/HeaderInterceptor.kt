@@ -6,9 +6,10 @@ import okhttp3.Response
 
 class HeaderInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
+        val bearer = BuildConfig.TMDB_API_KEY
         val request = chain.request().newBuilder()
             .addHeader("accept", "application/json")
-            .addHeader("Authorization", "Bearer ${BuildConfig.TMDB_API_KEY}")
+            .addHeader("Authorization", "Bearer $bearer")
             .build()
         return chain.proceed(request)
     }
