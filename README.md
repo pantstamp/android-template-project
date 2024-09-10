@@ -8,6 +8,11 @@ This template is suitable for both small and large applications.
 
 **Please note that this is a work in progress. More functionality and detailed documentation will be added in future updates.**
 
+## Architecture
+The **Android Template** app follows the Clean Architecture principles
+and is described in detail in the
+[architecture page](docs/ARCHITECTURE.md).
+
 ## Building the Project
 
 To build this project, you'll need to have the following setup:
