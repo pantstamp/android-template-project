@@ -6,13 +6,6 @@ Here you will explore the architecture of the Android Template app, including it
 
 The app architecture has three layers: a data layer, a domain layer and a Presentation or UI layer following the principles of Clean Architecture.
 
-### Why Multi-Module?
-
-* Developers can work on specific sections of the application without slowing down other developers.
-* Maintainability: All files are organized in their respective modules, making it easier to locate what we're looking for.
-* Incremental Compilation: Modifying a file allows modularized apps to compile faster compared to monolithic apps.
-* CI/CD processes run faster.
-
 ### Why Clean Architecture?
 
 * Separation of Concerns: Code is separated into different modules or sections with specific responsibilities, making it easier to maintain and modify.

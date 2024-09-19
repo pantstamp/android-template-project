@@ -13,6 +13,10 @@ The **Android Template** app follows the Clean Architecture principles
 and is described in detail in the
 [architecture page](docs/ARCHITECTURE.md).
 
+## Modularization
+The **Android Template** app has been fully modularized. The modularization strategy is described in detail in the
+[modularization page](docs/MODULARIZATION.md).
+
 ## Building the Project
 
 To build this project, you'll need to have the following setup:
