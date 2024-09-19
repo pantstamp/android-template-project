@@ -64,3 +64,13 @@ In each layer, we use specific mapper objects. To maintain consistency, these ma
 <center>
 <img src="images/flow_of_data.png" width="600px" alt="Diagram showing overall app architecture" />
 </center>
+
+## Feature modules with their own Clean layers
+
+A very common scenario we might encounter is implementing a new feature with functionality that is significantly different from the rest of the app. We should think of feature modules as small, independent apps that can be removed from the project without affecting other modules. In this case, the feature might have its own unique data sources, such as custom Retrofit services that interact with different backend systems than the rest of the app, its own database, unique repositories, and use cases with business logic that we are certain will never be used by other feature modules. They may also have their own domain models. All these classes should never reside in the :core modules. So, what should we do?
+
+There are two recommended approaches:
+
+- For smaller and simpler apps, follow a package-based approach. Create new packages inside the feature module to represent the Clean Architecture layers. For example, create a data package for all repository implementations, a domain package for all use cases and repository interfaces, a database package for all database-related classes, etc. It is important to remain consistent with the conventions used in the core modules.
+
+- For larger projects that require maximum configurability, you could create a Gradle module structure for the feature, where each layer is represented by its own Gradle module, similar to how modules exist in the core package. However, this approach adds complexity and should be avoided for smaller projects, as it can be considered over-engineering.
