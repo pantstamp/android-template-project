@@ -3,6 +3,7 @@ package com.pantelisstampoulis.plugin
 import com.android.build.api.dsl.ApplicationExtension
 import com.pantelisstampoulis.configuration.ProjectProperty
 import com.pantelisstampoulis.utils.configureAndroid
+import com.pantelisstampoulis.configuration.configureFlavors
 import com.pantelisstampoulis.utils.javaVersion
 import com.pantelisstampoulis.utils.libs
 import com.pantelisstampoulis.utils.requiredIntProperty
@@ -36,6 +37,7 @@ class AndroidApplicationCorePlugin : Plugin<Project> {
                     javaVersion = javaVersionFromLibs,
                 )
                 defaultConfig.targetSdk = targetSdk
+                configureFlavors(this)
             }
 
             dependencies {

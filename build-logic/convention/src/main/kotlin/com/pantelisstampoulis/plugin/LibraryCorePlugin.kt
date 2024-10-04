@@ -3,13 +3,12 @@ package com.pantelisstampoulis.plugin
 import com.android.build.gradle.LibraryExtension
 import com.pantelisstampoulis.configuration.ProjectProperty
 import com.pantelisstampoulis.utils.configureAndroid
+import com.pantelisstampoulis.configuration.configureFlavors
 import com.pantelisstampoulis.utils.javaVersion
 import com.pantelisstampoulis.utils.libs
 import com.pantelisstampoulis.utils.requiredIntProperty
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.kotlin
 
 @Suppress("unused")
 class LibraryCorePlugin : Plugin<Project> {
@@ -39,6 +38,7 @@ class LibraryCorePlugin : Plugin<Project> {
                 defaultConfig.targetSdk = targetSdk
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                 testOptions.animationsDisabled = true
+                configureFlavors(this)
             }
         }
     }
