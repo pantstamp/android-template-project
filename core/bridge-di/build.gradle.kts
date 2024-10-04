@@ -1,5 +1,3 @@
-import com.pantelisstampoulis.configuration.FlavorProperty
-import com.pantelisstampoulis.utils.getFlavoredModule
 import com.pantelisstampoulis.utils.namespaceWithProjectPackage
 
 plugins {
@@ -19,7 +17,7 @@ dependencies {
     // utilities
     implementation(projects.core.dispatcher.impl)
     implementation(projects.core.logging.api)
-    implementation(getFlavoredModule(property = FlavorProperty.Logging))
+    implementation(projects.core.logging.noop)
     implementation(projects.core.navigation.api)
-    implementation(getFlavoredModule(property = FlavorProperty.Navigation))
+    implementation(projects.core.navigation.navigationCompose)
 }
