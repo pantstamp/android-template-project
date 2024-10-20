@@ -74,3 +74,11 @@ There are two recommended approaches:
 - For smaller and simpler apps, follow a package-based approach. Create new packages inside the feature module to represent the Clean Architecture layers. For example, create a data package for all repository implementations, a domain package for all use cases and repository interfaces, a database package for all database-related classes, etc. It is important to remain consistent with the conventions used in the core modules.
 
 - For larger projects that require maximum configurability, you could create a Gradle module structure for the feature, where each layer is represented by its own Gradle module, similar to how modules exist in the core package. However, this approach adds complexity and should be avoided for smaller projects, as it can be considered over-engineering.
+
+**ATTENTION:**
+
+In the "core" package, there are the "data," "domain," "model," "database," and "network" modules. We only include classes in these modules that are used by two or more feature modules. We can think of these as the "clean layers" of the entire app, which can be accessed by various parts of the app. For example, in our case, the "Movie" domain model, the "GetMoviesUseCase," and the implementation of the "MoviesRepository" are expected to be used by multiple feature modules. If we were building a fintech app, we might have the "Account" domain model in the core package.
+
+If a class is intended to be used only by a specific feature module, we must place it in the corresponding feature module. Otherwise, if it exists in the core directory, every change to it will trigger rebuilds of feature modules that don't actually use it.
+
+**This app serves as a template and example for building other apps. That's why it contains as few features as possible, and that's also why the classes in the core module are used only by one feature module.**
