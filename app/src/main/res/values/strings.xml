@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">AndroidTemplateProject</string>
-    <string name="title_activity_main">MainActivity</string>
 
     <!-- Home screen -->
     <string name="app_title">Movie Finder</string>

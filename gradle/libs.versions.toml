@@ -2,7 +2,7 @@
 java-version = "17"
 
 # Kotlin
-kotlin = "2.0.10"
+kotlin = "2.0.21"
 kotlinx-collections-immutable = "0.3.7"
 kotlinx-coroutines = "1.9.0"
 kotlinx-datetime = "0.6.0"
@@ -29,7 +29,7 @@ koin = "3.6.0-Beta4"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
 room = "2.6.1"
-ksp = "2.0.0-1.0.22"
+ksp = "2.0.21-1.0.25"
 coil = "2.7.0"
 
 # testing
@@ -138,7 +138,6 @@ android-application = { id = "com.android.application", version.ref = "android-g
 android-library = { id = "com.android.library", version.ref = "android-gradlePlugin" }
 android-lint = { id = "com.android.lint" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinx-kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
@@ -159,6 +158,7 @@ custom-room = { id = "com.pantelisstampoulis.room" }
 custom-compose = { id = "com.pantelisstampoulis.compose" }
 custom-testing = { id = "com.pantelisstampoulis.testing" }
 custom-spotless = { id = "com.pantelisstampoulis.spotless" }
+custom-konsist = { id = "com.pantelisstampoulis.konsist" }
 
 
 [bundles]
