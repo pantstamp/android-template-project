@@ -29,7 +29,7 @@ koin = "3.6.0-Beta4"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
 room = "2.6.1"
-ksp = "2.0.0-1.0.22"
+ksp = "2.0.21-1.0.25"
 coil = "2.7.0"
 
 # testing
