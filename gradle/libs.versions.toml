@@ -158,6 +158,7 @@ custom-room = { id = "com.pantelisstampoulis.room" }
 custom-compose = { id = "com.pantelisstampoulis.compose" }
 custom-testing = { id = "com.pantelisstampoulis.testing" }
 custom-spotless = { id = "com.pantelisstampoulis.spotless" }
+custom-konsist = { id = "com.pantelisstampoulis.konsist" }
 
 
 [bundles]

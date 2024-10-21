@@ -61,6 +61,11 @@ gradlePlugin {
             id = "com.pantelisstampoulis.spotless"
             implementationClass = "com.pantelisstampoulis.plugin.SpotlessPlugin"
         }
+
+        register("konsist") {
+            id = "com.pantelisstampoulis.konsist"
+            implementationClass = "com.pantelisstampoulis.plugin.KonsistPlugin"
+        }
     }
 }
 
