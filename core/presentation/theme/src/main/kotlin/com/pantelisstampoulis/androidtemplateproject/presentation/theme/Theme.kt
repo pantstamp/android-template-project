@@ -1,4 +1,4 @@
-package com.pantelisstampoulis.androidtemplateproject.theme
+package com.pantelisstampoulis.androidtemplateproject.presentation.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

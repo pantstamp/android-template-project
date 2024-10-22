@@ -1,4 +1,4 @@
-package com.pantelisstampoulis.androidtemplateproject.theme
+package com.pantelisstampoulis.androidtemplateproject.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

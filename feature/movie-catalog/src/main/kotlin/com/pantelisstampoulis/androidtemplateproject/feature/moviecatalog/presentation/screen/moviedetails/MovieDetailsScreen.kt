@@ -40,7 +40,7 @@ import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.UserRatingBar
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
-import com.pantelisstampoulis.androidtemplateproject.theme.StarYellow
+import com.pantelisstampoulis.androidtemplateproject.presentation.theme.StarYellow
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.getKoin
 import org.koin.core.qualifier.named
