@@ -6,7 +6,7 @@ import com.lemonappdev.konsist.api.architecture.Layer
 import kotlin.test.Test
 
 @Suppress("ConstPropertyName")
-class ArchitectureLayersTest {
+class ArchitectureLayerDependenciesTest {
 
     @Test
     fun `every architecture layer has only the correct dependencies`() {
