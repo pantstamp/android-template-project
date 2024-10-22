@@ -34,14 +34,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
-import com.pantelisstampoulis.androidtemplateproject.common.ui.uicomponent.PullToRefreshLazyColumn
+import com.pantelisstampoulis.androidtemplateproject.presentation.common.ui.uicomponent.PullToRefreshLazyColumn
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.navigation.MovieCatalogDestination
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.navigation.Navigator
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
-import com.pantelisstampoulis.androidtemplateproject.theme.StarYellow
+import com.pantelisstampoulis.androidtemplateproject.presentation.theme.StarYellow
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.getKoin
