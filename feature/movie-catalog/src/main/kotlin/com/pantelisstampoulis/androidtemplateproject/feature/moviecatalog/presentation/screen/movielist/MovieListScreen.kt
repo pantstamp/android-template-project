@@ -37,9 +37,7 @@ import coil.compose.AsyncImage
 import com.pantelisstampoulis.androidtemplateproject.presentation.common.ui.uicomponent.PullToRefreshLazyColumn
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
-import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.navigation.MovieCatalogDestination
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.MovieUiModel
-import com.pantelisstampoulis.androidtemplateproject.navigation.Navigator
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import com.pantelisstampoulis.androidtemplateproject.presentation.theme.StarYellow
 import kotlinx.collections.immutable.ImmutableList
@@ -53,7 +51,7 @@ fun MovieListScreen(
     state: MovieListUiState,
     effect: Flow<MovieListSideEffect>,
     onEvent: (MovieListEvent) -> Unit,
-    navigator: Navigator,
+    onMovieClicked: (Int) -> Unit,
 ) {
     val context = LocalContext.current
     Box(
@@ -96,9 +94,7 @@ fun MovieListScreen(
                     Toast.makeText(context, sideEffect.text, Toast.LENGTH_SHORT).show()
 
                 is MovieListSideEffect.NavigateToMovieDetails -> {
-                    navigator.navigateTo(
-                        MovieCatalogDestination.MovieDetailsDestination(sideEffect.movieId),
-                    )
+                    onMovieClicked(sideEffect.movieId)
                 }
             }
         }

@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.navigation.MovieCatalogDestination
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.navigation.movieCatalogGraph
 import com.pantelisstampoulis.androidtemplateproject.ui.screen.HomeScreen
 import org.koin.compose.getKoin
@@ -28,10 +29,20 @@ fun AppNavHost(
         startDestination = startDestination,
     ) {
         composable<AppDestination.HomeScreenDestination> {
-            HomeScreen(navigator)
+            HomeScreen(
+                onButtonClicked = {
+                    navigator.navigateTo(MovieCatalogDestination.MovieListDestination)
+                }
+            )
         }
 
         // add feature Graphs here
-        movieCatalogGraph(navigator)
+        movieCatalogGraph(
+            onMovieClicked = { movieId ->
+                navigator.navigateTo(
+                    MovieCatalogDestination.MovieDetailsDestination(movieId)
+                )
+            }
+        )
     }
 }
