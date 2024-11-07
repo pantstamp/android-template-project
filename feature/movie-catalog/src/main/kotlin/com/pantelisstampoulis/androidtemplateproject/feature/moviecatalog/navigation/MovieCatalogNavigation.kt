@@ -10,22 +10,21 @@ import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presen
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviedetails.MovieDetailsViewModel
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.movielist.MovieListScreen
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.movielist.MovieListViewModel
-import com.pantelisstampoulis.androidtemplateproject.navigation.Navigator
 import org.koin.androidx.compose.koinViewModel
 
 fun NavGraphBuilder.movieCatalogGraph(
-    navigator: Navigator,
+    onMovieClicked: (Int) -> Unit,
 ) {
     navigation<MovieCatalogDestination.MovieCatalogHomeDestination>(
         startDestination = MovieCatalogDestination.MovieListDestination,
     ) {
-        addMovieListScreen(navigator)
-        addMovieDetailsScreen(navigator)
+        addMovieListScreen(onMovieClicked)
+        addMovieDetailsScreen()
     }
 }
 
 private fun NavGraphBuilder.addMovieListScreen(
-    navigator: Navigator,
+    onMovieClicked: (Int) -> Unit,
 ) {
     composable<MovieCatalogDestination.MovieListDestination> {
         val viewModel = koinViewModel<MovieListViewModel>()
@@ -34,14 +33,12 @@ private fun NavGraphBuilder.addMovieListScreen(
             state = state,
             effect = viewModel.effect,
             onEvent = viewModel::setEvent,
-            navigator = navigator,
+            onMovieClicked = onMovieClicked,
         )
     }
 }
 
-private fun NavGraphBuilder.addMovieDetailsScreen(
-    navigator: Navigator,
-) {
+private fun NavGraphBuilder.addMovieDetailsScreen() {
     composable<MovieCatalogDestination.MovieDetailsDestination> {
         val args = it.toRoute<MovieCatalogDestination.MovieDetailsDestination>()
         val viewModel = koinViewModel<MovieDetailsViewModel>()

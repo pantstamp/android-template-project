@@ -19,11 +19,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.pantelisstampoulis.androidtemplateproject.R
-import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.navigation.MovieCatalogDestination
-import com.pantelisstampoulis.androidtemplateproject.navigation.Navigator
 
 @Composable
-fun HomeScreen(navigator: Navigator) {
+fun HomeScreen(
+    onButtonClicked: () -> Unit
+) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -39,7 +39,7 @@ fun HomeScreen(navigator: Navigator) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = {
-                navigator.navigateTo(MovieCatalogDestination.MovieListDestination)
+                onButtonClicked()
             }) {
                 Text(
                     text = stringResource(id = R.string.label_discover_movies),
