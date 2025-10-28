@@ -2,35 +2,35 @@
 java-version = "17"
 
 # Kotlin
-kotlin = "2.0.21"
-kotlinx-collections-immutable = "0.3.7"
-kotlinx-coroutines = "1.9.0"
-kotlinx-datetime = "0.6.0"
-kotlinx-serialization = "1.7.0"
+kotlin = "2.2.21"
+kotlinx-collections-immutable = "0.4.0"
+kotlinx-coroutines = "1.10.2"
+kotlinx-datetime = "0.7.0"
+kotlinx-serialization = "1.9.0"
+ksp = "2.3.0"
 
 # Gradle Plugin
 android-gradlePlugin = "8.13.0"
 
 # AndroidX
-androidx-activityCompose = "1.9.3"
-androidx-annotation = "1.9.0"
-androidx-core-ktx = "1.13.1"
-androidx-datastore = "1.1.1"
-androidx-lifecycle = "2.8.6"
-androidx-navigation = "2.8.3"
-appcompat = "1.7.0"
+androidx-activityCompose = "1.11.0"
+androidx-annotation = "1.9.1"
+androidx-core-ktx = "1.17.0"
+androidx-datastore = "1.1.7"
+androidx-lifecycle = "2.9.4"
+androidx-navigation = "2.9.5"
+appcompat = "1.7.1"
 material = "1.12.0"
 
 # Compose
-compose = "2024.10.00"
+compose = "2025.10.01"
 
 # 3rd party libs
-koin = "3.6.0-Beta4"
-retrofit = "2.11.0"
-okhttp = "4.12.0"
-room = "2.6.1"
-ksp = "2.0.21-1.0.25"
-coil = "2.7.0"
+koin = "4.1.1"
+retrofit = "3.0.0"
+okhttp = "5.2.1"
+room = "2.8.3"
+coil = "3.3.0"
 
 # testing
 junit = "4.13.2"
@@ -101,8 +101,9 @@ compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 
 # Coil
-coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+coil-core = { group = "io.coil-kt.coil3", name = "coil", version.ref = "coil" }
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -173,6 +174,7 @@ compose-common = [
     "compose-ui-tooling",
     "compose-ui-tooling-preview",
     "coil-compose",
+    "coil-network-okhttp"
 ]
 
 koin-common = [
