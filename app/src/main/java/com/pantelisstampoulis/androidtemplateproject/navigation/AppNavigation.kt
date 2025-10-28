@@ -32,7 +32,7 @@ fun AppNavHost(
             HomeScreen(
                 onButtonClicked = {
                     navigator.navigateTo(MovieCatalogDestination.MovieListDestination)
-                }
+                },
             )
         }
 
@@ -40,9 +40,9 @@ fun AppNavHost(
         movieCatalogGraph(
             onMovieClicked = { movieId ->
                 navigator.navigateTo(
-                    MovieCatalogDestination.MovieDetailsDestination(movieId)
+                    MovieCatalogDestination.MovieDetailsDestination(movieId),
                 )
-            }
+            },
         )
     }
 }

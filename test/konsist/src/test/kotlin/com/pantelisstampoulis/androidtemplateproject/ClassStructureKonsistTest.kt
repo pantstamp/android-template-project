@@ -7,7 +7,7 @@ import com.lemonappdev.konsist.api.verify.assertFalse
 import com.lemonappdev.konsist.api.verify.assertTrue
 import kotlin.test.Test
 
-class ClassStructureTest {
+class ClassStructureKonsistTest {
 
     @Test
     fun `Companion object is last declaration in the class`() {

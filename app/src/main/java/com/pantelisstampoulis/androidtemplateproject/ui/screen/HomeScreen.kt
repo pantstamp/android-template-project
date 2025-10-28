@@ -22,7 +22,7 @@ import com.pantelisstampoulis.androidtemplateproject.R
 
 @Composable
 fun HomeScreen(
-    onButtonClicked: () -> Unit
+    onButtonClicked: () -> Unit,
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),

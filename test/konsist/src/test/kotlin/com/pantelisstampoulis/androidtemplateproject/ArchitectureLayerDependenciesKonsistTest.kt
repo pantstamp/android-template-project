@@ -6,20 +6,20 @@ import com.lemonappdev.konsist.api.architecture.Layer
 import kotlin.test.Test
 
 @Suppress("ConstPropertyName")
-class ArchitectureLayerDependenciesTest {
+class ArchitectureLayerDependenciesKonsistTest {
 
     @Test
     fun `every architecture layer has only the correct dependencies`() {
         Konsist
             .scopeFromProduction()
             .assertArchitecture {
-                val networkLayer = Layer(name = NetworkLayer, definedBy = NetworkPackage)
-                val databaseLayer = Layer(name = DatabaseLayer, definedBy = DatabasePackage)
-                val modelLayer = Layer(name = ModelLayer, definedBy = ModelPackage)
-                val dataLayer = Layer(name = DataLayer, definedBy = DataPackage)
-                val domainLayer = Layer(name = DomainLayer, definedBy = DomainPackage)
-                val presentationLayer = Layer(name = PresentationLayer, definedBy = PresentationPackage)
-                val featureLayer = Layer(name = FeatureLayer, definedBy = FeaturePackage)
+                val networkLayer = Layer(name = NetworkLayer, rootPackage = NetworkPackage)
+                val databaseLayer = Layer(name = DatabaseLayer, rootPackage = DatabasePackage)
+                val modelLayer = Layer(name = ModelLayer, rootPackage = ModelPackage)
+                val dataLayer = Layer(name = DataLayer, rootPackage = DataPackage)
+                val domainLayer = Layer(name = DomainLayer, rootPackage = DomainPackage)
+                val presentationLayer = Layer(name = PresentationLayer, rootPackage = PresentationPackage)
+                val featureLayer = Layer(name = FeatureLayer, rootPackage = FeaturePackage)
 
                 networkLayer.dependsOnNothing()
 

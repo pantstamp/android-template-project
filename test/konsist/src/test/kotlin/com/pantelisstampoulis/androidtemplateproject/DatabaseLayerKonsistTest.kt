@@ -10,7 +10,7 @@ import com.lemonappdev.konsist.api.verify.assertTrue
 import kotlin.test.Test
 
 @Suppress("ConstPropertyName")
-class DatabaseLayerTest {
+class DatabaseLayerKonsistTest {
 
     @Test
     fun `All 'Database' models should reside in 'database model' package`() {

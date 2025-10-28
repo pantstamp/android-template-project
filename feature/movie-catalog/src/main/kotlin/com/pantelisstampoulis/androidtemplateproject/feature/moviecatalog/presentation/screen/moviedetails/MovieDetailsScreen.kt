@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.UserRatingBar

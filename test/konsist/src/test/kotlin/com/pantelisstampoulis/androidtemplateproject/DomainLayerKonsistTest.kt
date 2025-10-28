@@ -7,7 +7,7 @@ import com.pantelisstampoulis.androidtemplateproject.utils.Constants.InvokeFunct
 import kotlin.test.Test
 
 @Suppress("ConstPropertyName")
-class DomainLayerTest {
+class DomainLayerKonsistTest {
 
     @Test
     fun `'UseCase' interfaces & classes should reside in 'domain usecase' package`() {
