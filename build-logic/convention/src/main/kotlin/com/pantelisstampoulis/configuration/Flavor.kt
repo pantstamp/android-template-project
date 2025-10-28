@@ -24,7 +24,7 @@ fun configureFlavors(
 ) {
     commonExtension.apply {
         // Add all flavor dimensions, for example
-        //  flavorDimensions += FlavorDimension.contentType.name
+          //flavorDimensions += FlavorDimension.contentType.name
 
         productFlavors {
             AppFlavor.values().forEach {
