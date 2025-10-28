@@ -10,7 +10,7 @@ import com.lemonappdev.konsist.api.verify.assertTrue
 import kotlin.test.Test
 
 @Suppress("ConstPropertyName")
-class NetworkLayerTest {
+class NetworkLayerKonsistTest {
 
     @Test
     fun `All 'Api' models should reside in 'network model' package`() {

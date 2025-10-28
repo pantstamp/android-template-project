@@ -7,7 +7,7 @@ import com.pantelisstampoulis.androidtemplateproject.utils.Constants.TestFileSuf
 import kotlin.test.Test
 
 @Suppress("ConstPropertyName")
-class DataLayerTest {
+class DataLayerKonsistTest {
 
     @Test
     fun `'Repository' implementations should reside in 'repository' package`() {

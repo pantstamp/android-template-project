@@ -6,7 +6,7 @@ import com.lemonappdev.konsist.api.verify.assertTrue
 import kotlin.test.Test
 
 @Suppress("ConstPropertyName")
-class PresentationLayerTest {
+class PresentationLayerKonsistTest {
 
     @Test
     fun `'ViewModels' classes should NOT use repositories directly`() {
