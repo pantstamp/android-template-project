@@ -1,5 +1,7 @@
 package com.pantelisstampoulis.androidtemplateproject.model.movies
 
+//import com.pantelisstampoulis.androidtemplateproject.network.model.MovieApiModel
+
 data class Movie(
     val id: Int,
     val adult: Boolean,
@@ -15,4 +17,6 @@ data class Movie(
     val video: Boolean,
     val voteAverage: Double,
     val voteCount: Int,
+
+    //val movieApiModel: MovieApiModel
 )

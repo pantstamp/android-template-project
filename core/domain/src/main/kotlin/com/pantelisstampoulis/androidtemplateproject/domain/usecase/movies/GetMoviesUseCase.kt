@@ -20,4 +20,5 @@ internal class GetMoviesUseCaseImpl(
     override operator fun invoke(ignoreCache: Boolean): Flow<ResultState<List<Movie>>> =
         moviesRepository.getMovies(ignoreCache)
             .onStartCatch(coroutineContext = coroutineContext, logger = logger)
+
 }

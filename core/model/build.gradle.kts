@@ -7,3 +7,12 @@ plugins {
 android {
     namespace = namespaceWithProjectPackage(suffix = "model")
 }
+
+dependencies {
+
+    // projects
+    //implementation(projects.core.network.api)
+
+}
+
+
