@@ -5,7 +5,7 @@ import com.pantelisstampoulis.androidtemplateproject.domain.onLoading
 import com.pantelisstampoulis.androidtemplateproject.domain.onSuccess
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetMoviesUseCase
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.mapper.MovieUiMapper
-import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.MovieUiModel
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.model.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.MviViewModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.UiState
 import kotlinx.collections.immutable.ImmutableList

@@ -2,7 +2,7 @@ package com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.prese
 
 import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.DomainToUiMapper
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
-import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.MovieUiModel
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.model.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
 
 class MovieUiMapper : DomainToUiMapper<Movie, MovieUiModel> {

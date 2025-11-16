@@ -1,4 +1,4 @@
-package com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel
+package com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.model
 
 import androidx.compose.runtime.Immutable
 

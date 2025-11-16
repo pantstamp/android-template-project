@@ -38,7 +38,7 @@ import coil3.compose.AsyncImage
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.UserRatingBar
-import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.MovieUiModel
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.model.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import com.pantelisstampoulis.androidtemplateproject.presentation.theme.StarYellow
 import kotlinx.coroutines.flow.Flow
