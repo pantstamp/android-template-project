@@ -22,7 +22,6 @@ internal class GetMoviesUseCaseImpl(
             .onStartCatch(coroutineContext = coroutineContext, logger = logger)
 
 
-    fun testFunction() {
 
-    }
+
 }
