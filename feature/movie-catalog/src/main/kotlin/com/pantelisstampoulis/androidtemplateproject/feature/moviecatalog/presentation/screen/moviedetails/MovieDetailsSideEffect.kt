@@ -3,5 +3,5 @@ package com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.prese
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.SideEffect
 
 sealed interface MovieDetailsSideEffect : SideEffect {
-    data class ShowToast(val text: String) : MovieDetailsSideEffect
+    data class ShowSnackbar(val message: String) : MovieDetailsSideEffect
 }

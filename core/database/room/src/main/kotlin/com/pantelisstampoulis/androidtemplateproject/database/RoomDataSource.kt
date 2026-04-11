@@ -2,6 +2,7 @@ package com.pantelisstampoulis.androidtemplateproject.database
 
 import com.pantelisstampoulis.androidtemplateproject.database.mapper.Mappers
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
+import com.pantelisstampoulis.androidtemplateproject.database.model.WatchedMovieDbModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -23,4 +24,18 @@ internal class RoomDataSource(
     override suspend fun getMovie(movieId: Int): MovieDbModel? = db.movieDao().getMovieEntity(movieId)?.let { movieEntity ->
         mappers.movieDbMapper.mapFromDb(movieEntity)
     }
+
+    override suspend fun insertWatchedMovie(movie: WatchedMovieDbModel) {
+        db.watchedMovieDao().insertWatchedMovie(mappers.watchedMovieDbMapper.toDb(movie))
+    }
+
+    override fun getWatchedMovies(): Flow<List<WatchedMovieDbModel>> =
+        db.watchedMovieDao().getWatchedMovieEntities().map { entities ->
+            entities.map { mappers.watchedMovieDbMapper.mapFromDb(it) }
+        }
+
+    override suspend fun getWatchedMovie(movieId: Int): WatchedMovieDbModel? =
+        db.watchedMovieDao().getWatchedMovieEntity(movieId)?.let {
+            mappers.watchedMovieDbMapper.mapFromDb(it)
+        }
 }

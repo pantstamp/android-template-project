@@ -4,7 +4,9 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.pantelisstampoulis.androidtemplateproject.domain.ResultState
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetMovieUseCase
+import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetWatchedMovieUseCase
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.RateMovieUseCase
+import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.SaveWatchedMovieUseCase
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.mapper.MovieUiMapper
 import com.pantelisstampoulis.androidtemplateproject.model.error.ErrorModel
 import com.pantelisstampoulis.androidtemplateproject.test.doubles.model.DomainTestDoubleFactory
@@ -38,24 +40,29 @@ class MovieDetailsViewModelTest : KoinTest {
     @Mock
     private val rateMovieUseCase = mock(RateMovieUseCase::class)
 
+    @Mock
+    private val saveWatchedMovieUseCase = mock(SaveWatchedMovieUseCase::class)
+
+    @Mock
+    private val getWatchedMovieUseCase = mock(GetWatchedMovieUseCase::class)
+
     private val uiMapper: MovieUiMapper by inject()
 
-    // Inject the ViewModel
     private val viewModel: MovieDetailsViewModel by inject()
 
-    // Use TestDispatcher for coroutines testing
     private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
 
-        // Configure Koin for dependency injection
         val mockModule = module {
             single { getMovieUseCase }
             single { rateMovieUseCase }
+            single { saveWatchedMovieUseCase }
+            single { getWatchedMovieUseCase }
             single { MovieUiMapper() }
-            single { MovieDetailsViewModel(get(), get(), get()) }
+            single { MovieDetailsViewModel(get(), get(), get(), get(), get()) }
         }
 
         startKoin {
@@ -72,11 +79,9 @@ class MovieDetailsViewModelTest : KoinTest {
     @Test
     fun shouldEmitLoadingStateWhenFetchingMovieDetailsStarts() = runTest {
         every { getMovieUseCase(any()) }
-            .returns(
-                flow {
-                    emit(ResultState.Loading) // Emit loading state
-                },
-            )
+            .returns(flow { emit(ResultState.Loading) })
+        every { getWatchedMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
 
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
 
@@ -84,8 +89,8 @@ class MovieDetailsViewModelTest : KoinTest {
 
         viewModel.viewState.test {
             val firstItem = awaitItem()
-            assertThat(firstItem.isLoading).isTrue() // Loading state should be emitted first
-            assertThat(firstItem.data).isNull() // No data yet, still loading
+            assertThat(firstItem.isLoading).isTrue()
+            assertThat(firstItem.data).isNull()
             cancelAndIgnoreRemainingEvents()
         }
 
@@ -98,11 +103,9 @@ class MovieDetailsViewModelTest : KoinTest {
         val uiMovie = uiMapper.fromDomainToUi(domainMovie)
 
         every { getMovieUseCase(any()) }
-            .returns(
-                flow {
-                    emit(ResultState.Success(domainMovie)) // Emit success state
-                },
-            )
+            .returns(flowOf(ResultState.Success(domainMovie)))
+        every { getWatchedMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
 
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
 
@@ -110,9 +113,9 @@ class MovieDetailsViewModelTest : KoinTest {
 
         viewModel.viewState.test {
             val firstItem = awaitItem()
-            assertThat(firstItem.isLoading).isFalse() // Loading should be done
-            assertThat(firstItem.errorMessage).isNull() // No error
-            assertThat(firstItem.data).isEqualTo(uiMovie) // Data should be the mapped UI model
+            assertThat(firstItem.isLoading).isFalse()
+            assertThat(firstItem.errorMessage).isNull()
+            assertThat(firstItem.data).isEqualTo(uiMovie)
             cancelAndIgnoreRemainingEvents()
         }
 
@@ -125,7 +128,9 @@ class MovieDetailsViewModelTest : KoinTest {
         val errorState = ErrorModel.NotFound(errorMessage)
 
         every { getMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(errorState))) // Emit error state
+            .returns(flowOf(ResultState.Error(errorState)))
+        every { getWatchedMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
 
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
 
@@ -133,9 +138,9 @@ class MovieDetailsViewModelTest : KoinTest {
 
         viewModel.viewState.test {
             val firstItem = awaitItem()
-            assertThat(firstItem.isLoading).isFalse() // Loading should be false
-            assertThat(firstItem.errorMessage).isEqualTo(errorMessage) // Error message should be set
-            assertThat(firstItem.data).isNull() // No data due to error
+            assertThat(firstItem.isLoading).isFalse()
+            assertThat(firstItem.errorMessage).isEqualTo(errorMessage)
+            assertThat(firstItem.data).isNull()
             cancelAndIgnoreRemainingEvents()
         }
 
@@ -143,15 +148,106 @@ class MovieDetailsViewModelTest : KoinTest {
     }
 
     @Test
-    fun shouldEmitSuccessStateWhenRatingMovie() = runTest {
-        every { rateMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Success(Unit))) // Emit success for rating
+    fun shouldSetUserRatingWhenMovieAlreadyRated() = runTest {
+        val watchedMovie = DomainTestDoubleFactory.provideWatchedMovieModel()
 
-        viewModel.setEvent(MovieDetailsEvent.RateMovie(movieId = 123, rating = 5F))
+        every { getMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+        every { getWatchedMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Success(watchedMovie)))
+
+        viewModel.setEvent(MovieDetailsEvent.Init(movieId = watchedMovie.movieId))
+
+        advanceUntilIdle()
+
+        viewModel.viewState.test {
+            val state = awaitItem()
+            assertThat(state.userRating).isEqualTo(watchedMovie.userRating)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun shouldLeaveUserRatingNullWhenMovieNotRated() = runTest {
+        every { getMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+        every { getWatchedMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+
+        viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
+
+        advanceUntilIdle()
+
+        viewModel.viewState.test {
+            val state = awaitItem()
+            assertThat(state.userRating).isNull()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun shouldSaveWatchedMovieAndEmitSnackbarWhenRatingFullySucceeds() = runTest {
+        val domainMovie = DomainTestDoubleFactory.provideMovieModel()
+
+        // Load movie into state first
+        every { getMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Success(domainMovie)))
+        every { getWatchedMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+        viewModel.setEvent(MovieDetailsEvent.Init(movieId = domainMovie.id))
+        advanceUntilIdle()
+
+        // Rate the movie
+        every { rateMovieUseCase(any()) }.returns(flowOf(ResultState.Success(Unit)))
+        every { saveWatchedMovieUseCase(any()) }.returns(flowOf(ResultState.Success(Unit)))
+
+        viewModel.setEvent(MovieDetailsEvent.RateMovie(movieId = domainMovie.id, rating = 8f))
 
         viewModel.effect.test {
             val effect = awaitItem()
-            assertThat(effect).isEqualTo(MovieDetailsSideEffect.ShowToast("Movie rated successfully"))
+            assertThat(effect).isEqualTo(MovieDetailsSideEffect.ShowSnackbar("Rating saved"))
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        advanceUntilIdle()
+
+        viewModel.viewState.test {
+            val state = awaitItem()
+            assertThat(state.userRating).isEqualTo(8)
+            assertThat(state.isRatingInProgress).isFalse()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        verify { rateMovieUseCase(any()) }.wasInvoked()
+        verify { saveWatchedMovieUseCase(any()) }.wasInvoked()
+    }
+
+    @Test
+    fun shouldEmitErrorSnackbarWhenNetworkRatingFails() = runTest {
+        every { getMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+        every { getWatchedMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+
+        every { rateMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Error(ErrorModel.ServerError("Network error"))))
+
+        viewModel.setEvent(MovieDetailsEvent.RateMovie(movieId = 123, rating = 5f))
+
+        viewModel.effect.test {
+            val effect = awaitItem()
+            assertThat(effect).isEqualTo(
+                MovieDetailsSideEffect.ShowSnackbar("Something went wrong. Please try again."),
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        advanceUntilIdle()
+
+        viewModel.viewState.test {
+            val state = awaitItem()
+            assertThat(state.userRating).isNull()
+            assertThat(state.isRatingInProgress).isFalse()
             cancelAndIgnoreRemainingEvents()
         }
 
@@ -159,21 +255,37 @@ class MovieDetailsViewModelTest : KoinTest {
     }
 
     @Test
-    fun shouldEmitErrorStateWhenRatingMovieFails() = runTest {
-        val errorMessage = "Rating failed"
-        val errorState = ErrorModel.ServerError(errorMessage)
+    fun shouldEmitErrorSnackbarWhenLocalSaveFails() = runTest {
+        val domainMovie = DomainTestDoubleFactory.provideMovieModel()
 
-        every { rateMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(errorState))) // Emit error for rating
+        every { getMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Success(domainMovie)))
+        every { getWatchedMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+        viewModel.setEvent(MovieDetailsEvent.Init(movieId = domainMovie.id))
+        advanceUntilIdle()
 
-        viewModel.setEvent(MovieDetailsEvent.RateMovie(movieId = 123, rating = 5F))
+        every { rateMovieUseCase(any()) }.returns(flowOf(ResultState.Success(Unit)))
+        every { saveWatchedMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Error(ErrorModel.Unknown("db error"))))
+
+        viewModel.setEvent(MovieDetailsEvent.RateMovie(movieId = domainMovie.id, rating = 5f))
 
         viewModel.effect.test {
             val effect = awaitItem()
-            assertThat(effect).isEqualTo(MovieDetailsSideEffect.ShowToast("Error while rating Movie: $errorMessage"))
+            assertThat(effect).isEqualTo(
+                MovieDetailsSideEffect.ShowSnackbar("Something went wrong. Please try again."),
+            )
             cancelAndIgnoreRemainingEvents()
         }
 
-        verify { rateMovieUseCase(any()) }.wasInvoked()
+        advanceUntilIdle()
+
+        viewModel.viewState.test {
+            val state = awaitItem()
+            assertThat(state.userRating).isNull()
+            assertThat(state.isRatingInProgress).isFalse()
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 }

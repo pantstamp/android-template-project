@@ -1,8 +1,9 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
+
 package com.pantelisstampoulis.androidtemplateproject.random
 
 import androidx.annotation.VisibleForTesting
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -12,6 +13,7 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import kotlin.random.Random
+import kotlin.time.Instant
 
 @VisibleForTesting
 val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')

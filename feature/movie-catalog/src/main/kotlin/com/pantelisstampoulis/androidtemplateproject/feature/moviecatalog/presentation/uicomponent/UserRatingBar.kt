@@ -36,6 +36,7 @@ fun UserRatingBar(
     ratingIconPainter: Painter = painterResource(id = R.drawable.ic_star),
     selectedColor: Color = Color(0xFFFFD700),
     unselectedColor: Color = Color(0xFFA2ADB1),
+    enabled: Boolean = true,
 ) {
     FlowRow(modifier = modifier) {
         // 2. Star Icon Generation Loop
@@ -47,6 +48,7 @@ fun UserRatingBar(
                 ratingState = ratingState,
                 selectedColor = selectedColor,
                 unselectedColor = unselectedColor,
+                enabled = enabled,
             )
         }
     }
@@ -62,6 +64,7 @@ fun StarIcon(
     ratingValue: Int,
     selectedColor: Color,
     unselectedColor: Color,
+    enabled: Boolean,
 ) {
     // 4. Color Animation
     val tint by animateColorAsState(
@@ -76,9 +79,11 @@ fun StarIcon(
             .size(size)
             // 5. Touch Interaction Handling
             .pointerInteropFilter {
-                when (it.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        ratingState.value = ratingValue
+                if (enabled) {
+                    when (it.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            ratingState.value = ratingValue
+                        }
                     }
                 }
                 true

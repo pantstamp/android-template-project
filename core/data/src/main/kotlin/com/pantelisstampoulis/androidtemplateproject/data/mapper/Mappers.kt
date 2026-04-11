@@ -7,4 +7,5 @@ internal class Mappers(
     val movieDataMapper: MovieDataMapper,
     val movieDomainMapper: MovieDomainMapper,
     val errorDomainMapper: ErrorDomainMapper,
+    val watchedMovieDomainMapper: WatchedMovieDomainMapper,
 )

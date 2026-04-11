@@ -3,7 +3,30 @@
     "allow": [
       "Bash(xargs cat:*)",
       "Bash(xargs -I{} bash -c 'echo \"=== {} ===\"; cat \"{}\"')",
-      "Bash(xargs ls:*)"
+      "Bash(xargs ls:*)",
+      "Bash(git checkout:*)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(./gradlew :utils:random:compileDebugKotlin)",
+      "Bash(./gradlew :utils:random:compileDebugKotlin --info)",
+      "Bash(./gradlew :core:database:api:compileDebugKotlin :core:database:room:compileDebugKotlin :core:database:noop:compileDebugKotlin :core:model:compileDebugKotlin :core:domain:compileDebugKotlin :core:data:compileDebugKotlin)",
+      "Bash(./gradlew :core:data:compileDebugKotlin --info)",
+      "Bash(./gradlew :core:domain:compileDebugKotlin)",
+      "Bash(./gradlew :feature:movie-catalog:spotlessCheck)",
+      "Bash(./gradlew :feature:movie-catalog:spotlessApply)",
+      "Bash(./gradlew :feature:movie-catalog:assembleDebug)",
+      "Bash(./gradlew :core:domain:spotlessApply :core:data:spotlessApply :feature:movie-catalog:spotlessApply :test:doubles:database:spotlessApply :test:doubles:model:spotlessApply)",
+      "Bash(./gradlew :core:domain:test :core:data:test :feature:movie-catalog:test)",
+      "Bash(find /Users/p.staboulis-ag/AndroidStudioProjects/android-template-project/core/domain/build/reports/tests -name \"*.xml\" -exec grep -l \"failures\\\\|errors\" {} \\\\;)",
+      "Bash(./gradlew :core:domain:testDebugUnitTest --info)",
+      "Bash(./gradlew :core:domain:testDebugUnitTest)",
+      "Bash(./gradlew :core:data:testDebugUnitTest)",
+      "Bash(./gradlew :core:domain:spotlessApply :core:data:spotlessApply)",
+      "Bash(./gradlew :core:domain:testDebugUnitTest :core:data:testDebugUnitTest :feature:movie-catalog:testDebugUnitTest)",
+      "Bash(./gradlew :core:domain:testDebugUnitTest :core:data:testDebugUnitTest :feature:movie-catalog:testDebugUnitTest --rerun-tasks)",
+      "Bash(./gradlew spotlessCheck assembleDebug)",
+      "Bash(./gradlew :test:konsist:spotlessApply)",
+      "Bash(./gradlew spotlessCheck)",
+      "Bash(./gradlew spotlessApply)"
     ]
   }
 }

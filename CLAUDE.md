@@ -157,6 +157,10 @@ All mappers implement typed interfaces from `:architecture:mapper`:
 - Test file naming: `FooTest` (suffix `Test`, not `Spec`)
 - **No Mockito** — use Mockative only
 - Test doubles live in `:test:doubles:*`, not in the module under test
+- **Mockative `every` vs `coEvery`**: use `every {}` for non-suspend functions (including Flow-returning ones); use `coEvery {}` only for `suspend` functions. Mixing them causes `InvalidExpectationException` at runtime.
+- **Logger in use case tests**: do not mock `Logger` — use an inline no-op object instead. Mockative stubs are not set up for `logger.e(...)`, so an unstubbed call inside `onStartCatch`'s `catch` block will propagate as an uncaught exception that Turbine surfaces as a flow error.
+- **Adding tests to a module that has none**: add `id(libs.plugins.custom.testing.get().pluginId)` to the module's `build.gradle.kts` first. Without it, test dependencies (Mockative, Turbine, Truth, test doubles) are not on the classpath.
+- **Event and SideEffect files**: each screen puts its `*Event` and `*SideEffect` in separate files (not co-located in the ViewModel file). Follow this convention when creating new screens.
 
 ---
 
@@ -171,6 +175,7 @@ All mappers implement typed interfaces from `:architecture:mapper`:
 - **KSP**: 2.3.0
 - **Navigation Compose**: 2.9.5
 - **kotlinx.collections.immutable**: 0.4.0 — use `ImmutableList` in `UiState`
+- **kotlinx-datetime**: 0.7.0 — `Instant` moved to `kotlin.time.Instant` (not `kotlinx.datetime.Instant`); requires `@file:OptIn(kotlin.time.ExperimentalTime::class)` at call sites.
 - All versions are in `gradle/libs.versions.toml`. Never hardcode versions in `build.gradle.kts`.
 
 ---
