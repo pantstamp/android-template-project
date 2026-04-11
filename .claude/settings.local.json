@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs cat:*)",
+      "Bash(xargs -I{} bash -c 'echo \"=== {} ===\"; cat \"{}\"')",
+      "Bash(xargs ls:*)"
+    ]
+  }
+}
