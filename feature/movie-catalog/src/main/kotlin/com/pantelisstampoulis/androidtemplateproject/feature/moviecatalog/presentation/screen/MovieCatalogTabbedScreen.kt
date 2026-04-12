@@ -1,18 +1,18 @@
 package com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import kotlinx.coroutines.launch
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.movielist.MovieListEvent
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.movielist.MovieListScreen
@@ -23,6 +23,7 @@ import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presen
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.watchedmovielist.WatchedMovieListSideEffect
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.watchedmovielist.WatchedMovieListUiState
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun MovieCatalogTabbedScreen(
@@ -38,30 +39,33 @@ fun MovieCatalogTabbedScreen(
         stringResource(R.string.tab_discover),
         stringResource(R.string.tab_watched),
     )
-    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+    val pagerState = rememberPagerState { tabTitles.size }
+    val coroutineScope = rememberCoroutineScope()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TabRow(selectedTabIndex = selectedTabIndex) {
+        TabRow(selectedTabIndex = pagerState.currentPage) {
             tabTitles.forEachIndexed { index, title ->
                 Tab(
-                    selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index },
+                    selected = pagerState.currentPage == index,
+                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
                     text = { Text(title) },
                 )
             }
         }
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (selectedTabIndex == 0) {
-                MovieListScreen(
+        HorizontalPager(
+            state = pagerState,
+            beyondViewportPageCount = 1,
+            modifier = Modifier.fillMaxSize(),
+        ) { page ->
+            when (page) {
+                0 -> MovieListScreen(
                     state = movieListState,
                     effect = movieListEffect,
                     onEvent = onMovieListEvent,
                     onMovieClicked = onMovieClicked,
                 )
-            }
-            if (selectedTabIndex == 1) {
-                WatchedMovieListScreen(
+                1 -> WatchedMovieListScreen(
                     state = watchedMovieListState,
                     effect = watchedMovieListEffect,
                     onEvent = onWatchedMovieListEvent,
@@ -70,4 +74,18 @@ fun MovieCatalogTabbedScreen(
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun PreviewMovieCatalogTabbedScreen() {
+    MovieCatalogTabbedScreen(
+        movieListState = MovieListUiState(isLoading = true),
+        movieListEffect = emptyFlow(),
+        onMovieListEvent = {},
+        watchedMovieListState = WatchedMovieListUiState(),
+        watchedMovieListEffect = emptyFlow(),
+        onWatchedMovieListEvent = {},
+        onMovieClicked = {},
+    )
 }

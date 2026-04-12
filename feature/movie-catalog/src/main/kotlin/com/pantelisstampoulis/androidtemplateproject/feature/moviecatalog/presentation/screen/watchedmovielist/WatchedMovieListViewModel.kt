@@ -1,9 +1,11 @@
 package com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.watchedmovielist
 
+import androidx.annotation.StringRes
 import com.pantelisstampoulis.androidtemplateproject.domain.onError
 import com.pantelisstampoulis.androidtemplateproject.domain.onLoading
 import com.pantelisstampoulis.androidtemplateproject.domain.onSuccess
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetWatchedMoviesUseCase
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.mapper.WatchedMovieUiMapper
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.WatchedMovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.MviViewModel
@@ -19,37 +21,37 @@ class WatchedMovieListViewModel(
     initialState = WatchedMovieListUiState(),
 ) {
 
+    init {
+        viewModelScope.launch {
+            getWatchedMoviesUseCase(input = Unit).collect { resultState ->
+                resultState
+                    .onLoading {
+                        setState { copy(isLoading = true) }
+                    }
+                    .onSuccess {
+                        setState {
+                            copy(
+                                isLoading = false,
+                                errorRes = null,
+                                data = it.map { movie -> mapper.fromDomainToUi(movie) }
+                                    .toImmutableList(),
+                            )
+                        }
+                    }
+                    .onError {
+                        setState {
+                            copy(
+                                isLoading = false,
+                                errorRes = R.string.error_generic,
+                            )
+                        }
+                    }
+            }
+        }
+    }
+
     override fun handleEvents(event: WatchedMovieListEvent) {
         when (event) {
-            is WatchedMovieListEvent.GetWatchedMovies -> {
-                viewModelScope.launch {
-                    getWatchedMoviesUseCase(input = Unit).collect { resultState ->
-                        resultState
-                            .onLoading {
-                                setState { copy(isLoading = true) }
-                            }
-                            .onSuccess {
-                                setState {
-                                    copy(
-                                        isLoading = false,
-                                        errorMessage = null,
-                                        data = it.map { mapper.fromDomainToUi(it) }
-                                            .toImmutableList(),
-                                    )
-                                }
-                            }
-                            .onError { error ->
-                                setState {
-                                    copy(
-                                        isLoading = false,
-                                        errorMessage = error.message ?: "An error occurred",
-                                    )
-                                }
-                            }
-                    }
-                }
-            }
-
             is WatchedMovieListEvent.ShowMovieDetails -> setEffect {
                 WatchedMovieListSideEffect.NavigateToMovieDetails(event.movieId)
             }
@@ -59,6 +61,6 @@ class WatchedMovieListViewModel(
 
 data class WatchedMovieListUiState(
     val isLoading: Boolean = false,
-    val errorMessage: String? = null,
+    @StringRes val errorRes: Int? = null,
     val data: ImmutableList<WatchedMovieUiModel>? = null,
 ) : UiState

@@ -8,6 +8,7 @@
     <string name="snackbar_rating_error">Something went wrong. Please try again.</string>
 
     <!-- Watched movie list screen -->
+    <string name="error_generic">An error occurred</string>
     <string name="tab_discover">Discover</string>
     <string name="tab_watched">Watched</string>
     <string name="watched_empty_state">No movies rated yet. Start exploring and rate movies you\'ve watched.</string>

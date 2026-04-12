@@ -205,7 +205,7 @@ class MovieDetailsViewModelTest : KoinTest {
 
         viewModel.effect.test {
             val effect = awaitItem()
-            assertThat(effect).isEqualTo(MovieDetailsSideEffect.ShowSnackbar("Rating saved"))
+            assertThat(effect).isEqualTo(MovieDetailsSideEffect.RatingSaved)
             cancelAndIgnoreRemainingEvents()
         }
 
@@ -236,9 +236,7 @@ class MovieDetailsViewModelTest : KoinTest {
 
         viewModel.effect.test {
             val effect = awaitItem()
-            assertThat(effect).isEqualTo(
-                MovieDetailsSideEffect.ShowSnackbar("Something went wrong. Please try again."),
-            )
+            assertThat(effect).isEqualTo(MovieDetailsSideEffect.RatingError)
             cancelAndIgnoreRemainingEvents()
         }
 
@@ -273,9 +271,7 @@ class MovieDetailsViewModelTest : KoinTest {
 
         viewModel.effect.test {
             val effect = awaitItem()
-            assertThat(effect).isEqualTo(
-                MovieDetailsSideEffect.ShowSnackbar("Something went wrong. Please try again."),
-            )
+            assertThat(effect).isEqualTo(MovieDetailsSideEffect.RatingError)
             cancelAndIgnoreRemainingEvents()
         }
 

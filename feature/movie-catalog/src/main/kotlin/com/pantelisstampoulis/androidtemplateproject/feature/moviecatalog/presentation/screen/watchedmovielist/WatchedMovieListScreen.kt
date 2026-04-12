@@ -21,16 +21,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.compose.AsyncImage
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
@@ -38,7 +36,9 @@ import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.WatchedMovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import com.pantelisstampoulis.androidtemplateproject.presentation.theme.StarYellow
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import org.koin.compose.getKoin
 import org.koin.core.qualifier.named
 import kotlin.coroutines.CoroutineContext
@@ -61,9 +61,9 @@ fun WatchedMovieListScreen(
                 CircularProgressIndicator()
             }
 
-            state.errorMessage != null -> {
+            state.errorRes != null -> {
                 Text(
-                    text = state.errorMessage,
+                    text = stringResource(id = state.errorRes),
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
             }
@@ -85,10 +85,6 @@ fun WatchedMovieListScreen(
             }
         }
 
-        LifecycleEventEffect(event = Lifecycle.Event.ON_RESUME) {
-            onEvent(WatchedMovieListEvent.GetWatchedMovies)
-        }
-
         ObserveEffects(
             effect = effect,
             coroutineContext = getKoin().get<CoroutineContext>(named(CoroutinesDispatchers.MainImmediate)),
@@ -108,7 +104,6 @@ fun WatchedMovieRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     Card(
         modifier = modifier.height(150.dp),
         onClick = onClick,
@@ -166,7 +161,7 @@ fun WatchedMovieRow(
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    val userRatingDescription = context.getString(
+                    val userRatingDescription = stringResource(
                         R.string.content_description_user_rating,
                         movie.userRating,
                     )
@@ -188,4 +183,57 @@ fun WatchedMovieRow(
             }
         }
     }
+}
+
+private val previewMovie = WatchedMovieUiModel(
+    movieId = 1,
+    title = "Interstellar",
+    posterPath = null,
+    voteAverage = 8.6,
+    userRating = 9,
+    releaseYear = "2014",
+)
+
+@Preview
+@Composable
+fun PreviewWatchedMovieRow() {
+    WatchedMovieRow(
+        movie = previewMovie,
+        onClick = {},
+    )
+}
+
+@Preview
+@Composable
+fun PreviewWatchedMovieListLoading() {
+    WatchedMovieListScreen(
+        state = WatchedMovieListUiState(isLoading = true),
+        effect = emptyFlow(),
+        onEvent = {},
+        onMovieClicked = {},
+    )
+}
+
+@Preview
+@Composable
+fun PreviewWatchedMovieListEmpty() {
+    WatchedMovieListScreen(
+        state = WatchedMovieListUiState(data = persistentListOf()),
+        effect = emptyFlow(),
+        onEvent = {},
+        onMovieClicked = {},
+    )
+}
+
+@Preview
+@Composable
+fun PreviewWatchedMovieListWithData() {
+    WatchedMovieListScreen(
+        state = WatchedMovieListUiState(
+            data = persistentListOf(previewMovie, previewMovie.copy(movieId = 2, title = "Dune")),
+        ),
+        effect = emptyFlow(),
+        onEvent = {},
+        onMovieClicked = {},
+    )
 }

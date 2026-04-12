@@ -12,6 +12,7 @@ import io.mockative.any
 import io.mockative.every
 import io.mockative.mock
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -70,14 +71,15 @@ class WatchedMovieListViewModelTest : KoinTest {
         every { getWatchedMoviesUseCase(any()) }
             .returns(flowOf(ResultState.Success(watchedMovies)))
 
-        viewModel.setEvent(WatchedMovieListEvent.GetWatchedMovies)
-
+        // Trigger ViewModel creation (init {} launches the collection coroutine)
+        // then run it to completion before collecting viewState.
+        val vm = viewModel
         advanceUntilIdle()
 
-        viewModel.viewState.test {
+        vm.viewState.test {
             val state = awaitItem()
             assertThat(state.isLoading).isFalse()
-            assertThat(state.errorMessage).isNull()
+            assertThat(state.errorRes).isNull()
             assertThat(state.data).isEqualTo(expectedUiModels)
             cancelAndIgnoreRemainingEvents()
         }
@@ -88,14 +90,13 @@ class WatchedMovieListViewModelTest : KoinTest {
         every { getWatchedMoviesUseCase(any()) }
             .returns(flowOf(ResultState.Success(emptyList())))
 
-        viewModel.setEvent(WatchedMovieListEvent.GetWatchedMovies)
-
+        val vm = viewModel
         advanceUntilIdle()
 
-        viewModel.viewState.test {
+        vm.viewState.test {
             val state = awaitItem()
             assertThat(state.isLoading).isFalse()
-            assertThat(state.errorMessage).isNull()
+            assertThat(state.errorRes).isNull()
             assertThat(state.data).isNotNull()
             assertThat(state.data).isEmpty()
             cancelAndIgnoreRemainingEvents()
@@ -104,18 +105,16 @@ class WatchedMovieListViewModelTest : KoinTest {
 
     @Test
     fun shouldEmitErrorMessageWhenFetchFails() = runTest {
-        val errorMessage = "Server error"
         every { getWatchedMoviesUseCase(any()) }
-            .returns(flowOf(ResultState.Error(ErrorModel.ServerError(errorMessage))))
+            .returns(flowOf(ResultState.Error(ErrorModel.ServerError("Server error"))))
 
-        viewModel.setEvent(WatchedMovieListEvent.GetWatchedMovies)
-
+        val vm = viewModel
         advanceUntilIdle()
 
-        viewModel.viewState.test {
+        vm.viewState.test {
             val state = awaitItem()
             assertThat(state.isLoading).isFalse()
-            assertThat(state.errorMessage).isEqualTo(errorMessage)
+            assertThat(state.errorRes).isNotNull()
             assertThat(state.data).isNull()
             cancelAndIgnoreRemainingEvents()
         }
@@ -123,6 +122,8 @@ class WatchedMovieListViewModelTest : KoinTest {
 
     @Test
     fun shouldEmitNavigateEffectWhenShowMovieDetailsEventTriggered() = runTest {
+        every { getWatchedMoviesUseCase(any()) }.returns(emptyFlow())
+
         viewModel.setEvent(WatchedMovieListEvent.ShowMovieDetails(movieId = 42))
 
         viewModel.effect.test {

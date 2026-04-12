@@ -15,13 +15,16 @@ import com.pantelisstampoulis.androidtemplateproject.network.isSuccess
 import com.pantelisstampoulis.androidtemplateproject.network.request.RateMovieRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 internal class MoviesRepositoryImpl(
     private val networkDataSource: NetworkDataSource,
     private val databaseDataSource: DatabaseDataSource,
     private val mappers: Mappers,
+    private val clock: () -> Long = System::currentTimeMillis,
 ) : MoviesRepository {
 
     override fun getMovie(movieId: Int): Flow<ResultState<Movie>> = flow {
@@ -83,17 +86,18 @@ internal class MoviesRepositoryImpl(
             publicRating = publicRating,
             releaseDate = releaseDate,
             userRating = userRating,
-            ratedAt = System.currentTimeMillis(),
+            ratedAt = clock(),
         )
         databaseDataSource.insertWatchedMovie(dbModel)
         emit(ResultState.Success(Unit))
     }
 
     override fun getWatchedMovies(): Flow<ResultState<List<WatchedMovie>>> = flow {
-        databaseDataSource.getWatchedMovies().collect { dbModels ->
-            val watchedMovies = dbModels.map(mappers.watchedMovieDomainMapper::fromDbToDomain)
-            emit(ResultState.Success(watchedMovies))
-        }
+        emitAll(
+            databaseDataSource.getWatchedMovies().map { dbModels ->
+                ResultState.Success(dbModels.map(mappers.watchedMovieDomainMapper::fromDbToDomain))
+            },
+        )
     }
 
     override fun getWatchedMovie(movieId: Int): Flow<ResultState<WatchedMovie>> = flow {

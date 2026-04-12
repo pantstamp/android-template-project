@@ -32,6 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -60,6 +61,7 @@ fun MovieDetailsScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) { Snackbar(it) } },
@@ -104,9 +106,13 @@ fun MovieDetailsScreen(
                 lifecycleOwner = LocalLifecycleOwner.current,
             ) { sideEffect ->
                 when (sideEffect) {
-                    is MovieDetailsSideEffect.ShowSnackbar ->
+                    MovieDetailsSideEffect.RatingSaved ->
                         coroutineScope.launch {
-                            snackbarHostState.showSnackbar(sideEffect.message)
+                            snackbarHostState.showSnackbar(context.getString(R.string.snackbar_rating_saved))
+                        }
+                    MovieDetailsSideEffect.RatingError ->
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(context.getString(R.string.snackbar_rating_error))
                         }
                 }
             }

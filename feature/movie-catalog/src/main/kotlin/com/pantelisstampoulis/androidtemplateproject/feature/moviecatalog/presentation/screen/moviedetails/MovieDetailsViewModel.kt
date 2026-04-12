@@ -72,49 +72,45 @@ class MovieDetailsViewModel(
                     ).collect { resultState ->
                         resultState
                             .onSuccess {
-                                val movie = viewState.value.data ?: return@onSuccess
-                                saveWatchedMovieUseCase.invoke(
-                                    SaveWatchedMovieInput(
-                                        movieId = movie.id,
-                                        title = movie.title,
-                                        posterUrl = movie.posterPath,
-                                        overview = movie.overview,
-                                        publicRating = movie.voteAverage,
-                                        releaseDate = movie.releaseYear,
-                                        userRating = event.rating.toInt(),
-                                    ),
-                                ).collect { saveResult ->
-                                    saveResult
-                                        .onSuccess {
-                                            setState {
-                                                copy(
-                                                    userRating = event.rating.toInt(),
-                                                    isRatingInProgress = false,
-                                                )
-                                            }
-                                            setEffect { MovieDetailsSideEffect.ShowSnackbar("Rating saved") }
-                                        }
-                                        .onError {
-                                            setState { copy(isRatingInProgress = false) }
-                                            setEffect {
-                                                MovieDetailsSideEffect.ShowSnackbar(
-                                                    "Something went wrong. Please try again.",
-                                                )
-                                            }
-                                        }
+                                val movie = viewState.value.data
+                                if (movie == null) {
+                                    setState { copy(isRatingInProgress = false) }
+                                    setEffect { MovieDetailsSideEffect.RatingError }
+                                    return@onSuccess
                                 }
+                                saveRating(movie = movie, rating = event.rating.toInt())
                             }
                             .onError {
                                 setState { copy(isRatingInProgress = false) }
-                                setEffect {
-                                    MovieDetailsSideEffect.ShowSnackbar(
-                                        "Something went wrong. Please try again.",
-                                    )
-                                }
+                                setEffect { MovieDetailsSideEffect.RatingError }
                             }
                     }
                 }
             }
+        }
+    }
+
+    private suspend fun saveRating(movie: MovieUiModel, rating: Int) {
+        saveWatchedMovieUseCase.invoke(
+            SaveWatchedMovieInput(
+                movieId = movie.id,
+                title = movie.title,
+                posterUrl = movie.posterPath,
+                overview = movie.overview,
+                publicRating = movie.voteAverage,
+                releaseDate = movie.releaseYear,
+                userRating = rating,
+            ),
+        ).collect { saveResult ->
+            saveResult
+                .onSuccess {
+                    setState { copy(userRating = rating, isRatingInProgress = false) }
+                    setEffect { MovieDetailsSideEffect.RatingSaved }
+                }
+                .onError {
+                    setState { copy(isRatingInProgress = false) }
+                    setEffect { MovieDetailsSideEffect.RatingError }
+                }
         }
     }
 }
