@@ -35,8 +35,8 @@ class DomainLayerKonsistTest {
                 val hasSingleInvokeOperatorMethod = declaration.hasFunction { function ->
                     function.let {
                         it.name == InvokeFunction &&
-                                it.hasPublicOrDefaultModifier &&
-                                it.hasOperatorModifier
+                            it.hasPublicOrDefaultModifier &&
+                            it.hasOperatorModifier
                     }
                 }
 

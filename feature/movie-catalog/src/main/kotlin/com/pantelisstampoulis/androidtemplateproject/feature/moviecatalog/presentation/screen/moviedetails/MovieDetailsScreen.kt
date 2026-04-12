@@ -1,6 +1,5 @@
 package com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviedetails
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,9 +19,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +47,7 @@ import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presen
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import com.pantelisstampoulis.androidtemplateproject.presentation.theme.StarYellow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import org.koin.compose.getKoin
 import org.koin.core.qualifier.named
 import kotlin.coroutines.CoroutineContext
@@ -53,46 +59,62 @@ fun MovieDetailsScreen(
     onEvent: (MovieDetailsEvent) -> Unit,
     movieId: Int,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center,
-    ) {
-        when {
-            state.isLoading -> {
-                CircularProgressIndicator()
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) { Snackbar(it) } },
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background)
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center,
+        ) {
+            when {
+                state.isLoading -> {
+                    CircularProgressIndicator()
+                }
+
+                state.errorMessage != null -> {
+                    Text(
+                        text = state.errorMessage,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
+                }
+
+                state.data != null -> {
+                    MovieDetails(
+                        movie = state.data,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        onEvent = onEvent,
+                        userRating = state.userRating,
+                        isRatingInProgress = state.isRatingInProgress,
+                    )
+                }
             }
 
-            state.errorMessage != null -> {
-                Text(
-                    text = state.errorMessage,
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                )
+            LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
+                onEvent(MovieDetailsEvent.Init(movieId))
             }
 
-            state.data != null -> {
-                MovieDetails(
-                    movie = state.data,
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    onEvent = onEvent,
-                )
-            }
-        }
-
-        LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
-            onEvent(MovieDetailsEvent.Init(movieId))
-        }
-
-        ObserveEffects(
-            effect = effect,
-            coroutineContext = getKoin().get<CoroutineContext>(named(CoroutinesDispatchers.MainImmediate)),
-            lifecycleOwner = LocalLifecycleOwner.current,
-        ) { sideEffect ->
-            when (sideEffect) {
-                is MovieDetailsSideEffect.ShowToast ->
-                    Toast.makeText(context, sideEffect.text, Toast.LENGTH_SHORT).show()
+            ObserveEffects(
+                effect = effect,
+                coroutineContext = getKoin().get<CoroutineContext>(named(CoroutinesDispatchers.MainImmediate)),
+                lifecycleOwner = LocalLifecycleOwner.current,
+            ) { sideEffect ->
+                when (sideEffect) {
+                    MovieDetailsSideEffect.RatingSaved ->
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(context.getString(R.string.snackbar_rating_saved))
+                        }
+                    MovieDetailsSideEffect.RatingError ->
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(context.getString(R.string.snackbar_rating_error))
+                        }
+                }
             }
         }
     }
@@ -103,6 +125,8 @@ fun MovieDetails(
     movie: MovieUiModel,
     modifier: Modifier = Modifier,
     onEvent: (MovieDetailsEvent) -> Unit,
+    userRating: Int?,
+    isRatingInProgress: Boolean,
 ) {
     Column(
         modifier = Modifier
@@ -173,6 +197,8 @@ fun MovieDetails(
             modifier = modifier,
             onEvent = onEvent,
             movie = movie,
+            userRating = userRating,
+            isRatingInProgress = isRatingInProgress,
         )
     }
 }
@@ -182,31 +208,45 @@ fun RateMovie(
     modifier: Modifier = Modifier,
     onEvent: (MovieDetailsEvent) -> Unit,
     movie: MovieUiModel,
+    userRating: Int?,
+    isRatingInProgress: Boolean,
 ) {
-    val ratingState = rememberSaveable { mutableIntStateOf(0) }
-
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .wrapContentSize(), // Wrap the content size to center horizontally
-        verticalArrangement = Arrangement.spacedBy(16.dp), // Space between items
-        horizontalAlignment = Alignment.CenterHorizontally, // Center the items horizontally
+            .wrapContentSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        UserRatingBar(
-            ratingState = ratingState,
-            size = 28.dp,
-        )
-
-        Button(
-            onClick = {
-                onEvent(MovieDetailsEvent.RateMovie(movie.id, ratingState.intValue.toFloat()))
-            },
-            enabled = ratingState.intValue >= 1,
-        ) {
+        if (userRating != null) {
             Text(
-                text = stringResource(id = R.string.label_rate),
+                text = stringResource(id = R.string.label_you_rated_this),
                 style = MaterialTheme.typography.labelMedium,
             )
+            val lockedRatingState = remember { mutableIntStateOf(userRating) }
+            UserRatingBar(
+                ratingState = lockedRatingState,
+                size = 28.dp,
+                enabled = false,
+            )
+        } else {
+            val ratingState = rememberSaveable { mutableIntStateOf(0) }
+            UserRatingBar(
+                ratingState = ratingState,
+                size = 28.dp,
+                enabled = !isRatingInProgress,
+            )
+            Button(
+                onClick = {
+                    onEvent(MovieDetailsEvent.RateMovie(movie.id, ratingState.intValue.toFloat()))
+                },
+                enabled = ratingState.intValue >= 1 && !isRatingInProgress,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.label_rate),
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
         }
     }
 }

@@ -6,10 +6,11 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.MovieCatalogTabbedScreen
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviedetails.MovieDetailsScreen
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviedetails.MovieDetailsViewModel
-import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.movielist.MovieListScreen
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.movielist.MovieListViewModel
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.watchedmovielist.WatchedMovieListViewModel
 import org.koin.androidx.compose.koinViewModel
 
 fun NavGraphBuilder.movieCatalogGraph(
@@ -27,12 +28,19 @@ private fun NavGraphBuilder.addMovieListScreen(
     onMovieClicked: (Int) -> Unit,
 ) {
     composable<MovieCatalogDestination.MovieListDestination> {
-        val viewModel = koinViewModel<MovieListViewModel>()
-        val state by viewModel.viewState.collectAsStateWithLifecycle()
-        MovieListScreen(
-            state = state,
-            effect = viewModel.effect,
-            onEvent = viewModel::setEvent,
+        val movieListViewModel = koinViewModel<MovieListViewModel>()
+        val movieListState by movieListViewModel.viewState.collectAsStateWithLifecycle()
+
+        val watchedMovieListViewModel = koinViewModel<WatchedMovieListViewModel>()
+        val watchedMovieListState by watchedMovieListViewModel.viewState.collectAsStateWithLifecycle()
+
+        MovieCatalogTabbedScreen(
+            movieListState = movieListState,
+            movieListEffect = movieListViewModel.effect,
+            onMovieListEvent = movieListViewModel::setEvent,
+            watchedMovieListState = watchedMovieListState,
+            watchedMovieListEffect = watchedMovieListViewModel.effect,
+            onWatchedMovieListEvent = watchedMovieListViewModel::setEvent,
             onMovieClicked = onMovieClicked,
         )
     }

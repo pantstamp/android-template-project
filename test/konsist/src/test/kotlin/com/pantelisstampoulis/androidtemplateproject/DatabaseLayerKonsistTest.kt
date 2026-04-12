@@ -63,7 +63,8 @@ class DatabaseLayerKonsistTest {
                                 "isPublicOrDefault: $isPropertyPublicOrDefault.",
                         )
                         isVal && isPropertyPublicOrDefault
-                    } && areFunctionsEmpty
+                    } &&
+                    areFunctionsEmpty
             }
     }
 
@@ -75,13 +76,13 @@ class DatabaseLayerKonsistTest {
             .withName(DatabaseDataSource)
             .assertTrue(strict = true) { declaration ->
                 declaration.resideInPackage(name = DatabasePackage) &&
-                        declaration.hasPublicOrDefaultModifier &&
-                        declaration.functions().all { functionDeclaration ->
-                            functionDeclaration.hasSuspendModifier
-                        } &&
-                        declaration.hasAllChildren(indirectChildren = true) { childDeclaration ->
-                            childDeclaration.resideInPackage(name = DatabasePackage)
-                        }
+                    declaration.hasPublicOrDefaultModifier &&
+                    declaration.functions().all { functionDeclaration ->
+                        functionDeclaration.hasSuspendModifier
+                    } &&
+                    declaration.hasAllChildren(indirectChildren = true) { childDeclaration ->
+                        childDeclaration.resideInPackage(name = DatabasePackage)
+                    }
             }
     }
 

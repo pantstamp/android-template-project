@@ -15,6 +15,7 @@ import com.pantelisstampoulis.androidtemplateproject.network.response.ApiResultR
 import com.pantelisstampoulis.androidtemplateproject.test.doubles.database.DatabaseTestDoubleFactory
 import com.pantelisstampoulis.androidtemplateproject.test.doubles.network.NetworkTestDoubleFactory
 import io.mockative.Mock
+import io.mockative.any
 import io.mockative.classOf
 import io.mockative.coEvery
 import io.mockative.coVerify
@@ -207,6 +208,79 @@ class MoviesRepositoryImplTest : KoinTest {
             assertThat(result).isInstanceOf(ResultState.Error::class.java)
             assertThat((result as ResultState.Error).error).isInstanceOf(ErrorModel.ServerError::class.java)
             coVerify { networkDataSource.rateMovie(movieId, RateMovieRequest(rating)) }.wasInvoked(exactly = once)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun shouldInsertWatchedMovieAndEmitSuccessWhenSaving() = runTest {
+        coEvery { databaseDataSource.insertWatchedMovie(any()) }.returns(Unit)
+
+        repository.saveWatchedMovie(
+            movieId = 1,
+            title = "Test Movie",
+            posterUrl = null,
+            overview = null,
+            publicRating = 7.5,
+            releaseDate = null,
+            userRating = 8,
+        ).test {
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(ResultState.Success::class.java)
+            assertThat((result as ResultState.Success).data).isEqualTo(Unit)
+            coVerify { databaseDataSource.insertWatchedMovie(any()) }.wasInvoked(exactly = once)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun shouldReturnWatchedMoviesFromDatabase() = runTest {
+        val mockWatchedMovieDbList = listOf(
+            DatabaseTestDoubleFactory.provideWatchedMovieDbModel(),
+            DatabaseTestDoubleFactory.provideWatchedMovieDbModel(),
+        )
+        val expectedWatchedMovies = mockWatchedMovieDbList.map {
+            dataMappers.watchedMovieDomainMapper.fromDbToDomain(it)
+        }
+
+        coEvery { databaseDataSource.getWatchedMovies() }.returns(flowOf(mockWatchedMovieDbList))
+
+        repository.getWatchedMovies().test {
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(ResultState.Success::class.java)
+            assertThat((result as ResultState.Success).data).isEqualTo(expectedWatchedMovies)
+            coVerify { databaseDataSource.getWatchedMovies() }.wasInvoked(exactly = once)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun shouldReturnWatchedMovieFromDatabaseWhenFound() = runTest {
+        val movieId = 42
+        val mockWatchedMovieDbModel = DatabaseTestDoubleFactory.provideWatchedMovieDbModel()
+        val expectedWatchedMovie = dataMappers.watchedMovieDomainMapper.fromDbToDomain(mockWatchedMovieDbModel)
+
+        coEvery { databaseDataSource.getWatchedMovie(movieId) }.returns(mockWatchedMovieDbModel)
+
+        repository.getWatchedMovie(movieId).test {
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(ResultState.Success::class.java)
+            assertThat((result as ResultState.Success).data).isEqualTo(expectedWatchedMovie)
+            coVerify { databaseDataSource.getWatchedMovie(movieId) }.wasInvoked(exactly = once)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun shouldReturnErrorWhenWatchedMovieNotFound() = runTest {
+        val movieId = 42
+        coEvery { databaseDataSource.getWatchedMovie(movieId) }.returns(null)
+
+        repository.getWatchedMovie(movieId).test {
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(ResultState.Error::class.java)
+            assertThat((result as ResultState.Error).error).isInstanceOf(ErrorModel.NotFound::class.java)
+            coVerify { databaseDataSource.getWatchedMovie(movieId) }.wasInvoked(exactly = once)
             awaitComplete()
         }
     }

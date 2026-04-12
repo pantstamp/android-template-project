@@ -3,5 +3,6 @@ package com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.prese
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.SideEffect
 
 sealed interface MovieDetailsSideEffect : SideEffect {
-    data class ShowToast(val text: String) : MovieDetailsSideEffect
+    data object RatingSaved : MovieDetailsSideEffect
+    data object RatingError : MovieDetailsSideEffect
 }

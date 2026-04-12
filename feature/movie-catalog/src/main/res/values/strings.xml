@@ -3,6 +3,16 @@
 
     <!-- Movie details screen -->
     <string name="label_rate">Rate</string>
+    <string name="label_you_rated_this">You rated this</string>
+    <string name="snackbar_rating_saved">Rating saved</string>
+    <string name="snackbar_rating_error">Something went wrong. Please try again.</string>
+
+    <!-- Watched movie list screen -->
+    <string name="error_generic">An error occurred</string>
+    <string name="tab_discover">Discover</string>
+    <string name="tab_watched">Watched</string>
+    <string name="watched_empty_state">No movies rated yet. Start exploring and rate movies you\'ve watched.</string>
+    <string name="content_description_user_rating">Your rating: %d out of 10</string>
 
     <!-- Movie genres -->
     <string name="genre_action">Action</string>
