@@ -23,15 +23,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          show_full_output: true
           classify_inline_comments: true
           prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+
             Review this PR thoroughly as a senior Android engineer. Read CLAUDE.md for project conventions before reviewing.
+
+            Use `mcp__github_inline_comment__create_inline_comment` (with `confirmed: true`) to post inline comments on specific lines where issues are found.
+            Use `gh pr comment` for the final summary comment.
+            Only post GitHub comments - don't submit review text as messages.
 
             For each finding, format as:
             [Severity] [Category] — Description and suggested fix
@@ -78,6 +84,9 @@ jobs:
             - Test naming follows project convention
             - Edge cases and error scenarios covered
 
-            For issues tied to specific lines, mention the file and line so they can be posted as inline comments.
+            Post inline comments on the specific lines where issues are found.
             Be constructive — always suggest the fix, not just the problem.
-            At the end, provide a summary with counts per severity level.
+            At the end, post a summary comment with counts per severity level.
+
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
