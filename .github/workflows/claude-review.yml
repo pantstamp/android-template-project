@@ -30,6 +30,7 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           show_full_output: true
           classify_inline_comments: true
+          claude_args: "--permission-mode accept-all"
           additional_permissions: |
             Bash(gh pr review *)
             Bash(gh pr comment *)
