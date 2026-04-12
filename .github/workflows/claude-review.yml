@@ -30,10 +30,18 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           show_full_output: true
           classify_inline_comments: true
+          additional_permissions: |
+            Bash(gh pr review *)
+            Bash(gh pr comment *)
+            Bash(gh api *)
           prompt: |
             Review this PR thoroughly as a senior Android engineer. Read CLAUDE.md for project conventions before reviewing.
 
-            For every comment, use this format:
+            IMPORTANT: You MUST post your review using the gh CLI. Use this approach:
+            1. First read the changed files and analyze them
+            2. Then submit your review using: gh pr review <PR_NUMBER> --event COMMENT --body "<your full review>"
+            3. For the review body, format each finding as:
+
             [Severity] [Category] — Description and suggested fix
 
             Severity levels:
