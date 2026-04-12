@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize]
   issue_comment:
-    types: [ created ]
+    types: [created]
 
 permissions:
   contents: read
@@ -30,19 +30,10 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           show_full_output: true
           classify_inline_comments: true
-          claude_args: "--permission-mode accept-all"
-          additional_permissions: |
-            Bash(gh pr review *)
-            Bash(gh pr comment *)
-            Bash(gh api *)
           prompt: |
             Review this PR thoroughly as a senior Android engineer. Read CLAUDE.md for project conventions before reviewing.
 
-            IMPORTANT: You MUST post your review using the gh CLI. Use this approach:
-            1. First read the changed files and analyze them
-            2. Then submit your review using: gh pr review <PR_NUMBER> --event COMMENT --body "<your full review>"
-            3. For the review body, format each finding as:
-
+            For each finding, format as:
             [Severity] [Category] — Description and suggested fix
 
             Severity levels:
@@ -87,6 +78,6 @@ jobs:
             - Test naming follows project convention
             - Edge cases and error scenarios covered
 
-            Post inline comments on the specific lines where issues are found.
+            For issues tied to specific lines, mention the file and line so they can be posted as inline comments.
             Be constructive — always suggest the fix, not just the problem.
-            At the end, post a summary comment with counts per severity level.
+            At the end, provide a summary with counts per severity level.
