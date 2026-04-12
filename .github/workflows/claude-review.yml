@@ -28,13 +28,8 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          allowed_tools: |
-            Read
-            Glob
-            Grep
-            Bash(git diff *)
-            Bash(git log *)
-            Bash(git show *)
+          show_full_output: true
+          classify_inline_comments: true
           prompt: |
             Review this PR thoroughly as a senior Android engineer. Read CLAUDE.md for project conventions before reviewing.
 
