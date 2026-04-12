@@ -31,7 +31,7 @@ class ArchitectureLayerDependenciesKonsistTest {
                     networkLayer,
                     databaseLayer,
                     modelLayer,
-                    domainLayer
+                    domainLayer,
                 )
 
                 domainLayer.dependsOn(layer = modelLayer)

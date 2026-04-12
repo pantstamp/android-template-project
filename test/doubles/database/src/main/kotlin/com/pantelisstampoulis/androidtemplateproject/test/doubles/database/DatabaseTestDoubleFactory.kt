@@ -1,6 +1,7 @@
 package com.pantelisstampoulis.androidtemplateproject.test.doubles.database
 
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
+import com.pantelisstampoulis.androidtemplateproject.database.model.WatchedMovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.random.randomBoolean
 import com.pantelisstampoulis.androidtemplateproject.random.randomFloat
 import com.pantelisstampoulis.androidtemplateproject.random.randomInt
@@ -23,5 +24,16 @@ object DatabaseTestDoubleFactory {
         video = randomBoolean(),
         voteAverage = randomFloat(from = 0F, until = 10F).toDouble(),
         voteCount = randomInt(from = 0),
+    )
+
+    fun provideWatchedMovieDbModel() = WatchedMovieDbModel(
+        movieId = randomInt(from = 1, until = 1000),
+        title = randomString(),
+        posterUrl = randomString(),
+        overview = randomString(),
+        publicRating = randomFloat(from = 0F, until = 10F).toDouble(),
+        releaseDate = randomString(),
+        userRating = randomInt(from = 1, until = 10),
+        ratedAt = System.currentTimeMillis(),
     )
 }
