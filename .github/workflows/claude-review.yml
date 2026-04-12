@@ -3,6 +3,8 @@ name: Claude PR Review
 on:
   pull_request:
     types: [opened, synchronize]
+  issue_comment:
+    types: [ created ]
 
 permissions:
   contents: read
