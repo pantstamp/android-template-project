@@ -29,7 +29,7 @@ internal class RoomDataSource(
         db.watchedMovieDao().insertWatchedMovie(mappers.watchedMovieDbMapper.toDb(movie))
     }
 
-    override fun getWatchedMovies(): Flow<List<WatchedMovieDbModel>> =
+    override suspend fun getWatchedMovies(): Flow<List<WatchedMovieDbModel>> =
         db.watchedMovieDao().getWatchedMovieEntities().map { entities ->
             entities.map { mappers.watchedMovieDbMapper.mapFromDb(it) }
         }

@@ -17,7 +17,7 @@ internal class NoopDatabaseDataSource : DatabaseDataSource {
 
     override suspend fun insertWatchedMovie(movie: WatchedMovieDbModel) { }
 
-    override fun getWatchedMovies(): Flow<List<WatchedMovieDbModel>> = flowOf(emptyList())
+    override suspend fun getWatchedMovies(): Flow<List<WatchedMovieDbModel>> = flowOf(emptyList())
 
     override suspend fun getWatchedMovie(movieId: Int): WatchedMovieDbModel? = null
 }

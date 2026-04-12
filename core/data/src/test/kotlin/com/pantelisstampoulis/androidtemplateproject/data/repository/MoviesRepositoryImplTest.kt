@@ -19,10 +19,8 @@ import io.mockative.any
 import io.mockative.classOf
 import io.mockative.coEvery
 import io.mockative.coVerify
-import io.mockative.every
 import io.mockative.mock
 import io.mockative.once
-import io.mockative.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -245,13 +243,13 @@ class MoviesRepositoryImplTest : KoinTest {
             dataMappers.watchedMovieDomainMapper.fromDbToDomain(it)
         }
 
-        every { databaseDataSource.getWatchedMovies() }.returns(flowOf(mockWatchedMovieDbList))
+        coEvery { databaseDataSource.getWatchedMovies() }.returns(flowOf(mockWatchedMovieDbList))
 
         repository.getWatchedMovies().test {
             val result = awaitItem()
             assertThat(result).isInstanceOf(ResultState.Success::class.java)
             assertThat((result as ResultState.Success).data).isEqualTo(expectedWatchedMovies)
-            verify { databaseDataSource.getWatchedMovies() }.wasInvoked(exactly = once)
+            coVerify { databaseDataSource.getWatchedMovies() }.wasInvoked(exactly = once)
             awaitComplete()
         }
     }

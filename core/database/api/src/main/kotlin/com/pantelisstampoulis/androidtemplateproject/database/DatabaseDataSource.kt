@@ -16,7 +16,7 @@ interface DatabaseDataSource {
 
     suspend fun insertWatchedMovie(movie: WatchedMovieDbModel)
 
-    fun getWatchedMovies(): Flow<List<WatchedMovieDbModel>>
+    suspend fun getWatchedMovies(): Flow<List<WatchedMovieDbModel>>
 
     suspend fun getWatchedMovie(movieId: Int): WatchedMovieDbModel?
 }
