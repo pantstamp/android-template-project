@@ -43,7 +43,7 @@ Before asking questions, silently identify:
 - Missing error / unhappy path handling
 - Implicit assumptions about platform behavior
 - Android-specific concerns: offline behavior, lifecycle handling, permissions,
-  deep links, back navigation, accessibility, unhappy paths when there are network or database errors, etc.
+  deep links, back navigation, accessibility
 
 ### 3. Interview — one topic at a time
 

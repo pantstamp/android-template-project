@@ -104,11 +104,22 @@ of degradation (slower responses, less precise output) and proactively manage:
   This works because PLAN.md is self-contained — Claude can pick up at any
   phase without needing the prior conversation.
 
-### 5. PR creation (after all phases pass)
+### 5. Pre-PR quality gate (recommended)
 
-Once the user confirms the last phase is complete:
+After all phases are complete, suggest running the pre-PR checklist:
 
-**a) Final verification:**
+"All phases are done. Want me to run the pre-PR quality gate before
+creating the PR? It checks build, tests, lint, plan coverage, and
+scans for common mistakes."
+
+If the user agrees, hand off to the **pre-pr-checklist** skill.
+If they skip it, proceed directly to PR creation.
+
+### 6. PR creation (after quality gate or user approval)
+
+Once the pre-PR checklist passes (or the user skips it):
+
+**a) Final verification** (skip if the pre-PR checklist already ran these):
 ```bash
 ./gradlew assembleDebug
 ./gradlew testDebugUnitTest
@@ -168,7 +179,7 @@ EOF
 Do NOT merge the PR — just create it. The automated review workflow will
 pick it up from here.
 
-### 6. Confirm completion
+### 7. Confirm completion
 
 Tell the user:
 - The PR number and link
