@@ -10,7 +10,7 @@ kotlinx-serialization = "1.11.0"
 ksp = "2.3.12"
 
 # Gradle Plugin
-android-gradlePlugin = "8.13.0"
+android-gradlePlugin = "8.13.2"
 
 # AndroidX
 androidx-activityCompose = "1.13.0"
@@ -43,7 +43,6 @@ turbine = "1.2.1"
 
 # Quality
 konsist = "0.17.3"
-kover = "0.8.0"
 ktlint = "1.8.0"
 spotless = "8.10.2"
 
@@ -140,7 +139,6 @@ android-library = { id = "com.android.library", version.ref = "android-gradlePlu
 android-lint = { id = "com.android.lint" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlinx-kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
