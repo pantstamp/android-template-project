@@ -41,7 +41,14 @@ class LintPlugin : Plugin<Project> {
 }
 
 private fun Lint.configure(
-    excludeList: List<String> = listOf("ObsoleteLintCustomCheck", "GradleDependency"),
+    excludeList: List<String> = listOf(
+        "ObsoleteLintCustomCheck",
+        "GradleDependency",
+        // Staying on AGP 8.x is deliberate: AGP 9 requires either built-in Kotlin,
+        // which KSP does not support, or the deprecated android.newDsl=false escape
+        // hatch. Revisit once KSP supports AGP's built-in Kotlin.
+        "AndroidGradlePluginVersion",
+    ),
 ) {
     abortOnError = true
     textReport = false
