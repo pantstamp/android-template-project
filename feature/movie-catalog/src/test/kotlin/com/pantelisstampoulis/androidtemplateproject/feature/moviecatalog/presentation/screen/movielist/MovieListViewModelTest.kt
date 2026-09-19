@@ -1,3 +1,5 @@
+@file:OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+
 package com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.movielist
 
 import app.cash.turbine.test
