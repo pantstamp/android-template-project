@@ -35,7 +35,9 @@ class LibraryCorePlugin : Plugin<Project> {
                     minSdk = minSdk,
                     javaVersion = javaVersionFromLibs,
                 )
-                defaultConfig.targetSdk = targetSdk
+                // AGP 9 removed targetSdk from a library's defaultConfig: for a library it
+                // only ever applied to instrumentation tests, so it now lives on testOptions.
+                testOptions.targetSdk = targetSdk
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                 testOptions.animationsDisabled = true
                 configureFlavors(this)

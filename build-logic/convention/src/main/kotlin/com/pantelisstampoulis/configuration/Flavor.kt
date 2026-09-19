@@ -2,8 +2,10 @@ package com.pantelisstampoulis.configuration
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.ApplicationProductFlavor
-import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.dsl.LibraryProductFlavor
 import com.android.build.api.dsl.ProductFlavor
+import org.gradle.api.NamedDomainObjectContainer
 
 @Suppress("EnumEntryName")
 enum class FlavorDimension {
@@ -18,25 +20,48 @@ enum class AppFlavor(val dimension: FlavorDimension, val applicationIdSuffix: St
     //   prod(FlavorDimension.contentType)
 }
 
-fun configureFlavors(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
-    flavorConfigurationBlock: ProductFlavor.(flavor: AppFlavor) -> Unit = {}
-) {
-    commonExtension.apply {
-        // Add all flavor dimensions, for example
-          //flavorDimensions += FlavorDimension.contentType.name
+// AGP 9 types productFlavors per extension (ApplicationProductFlavor vs LibraryProductFlavor),
+// and CommonExtension only exposes it as an out-projected container, which cannot be created
+// into. Hence one overload per extension over a shared, type-safe implementation.
 
-        productFlavors {
-            AppFlavor.values().forEach {
-                create(it.name) {
-                    dimension = it.dimension.name
-                    flavorConfigurationBlock(this, it)
-                    if (this@apply is ApplicationExtension && this is ApplicationProductFlavor) {
-                        if (it.applicationIdSuffix != null) {
-                            applicationIdSuffix = it.applicationIdSuffix
-                        }
-                    }
-                }
+fun configureFlavors(
+    commonExtension: ApplicationExtension,
+    flavorConfigurationBlock: ApplicationProductFlavor.(flavor: AppFlavor) -> Unit = {}
+) {
+    // Add all flavor dimensions, for example
+    //   commonExtension.flavorDimensions += FlavorDimension.contentType.name
+
+    commonExtension.productFlavors {
+        createAppFlavors(this, flavorConfigurationBlock) { flavor, suffix ->
+            flavor.applicationIdSuffix = suffix
+        }
+    }
+}
+
+fun configureFlavors(
+    commonExtension: LibraryExtension,
+    flavorConfigurationBlock: LibraryProductFlavor.(flavor: AppFlavor) -> Unit = {}
+) {
+    // Add all flavor dimensions, for example
+    //   commonExtension.flavorDimensions += FlavorDimension.contentType.name
+
+    commonExtension.productFlavors {
+        // applicationIdSuffix is an application-only concept, so libraries ignore it
+        createAppFlavors(this, flavorConfigurationBlock) { _, _ -> }
+    }
+}
+
+private fun <T : ProductFlavor> createAppFlavors(
+    container: NamedDomainObjectContainer<T>,
+    flavorConfigurationBlock: T.(flavor: AppFlavor) -> Unit,
+    applicationIdSuffixSetter: (flavor: T, suffix: String) -> Unit,
+) {
+    AppFlavor.entries.forEach { appFlavor ->
+        container.create(appFlavor.name) {
+            dimension = appFlavor.dimension.name
+            flavorConfigurationBlock(appFlavor)
+            appFlavor.applicationIdSuffix?.let { suffix ->
+                applicationIdSuffixSetter(this, suffix)
             }
         }
     }
