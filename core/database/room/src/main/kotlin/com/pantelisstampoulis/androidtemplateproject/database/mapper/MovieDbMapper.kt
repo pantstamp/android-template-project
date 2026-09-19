@@ -5,9 +5,7 @@ import com.pantelisstampoulis.androidtemplateproject.database.model.MovieEntity
 
 class MovieDbMapper {
 
-    internal fun toDb(
-        model: MovieDbModel,
-    ): MovieEntity = MovieEntity(
+    internal fun toDb(model: MovieDbModel): MovieEntity = MovieEntity(
         id = model.id,
         adult = model.adult,
         backdropPath = model.backdropPath,
@@ -24,9 +22,7 @@ class MovieDbMapper {
         voteCount = model.voteCount,
     )
 
-    internal fun mapFromDb(
-        model: MovieEntity,
-    ): MovieDbModel = MovieDbModel(
+    internal fun mapFromDb(model: MovieEntity): MovieDbModel = MovieDbModel(
         id = model.id,
         adult = model.adult,
         backdropPath = model.backdropPath,

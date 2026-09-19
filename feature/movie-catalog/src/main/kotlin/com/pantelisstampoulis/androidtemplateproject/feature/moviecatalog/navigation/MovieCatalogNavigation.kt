@@ -13,9 +13,7 @@ import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presen
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.watchedmovielist.WatchedMovieListViewModel
 import org.koin.androidx.compose.koinViewModel
 
-fun NavGraphBuilder.movieCatalogGraph(
-    onMovieClicked: (Int) -> Unit,
-) {
+fun NavGraphBuilder.movieCatalogGraph(onMovieClicked: (Int) -> Unit) {
     navigation<MovieCatalogDestination.MovieCatalogHomeDestination>(
         startDestination = MovieCatalogDestination.MovieListDestination,
     ) {
@@ -24,9 +22,7 @@ fun NavGraphBuilder.movieCatalogGraph(
     }
 }
 
-private fun NavGraphBuilder.addMovieListScreen(
-    onMovieClicked: (Int) -> Unit,
-) {
+private fun NavGraphBuilder.addMovieListScreen(onMovieClicked: (Int) -> Unit) {
     composable<MovieCatalogDestination.MovieListDestination> {
         val movieListViewModel = koinViewModel<MovieListViewModel>()
         val movieListState by movieListViewModel.viewState.collectAsStateWithLifecycle()

@@ -5,7 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface UseCase<I, M> {
 
-    operator fun invoke(
-        input: I,
-    ): Flow<ResultState<M>>
+    operator fun invoke(input: I): Flow<ResultState<M>>
 }

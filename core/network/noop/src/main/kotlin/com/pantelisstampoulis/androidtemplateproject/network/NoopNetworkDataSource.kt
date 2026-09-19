@@ -5,12 +5,8 @@ import com.pantelisstampoulis.androidtemplateproject.network.request.RateMovieRe
 import com.pantelisstampoulis.androidtemplateproject.network.response.ApiResultResponse
 
 internal class NoopNetworkDataSource : NetworkDataSource {
-    override suspend fun getMovies(): NetworkResult<List<MovieApiModel>> =
-        NetworkResult.Success(emptyList())
+    override suspend fun getMovies(): NetworkResult<List<MovieApiModel>> = NetworkResult.Success(emptyList())
 
-    override suspend fun rateMovie(
-        movieId: Int,
-        request: RateMovieRequest,
-    ): NetworkResult<ApiResultResponse> =
+    override suspend fun rateMovie(movieId: Int, request: RateMovieRequest): NetworkResult<ApiResultResponse> =
         NetworkResult.Success(ApiResultResponse(success = true, statusCode = 200))
 }

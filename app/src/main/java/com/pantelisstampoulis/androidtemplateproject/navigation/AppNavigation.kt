@@ -12,10 +12,7 @@ import org.koin.compose.getKoin
 import org.koin.compose.koinInject
 
 @Composable
-fun AppNavHost(
-    modifier: Modifier = Modifier,
-    startDestination: Any,
-) {
+fun AppNavHost(modifier: Modifier = Modifier, startDestination: Any) {
     // Injecting the NavController into Koin
     val mainNavController = rememberNavController()
     getKoin().setProperty(NavigationConstants.NAVIGATION_CONTROLLER, mainNavController)

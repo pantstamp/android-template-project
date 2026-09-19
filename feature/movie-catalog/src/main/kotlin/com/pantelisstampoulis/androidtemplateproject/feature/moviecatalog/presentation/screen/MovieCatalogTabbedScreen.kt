@@ -65,6 +65,7 @@ fun MovieCatalogTabbedScreen(
                     onEvent = onMovieListEvent,
                     onMovieClicked = onMovieClicked,
                 )
+
                 1 -> WatchedMovieListScreen(
                     state = watchedMovieListState,
                     effect = watchedMovieListEffect,

@@ -6,9 +6,7 @@ import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
 
 internal class MovieDomainMapper : DbToDomainMapper<MovieDbModel, Movie> {
 
-    override fun fromDbToDomain(
-        dbModel: MovieDbModel,
-    ): Movie = Movie(
+    override fun fromDbToDomain(dbModel: MovieDbModel): Movie = Movie(
         id = dbModel.id,
         adult = dbModel.adult,
         backdropPath = dbModel.backdropPath,

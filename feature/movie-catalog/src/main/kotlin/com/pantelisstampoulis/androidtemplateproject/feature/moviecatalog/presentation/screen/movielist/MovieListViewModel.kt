@@ -52,6 +52,7 @@ class MovieListViewModel(
                     }
                 }
             }
+
             is MovieListEvent.ShowMovieDetails -> setEffect {
                 MovieListSideEffect.NavigateToMovieDetails(event.movieId)
             }

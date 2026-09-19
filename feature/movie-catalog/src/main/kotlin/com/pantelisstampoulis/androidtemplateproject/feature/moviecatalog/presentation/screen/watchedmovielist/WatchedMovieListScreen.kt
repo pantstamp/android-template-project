@@ -99,11 +99,7 @@ fun WatchedMovieListScreen(
 }
 
 @Composable
-fun WatchedMovieRow(
-    movie: WatchedMovieUiModel,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun WatchedMovieRow(movie: WatchedMovieUiModel, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.height(150.dp),
         onClick = onClick,

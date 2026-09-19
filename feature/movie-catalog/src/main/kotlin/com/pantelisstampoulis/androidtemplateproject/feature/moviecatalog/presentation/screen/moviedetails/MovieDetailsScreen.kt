@@ -110,6 +110,7 @@ fun MovieDetailsScreen(
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar(context.getString(R.string.snackbar_rating_saved))
                         }
+
                     MovieDetailsSideEffect.RatingError ->
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar(context.getString(R.string.snackbar_rating_error))

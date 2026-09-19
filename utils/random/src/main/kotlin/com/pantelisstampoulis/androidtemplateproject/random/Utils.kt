@@ -21,27 +21,15 @@ val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 @VisibleForTesting
 val charHexPool: List<Char> = listOf('A', 'B', 'C', 'D', 'E', 'F') + ('0'..'9')
 
-fun randomString(
-    length: Int = 10,
-    characterPool: List<Char> = charPool,
-): String = (1..length)
+fun randomString(length: Int = 10, characterPool: List<Char> = charPool): String = (1..length)
     .map { Random.nextInt(0, characterPool.size).let { characterPool[it] } }
     .joinToString("")
 
-fun randomInt(
-    from: Int = 0,
-    until: Int = 9,
-): Int = Random.nextInt(from = from, until = until)
+fun randomInt(from: Int = 0, until: Int = 9): Int = Random.nextInt(from = from, until = until)
 
-fun randomLong(
-    from: Long = 0,
-    until: Long = 9,
-): Long = Random.nextLong(from = from, until = until)
+fun randomLong(from: Long = 0, until: Long = 9): Long = Random.nextLong(from = from, until = until)
 
-fun randomFloat(
-    from: Float = 0f,
-    until: Float = 9f,
-): Float {
+fun randomFloat(from: Float = 0f, until: Float = 9f): Float {
     require(until > from) {
         "$until should be greater than $from"
     }
@@ -90,11 +78,7 @@ private fun validateYear(year: Int) {
     }
 }
 
-private fun validateDayOfMonth(
-    year: Int,
-    dayOfMonth: Int,
-    month: Month,
-) {
+private fun validateDayOfMonth(year: Int, dayOfMonth: Int, month: Month) {
     val lastDayOfMonth = LocalDate(
         year = year,
         month = month,

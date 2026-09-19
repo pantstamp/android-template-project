@@ -21,9 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.pantelisstampoulis.androidtemplateproject.R
 
 @Composable
-fun HomeScreen(
-    onButtonClicked: () -> Unit,
-) {
+fun HomeScreen(onButtonClicked: () -> Unit) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,

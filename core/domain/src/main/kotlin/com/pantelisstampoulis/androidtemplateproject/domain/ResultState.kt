@@ -25,21 +25,14 @@ import kotlin.coroutines.CoroutineContext
  */
 sealed class ResultState<out T> {
 
-    data class Success<T>(
-        val data: T,
-    ) : ResultState<T>()
+    data class Success<T>(val data: T) : ResultState<T>()
 
     data object Loading : ResultState<Nothing>()
 
-    data class Error(
-        val error: ErrorModel,
-    ) : ResultState<Nothing>()
+    data class Error(val error: ErrorModel) : ResultState<Nothing>()
 }
 
-fun <T> Flow<ResultState<T>>.onStartCatch(
-    coroutineContext: CoroutineContext,
-    logger: Logger,
-) = this
+fun <T> Flow<ResultState<T>>.onStartCatch(coroutineContext: CoroutineContext, logger: Logger) = this
     .onStart {
         emit(value = ResultState.Loading)
     }
