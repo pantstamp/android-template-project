@@ -25,6 +25,7 @@ internal fun Project.configureCompose(
         // use -Pandroidx.enableComposeCompilerReports=true to enable compose compiler reports
         reportsDestination.set(reportsFolder)
 
-        enableIntrinsicRemember.set(true)
+        // Intrinsic remember is on by default since Kotlin 2.4; both the
+        // enableIntrinsicRemember property and its feature flag are deprecated.
     }
 }
