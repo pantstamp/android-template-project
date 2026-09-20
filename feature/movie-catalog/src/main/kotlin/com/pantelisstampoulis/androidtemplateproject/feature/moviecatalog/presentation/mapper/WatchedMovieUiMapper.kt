@@ -6,16 +6,15 @@ import com.pantelisstampoulis.androidtemplateproject.model.movies.WatchedMovie
 
 class WatchedMovieUiMapper : DomainToUiMapper<WatchedMovie, WatchedMovieUiModel> {
 
-    override fun fromDomainToUi(domainModel: WatchedMovie): WatchedMovieUiModel =
-        WatchedMovieUiModel(
-            movieId = domainModel.movieId,
-            title = domainModel.title,
-            posterPath = domainModel.posterUrl,
-            voteAverage = domainModel.publicRating,
-            userRating = domainModel.userRating,
-            releaseYear = domainModel.releaseDate
-                ?.split("-")
-                ?.firstOrNull()
-                .orEmpty(),
-        )
+    override fun fromDomainToUi(domainModel: WatchedMovie): WatchedMovieUiModel = WatchedMovieUiModel(
+        movieId = domainModel.movieId,
+        title = domainModel.title,
+        posterPath = domainModel.posterUrl,
+        voteAverage = domainModel.publicRating,
+        userRating = domainModel.userRating,
+        releaseYear = domainModel.releaseDate
+            ?.split("-")
+            ?.firstOrNull()
+            .orEmpty(),
+    )
 }

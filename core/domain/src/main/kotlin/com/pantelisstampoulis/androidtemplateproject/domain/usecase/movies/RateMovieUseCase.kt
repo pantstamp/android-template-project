@@ -10,7 +10,10 @@ import kotlin.coroutines.CoroutineContext
 
 interface RateMovieUseCase : UseCase<RateMovieUseCaseInput, Unit>
 
-data class RateMovieUseCaseInput(val movieId: Int, val rating: Float)
+data class RateMovieUseCaseInput(
+    val movieId: Int,
+    val rating: Float,
+)
 
 internal class RateMovieUseCaseImpl(
     private val moviesRepository: MoviesRepository,

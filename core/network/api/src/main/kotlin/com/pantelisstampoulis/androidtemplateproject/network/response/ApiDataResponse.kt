@@ -13,6 +13,4 @@ import kotlinx.serialization.Serializable
  * in handling various types of data returned by different API endpoints.
  */
 @Serializable
-data class ApiDataResponse<T>(
-    val results: T,
-)
+data class ApiDataResponse<T>(val results: T)

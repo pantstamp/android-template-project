@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Movie details screen -->
     <string name="label_rate">Rate</string>
@@ -12,7 +12,8 @@
     <string name="tab_discover">Discover</string>
     <string name="tab_watched">Watched</string>
     <string name="watched_empty_state">No movies rated yet. Start exploring and rate movies you\'ve watched.</string>
-    <string name="content_description_user_rating">Your rating: %d out of 10</string>
+    <!-- Not a plural: %d is a score out of a fixed maximum, not a count of items. -->
+    <string name="content_description_user_rating" tools:ignore="PluralsCandidate">Your rating: %d out of 10</string>
 
     <!-- Movie genres -->
     <string name="genre_action">Action</string>

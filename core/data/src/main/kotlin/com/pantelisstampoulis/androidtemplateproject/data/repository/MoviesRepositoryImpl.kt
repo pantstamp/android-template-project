@@ -115,6 +115,7 @@ internal class MoviesRepositoryImpl(
                 databaseDataSource.insertMovies(movieList)
                 emitMoviesFromDb(movieList)
             }
+
             is NetworkResult.Error, is NetworkResult.Exception -> {
                 val errorModel = mappers.errorDomainMapper.mapNetworkResultToErrorModel(moviesNetworkResult)
                 errorModel?.let { emit(ResultState.Error(it)) }
@@ -122,4 +123,3 @@ internal class MoviesRepositoryImpl(
         }
     }
 }
-

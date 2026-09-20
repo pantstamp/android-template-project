@@ -7,9 +7,7 @@ import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
 
 class MovieUiMapper : DomainToUiMapper<Movie, MovieUiModel> {
 
-    override fun fromDomainToUi(
-        domainModel: Movie,
-    ): MovieUiModel = MovieUiModel(
+    override fun fromDomainToUi(domainModel: Movie): MovieUiModel = MovieUiModel(
         id = domainModel.id,
         adult = domainModel.adult,
         backdropPath = domainModel.backdropPath,

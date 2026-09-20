@@ -46,6 +46,7 @@ fun AndroidTemplateProjectTheme(
         }
 
         darkTheme -> DarkColorScheme
+
         else -> LightColorScheme
     }
 

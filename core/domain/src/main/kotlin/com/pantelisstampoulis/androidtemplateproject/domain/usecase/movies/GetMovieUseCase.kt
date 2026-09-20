@@ -17,7 +17,6 @@ internal class GetMovieUseCaseImpl(
     private val logger: Logger,
 ) : GetMovieUseCase {
 
-    override operator fun invoke(input: Int): Flow<ResultState<Movie>> =
-        moviesRepository.getMovie(movieId = input)
-            .onStartCatch(coroutineContext = coroutineContext, logger = logger)
+    override operator fun invoke(input: Int): Flow<ResultState<Movie>> = moviesRepository.getMovie(movieId = input)
+        .onStartCatch(coroutineContext = coroutineContext, logger = logger)
 }

@@ -102,11 +102,7 @@ fun MovieListScreen(
 }
 
 @Composable
-fun MovieList(
-    movies: ImmutableList<MovieUiModel>,
-    onEvent: (MovieListEvent) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun MovieList(movies: ImmutableList<MovieUiModel>, onEvent: (MovieListEvent) -> Unit, modifier: Modifier = Modifier) {
     var isRefreshing by remember {
         mutableStateOf(false)
     }
@@ -133,11 +129,7 @@ fun MovieList(
 }
 
 @Composable
-fun MovieRow(
-    movie: MovieUiModel,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun MovieRow(movie: MovieUiModel, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.height(150.dp),
         onClick = onClick,

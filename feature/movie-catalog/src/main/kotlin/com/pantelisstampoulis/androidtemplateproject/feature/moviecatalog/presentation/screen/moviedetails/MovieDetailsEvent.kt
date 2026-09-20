@@ -6,5 +6,8 @@ sealed interface MovieDetailsEvent : Event {
 
     data class Init(val movieId: Int) : MovieDetailsEvent
 
-    data class RateMovie(val movieId: Int, val rating: Float) : MovieDetailsEvent
+    data class RateMovie(
+        val movieId: Int,
+        val rating: Float,
+    ) : MovieDetailsEvent
 }

@@ -7,9 +7,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class NetworkResultCall<T : Any>(
-    private val delegate: Call<T>,
-) : Call<NetworkResult<T>> {
+class NetworkResultCall<T : Any>(private val delegate: Call<T>) : Call<NetworkResult<T>> {
 
     override fun enqueue(callback: Callback<NetworkResult<T>>) {
         delegate.enqueue(object : Callback<T> {

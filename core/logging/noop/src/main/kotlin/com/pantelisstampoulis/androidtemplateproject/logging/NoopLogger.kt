@@ -1,8 +1,6 @@
 package com.pantelisstampoulis.androidtemplateproject.logging
 
-internal class NoopLogger(
-    override val tag: String,
-) : Logger {
+internal class NoopLogger(override val tag: String) : Logger {
 
     override fun d(throwable: Throwable?, tag: String, message: () -> String) {
         /* empty implementation */

@@ -42,7 +42,8 @@ class DatabaseLayerKonsistTest {
             .withPackage(DatabaseModelPackage)
             .assertTrue { declaration ->
                 val isPublicOrDefault = declaration.hasPublicOrDefaultModifier
-                val hasCorrectSuffix = declaration.name.endsWith(DatabaseModelSuffix) || declaration.name.endsWith(DatabaseEntitySuffix)
+                val hasCorrectSuffix =
+                    declaration.name.endsWith(DatabaseModelSuffix) || declaration.name.endsWith(DatabaseEntitySuffix)
                 val isDataClass = declaration.hasDataModifier
                 val areFunctionsEmpty = declaration.functions().isEmpty()
                 println(

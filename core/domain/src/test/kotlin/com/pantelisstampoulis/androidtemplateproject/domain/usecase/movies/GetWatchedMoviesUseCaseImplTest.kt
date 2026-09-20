@@ -1,3 +1,5 @@
+@file:OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+
 package com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies
 
 import app.cash.turbine.test

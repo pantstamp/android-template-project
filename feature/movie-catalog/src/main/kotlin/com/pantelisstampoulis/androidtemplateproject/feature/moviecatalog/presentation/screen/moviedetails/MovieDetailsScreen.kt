@@ -32,7 +32,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -61,7 +60,11 @@ fun MovieDetailsScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
+
+    // Resolved in composition rather than via LocalContext.getString() inside the
+    // effect, so the messages follow configuration changes such as locale.
+    val ratingSavedMessage = stringResource(id = R.string.snackbar_rating_saved)
+    val ratingErrorMessage = stringResource(id = R.string.snackbar_rating_error)
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) { Snackbar(it) } },
@@ -108,11 +111,12 @@ fun MovieDetailsScreen(
                 when (sideEffect) {
                     MovieDetailsSideEffect.RatingSaved ->
                         coroutineScope.launch {
-                            snackbarHostState.showSnackbar(context.getString(R.string.snackbar_rating_saved))
+                            snackbarHostState.showSnackbar(ratingSavedMessage)
                         }
+
                     MovieDetailsSideEffect.RatingError ->
                         coroutineScope.launch {
-                            snackbarHostState.showSnackbar(context.getString(R.string.snackbar_rating_error))
+                            snackbarHostState.showSnackbar(ratingErrorMessage)
                         }
                 }
             }

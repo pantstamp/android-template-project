@@ -9,11 +9,7 @@ import java.lang.reflect.Type
 
 class NetworkResultCallAdapterFactory private constructor() : CallAdapter.Factory() {
 
-    override fun get(
-        returnType: Type,
-        annotations: Array<out Annotation>,
-        retrofit: Retrofit,
-    ): CallAdapter<*, *>? {
+    override fun get(returnType: Type, annotations: Array<out Annotation>, retrofit: Retrofit): CallAdapter<*, *>? {
         // Check if the return type is a Call<T>
         if (getRawType(returnType) != Call::class.java) {
             return null

@@ -14,8 +14,6 @@ internal class RetrofitNetworkDataSource(private val networkApi: RetrofitNetwork
         }
     }
 
-    override suspend fun rateMovie(
-        movieId: Int,
-        request: RateMovieRequest,
-    ): NetworkResult<ApiResultResponse> = networkApi.rateMovie(movieId, request)
+    override suspend fun rateMovie(movieId: Int, request: RateMovieRequest): NetworkResult<ApiResultResponse> =
+        networkApi.rateMovie(movieId, request)
 }

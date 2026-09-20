@@ -7,9 +7,7 @@ import com.pantelisstampoulis.androidtemplateproject.network.model.MovieApiModel
 
 internal class MovieDataMapper : ApiToDbMapper<MovieApiModel, MovieDbModel> {
 
-    override fun fromApiToDb(
-        apiModel: MovieApiModel,
-    ): MovieDbModel = MovieDbModel(
+    override fun fromApiToDb(apiModel: MovieApiModel): MovieDbModel = MovieDbModel(
         id = apiModel.id,
         adult = apiModel.adult,
         backdropPath = apiModel.backdropPath,
