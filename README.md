@@ -108,6 +108,11 @@ Navigation, Coil, OkHttp), because their newest releases declare `minCompileSdk=
 and a Gradle plugin; `@Mock`, `mock()`, `every` and `verify` no longer exist. Migrating means
 rewriting the entire test suite against a new API for no functional gain.
 
+## Contributing
+
+The branch model, CI gates and release process are described in
+[CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Roadmap
 
 The template is complete and buildable as it stands — everything below is about breadth, not
