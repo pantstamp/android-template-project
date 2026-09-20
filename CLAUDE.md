@@ -2,11 +2,15 @@
 
 ## Build & Run
 
+- **Requires JDK 21** to run Gradle. The compile toolchain (`java-version` in the catalog) is
+  provisioned by the foojay resolver in `settings.gradle.kts`, so no specific JDK install is needed.
 - **Requires** `TMDB_API_KEY=<token>` in `local.properties` (root). Missing key = empty BuildConfig field, not a build error.
 - Build/run via Android Studio or `./gradlew assembleDebug`.
 - Run all tests: `./gradlew test`
 - Run Konsist architecture tests: `./gradlew :test:konsist:test`
 - Run Spotless check: `./gradlew spotlessCheck` — fix: `./gradlew spotlessApply`
+- Run Android Lint: `./gradlew lint` (`abortOnError = true`, `warningsAsErrors = true`)
+- CI (`.github/workflows/build.yml`) runs all of the above on every PR.
 
 ---
 
@@ -166,17 +170,30 @@ All mappers implement typed interfaces from `:architecture:mapper`:
 
 ## Key Libraries
 
-- **Kotlin**: 2.2.21, Java 17
-- **Coroutines**: 1.10.2
-- **Compose BOM**: 2025.10.01
-- **Koin**: 4.1.1
-- **Retrofit**: 3.0.0 + OkHttp 5.2.1
-- **Room**: 2.8.3
-- **KSP**: 2.3.0
-- **Navigation Compose**: 2.9.5
-- **kotlinx.collections.immutable**: 0.4.0 — use `ImmutableList` in `UiState`
-- **kotlinx-datetime**: 0.7.0 — `Instant` moved to `kotlin.time.Instant` (not `kotlinx.datetime.Instant`); requires `@file:OptIn(kotlin.time.ExperimentalTime::class)` at call sites.
+- **Kotlin**: 2.4.20 — compiles to Java 17; Gradle itself runs on JDK 21
+- **Gradle**: 9.5.1 · **AGP**: 8.13.2 · **compileSdk/targetSdk**: 36 · **minSdk**: 24
+- **Coroutines**: 1.11.0
+- **Compose BOM**: 2026.06.01
+- **Koin**: 4.2.2
+- **Retrofit**: 3.0.0 + OkHttp 5.4.0
+- **Room**: 2.8.5
+- **KSP**: 2.3.12
+- **Navigation Compose**: 2.9.6
+- **kotlinx.collections.immutable**: 0.5.2 — use `ImmutableList` in `UiState`
+- **kotlinx-datetime**: 0.8.0 — `Instant` moved to `kotlin.time.Instant` (not `kotlinx.datetime.Instant`); requires `@file:OptIn(kotlin.time.ExperimentalTime::class)` at call sites.
 - All versions are in `gradle/libs.versions.toml`. Never hardcode versions in `build.gradle.kts`.
+
+### Pinned on purpose — do not "upgrade" these without reading why
+
+- **AGP stays on 8.x.** AGP 9 needs either built-in Kotlin (which KSP does not support) or the
+  deprecated `android.newDsl=false`. Room and Mockative both need KSP. Spike: `chore/agp9-experiment`.
+- **Compose, Lifecycle, Navigation, Coil, OkHttp are one minor behind latest.** Their newest
+  releases declare `minCompileSdk=37`, which requires AGP 9.1+.
+- **Mockative stays on 2.x.** Mockative 3 dropped `@Mock`/`mock()`/`every`/`verify` for runtime
+  bytecode mocking; migrating means rewriting the whole test suite.
+- **ktlint config**: `max_line_length=120` and forced multi-line class signatures are set in
+  `SpotlessUtils.kt`. Without them ktlint 1.8 produces 140-char declarations and collapses
+  constructors.
 
 ---
 
