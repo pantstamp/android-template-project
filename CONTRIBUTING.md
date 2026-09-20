@@ -114,10 +114,18 @@ rather than a build failure, so CI still passes on forks without the secret.
 
 ### Claude PR Review
 
-`.github/workflows/claude-review.yml` posts an automated review on each pull request. It is
-**advisory and not a required check** — it depends on an external API and can fail for reasons that
-have nothing to do with the code. It stands in for the second pair of eyes that a solo repository
-does not otherwise have; treat its findings as suggestions.
+`.github/workflows/claude-review.yml` posts an automated review on each pull request. It stands in
+for the second pair of eyes that a solo repository does not otherwise have; treat its findings as
+suggestions.
+
+It is **advisory and can never block a merge**, in two independent ways: it is not in the required
+status checks, and its step is marked `continue-on-error` so an outage does not put a red cross on
+a pull request whose build is green. The trade-off is that the check reports green even when the
+review did not run — if you expected a review and no comment appeared, look at the workflow run.
+
+It authenticates with `CLAUDE_CODE_OAUTH_TOKEN`, generated with `claude setup-token` and tied to a
+Claude subscription, rather than metered API credits. If that secret is absent the step fails
+quietly and the pull request is unaffected.
 
 ---
 

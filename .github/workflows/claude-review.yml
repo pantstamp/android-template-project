@@ -25,9 +25,17 @@ jobs:
         with:
           fetch-depth: 1
 
+      # Advisory only. This review depends on an external API and must never
+      # gate a pull request whose build is green, so the step is allowed to
+      # fail without failing the job.
       - uses: anthropics/claude-code-action@v1
+        continue-on-error: true
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Authenticates with a Claude Pro/Max subscription rather than
+          # pay-as-you-go API credits. Generate the token locally with
+          # `claude setup-token` and store it as the CLAUDE_CODE_OAUTH_TOKEN
+          # repository secret.
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           classify_inline_comments: true
           prompt: |
             REPO: ${{ github.repository }}
