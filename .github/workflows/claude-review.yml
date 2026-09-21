@@ -1,8 +1,12 @@
 name: Claude PR Review
 
+# Opt-in only. Reviews cost API credits, so nothing runs automatically:
+# comment "@claude-review" on a pull request to request one.
+#
+# There is deliberately no pull_request trigger. It previously ran on
+# [opened, synchronize], which meant a full review of the whole diff on
+# every push to an open branch - paid for, and never asked for.
 on:
-  pull_request:
-    types: [opened, synchronize]
   issue_comment:
     types: [created]
 
@@ -16,26 +20,40 @@ jobs:
   claude-review:
     runs-on: ubuntu-latest
     if: |
-      github.event_name == 'pull_request' ||
-      (github.event_name == 'issue_comment' &&
-       github.event.issue.pull_request &&
-       contains(github.event.comment.body, '@claude'))
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '@claude-review')
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      # Advisory only. This review depends on an external API and must never
-      # gate a pull request whose build is green, so the step is allowed to
-      # fail without failing the job.
+      # Advisory only. This step is allowed to fail visibly: the review is not
+      # one of the required status checks, so a red cross here can never block
+      # a merge. continue-on-error was tried and removed - it reported success
+      # while the review was silently failing, which is worse than the noise.
       - uses: anthropics/claude-code-action@v1
-        continue-on-error: true
         with:
-          # Authenticates with a Claude Pro/Max subscription rather than
-          # pay-as-you-go API credits. Generate the token locally with
-          # `claude setup-token` and store it as the CLAUDE_CODE_OAUTH_TOKEN
-          # repository secret.
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Subscription auth (claude_code_oauth_token) is documented but does
+          # not currently work in this action: tokens from `claude setup-token`
+          # are rejected with a 401 that the action reports as success.
+          # See https://github.com/anthropics/claude-code-action/issues/1614
+          # and https://github.com/anthropics/claude-code-action/issues/727.
+          # Revisit when those are fixed; until then this needs API credits.
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+          # Off by default. This dumps every Claude message, including tool
+          # results that may contain secrets, and this repository's action logs
+          # are public. Set the CLAUDE_DEBUG repository variable to "true" only
+          # while diagnosing a failure, then unset it.
+          show_full_output: ${{ vars.CLAUDE_DEBUG == 'true' }}
+
+          # Named after what it does. The action's default is "@claude", which
+          # reads as a general-purpose conversational mention - misleading for a
+          # workflow that only ever runs one fixed review prompt. Keeping the
+          # default would also collide with any future Claude workflow on
+          # issue_comment, since both would fire on the same phrase.
+          trigger_phrase: "@claude-review"
+
           classify_inline_comments: true
           prompt: |
             REPO: ${{ github.repository }}
