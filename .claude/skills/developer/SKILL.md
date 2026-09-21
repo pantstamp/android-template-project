@@ -146,7 +146,7 @@ that's fine — no need to squash.
 **c) Push and create PR:**
 ```bash
 git push -u origin feature/{feature-name}
-gh pr create --base develop --title "feat: {Feature Title}" --body "$(cat <<'EOF'
+gh pr create --base master --title "feat: {Feature Title}" --body "$(cat <<'EOF'
 ## Summary
 {One paragraph: what this PR implements and why}
 

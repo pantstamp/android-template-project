@@ -2,7 +2,7 @@
 name: pre-pr-checklist
 description: >
   Run a comprehensive pre-PR quality gate before creating a pull request.
-  Verifies build, tests, lint, PLAN.md coverage, and common mistakes —
+  Verifies build, tests, architecture rules, lint, PLAN.md coverage, and common mistakes —
   then reports go/no-go with specific issues to fix.
   Use this skill when the user is about to create a PR, has finished implementing
   a feature, wants to verify everything is ready before pushing, or mentions
@@ -51,7 +51,25 @@ Report: PASS or FAIL with the first compiler error.
 Report: PASS (with count of tests run) or FAIL (with failing test names and
 the assertion that failed).
 
-### Check 3: Lint / Code Style
+### Check 3: Architecture Rules
+
+```bash
+./gradlew :test:konsist:test
+```
+
+Konsist enforces this project's structural conventions — layer dependencies,
+naming suffixes, package placement, and the rule that ViewModels receive use
+cases rather than repositories. These live in their own module, so Check 2
+does not cover them.
+
+A failure here names the violated rule and the offending declaration. Fix the
+code to match the convention rather than relaxing the rule — if a rule genuinely
+needs to change, that is a conversation to have with the user, not a silent edit
+to the Konsist test.
+
+Report: PASS or FAIL with the rule name and the offending class.
+
+### Check 4: Lint / Code Style
 
 ```bash
 ./gradlew spotlessCheck
@@ -65,7 +83,7 @@ If it fails, offer to auto-fix:
 Then re-run `spotlessCheck` to verify the fix worked. Report any remaining issues
 that couldn't be auto-fixed.
 
-### Check 4: PLAN.md Coverage
+### Check 5: PLAN.md Coverage
 
 Read `docs/features/{feature-name}/PLAN.md` and extract:
 - Every file path listed under "Files to create"
@@ -81,7 +99,7 @@ Report:
 - Files in plan that show no changes
 - Files changed that aren't in the plan (flag for review, not necessarily wrong)
 
-### Check 5: SPEC.md Acceptance Criteria
+### Check 6: SPEC.md Acceptance Criteria
 
 Read `docs/features/{feature-name}/SPEC.md` and extract the acceptance criteria.
 For each criterion, assess whether the implementation appears to address it based
@@ -90,7 +108,7 @@ unaddressed rather than making assumptions.
 
 Report: List of criteria with COVERED / NEEDS VERIFICATION / NOT ADDRESSED.
 
-### Check 6: Common Mistakes Scan
+### Check 7: Common Mistakes Scan
 
 Scan the changed files (`git diff --name-only HEAD~1..HEAD` or the full branch diff)
 for common issues:
@@ -105,7 +123,7 @@ for common issues:
 
 Report: List of findings with file path and line number.
 
-### Check 7: Git Status
+### Check 8: Git Status
 
 ```bash
 git status
@@ -130,6 +148,7 @@ Present results as a clear go/no-go report:
 
   ✅ Build           PASS
   ✅ Tests           PASS (14 tests)
+  ✅ Architecture    PASS (Konsist rules)
   ✅ Lint            PASS (auto-fixed 2 issues)
   ✅ Plan coverage   PASS (12/12 files accounted for)
   ⚠️  Spec criteria   3/5 covered, 2 need manual verification
@@ -151,7 +170,7 @@ Present results as a clear go/no-go report:
 Use these result levels:
 - **GO** — all checks pass, ready to create PR
 - **CONDITIONAL GO** — minor issues that should be reviewed but won't block
-- **NO GO** — critical failures (build, tests) that must be fixed first
+- **NO GO** — critical failures (build, tests, architecture rules) that must be fixed first
 
 ## After the report
 
@@ -166,7 +185,7 @@ If the result is CONDITIONAL GO:
 
 If the result is NO GO:
 - Show the errors clearly
-- Offer to help fix the build or test failures
+- Offer to help fix the build, test, or Konsist rule failures
 - After fixes, re-run the full checklist from the top
 
 ## Integration with the developer skill
