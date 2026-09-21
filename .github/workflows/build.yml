@@ -11,6 +11,11 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
+# This job only reads the repository. Declared explicitly so it does not
+# inherit a broader repository-wide default.
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Assemble, test and verify
@@ -33,22 +38,31 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       # The app reads TMDB_API_KEY from local.properties. A missing key yields
-      # an empty BuildConfig field rather than a build failure, so CI supplies a
-      # placeholder and does not depend on the secret being configured.
+      # an empty BuildConfig field rather than a build failure, so this writes
+      # the secret through as-is: an empty value when it is not configured. The
+      # build still succeeds; only requests against the live API would fail.
       - name: Provide TMDB API key
         run: echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> local.properties
 
+      # Steps are ordered cheapest-first so the fastest signal fails the run
+      # earliest. Formatting needs no compilation; Konsist parses sources and
+      # builds only its own module; `test` compiles every module; assembleDebug
+      # additionally processes resources, dexes and packages.
       - name: Check formatting
         run: ./gradlew spotlessCheck
 
-      - name: Assemble debug
-        run: ./gradlew assembleDebug
+      # Runs before `test` on purpose. The unqualified `test` task below fans
+      # out to every module including :test:konsist, so running architecture
+      # rules here is what makes a violation report against this step rather
+      # than surfacing under "Unit tests".
+      - name: Architecture tests
+        run: ./gradlew :test:konsist:test
 
       - name: Unit tests
         run: ./gradlew test
 
-      - name: Architecture tests
-        run: ./gradlew :test:konsist:test
+      - name: Assemble debug
+        run: ./gradlew assembleDebug
 
       - name: Android Lint
         run: ./gradlew lint
