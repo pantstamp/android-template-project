@@ -114,18 +114,45 @@ rather than a build failure, so CI still passes on forks without the secret.
 
 ### Claude PR Review
 
-`.github/workflows/claude-review.yml` posts an automated review on each pull request. It stands in
-for the second pair of eyes that a solo repository does not otherwise have; treat its findings as
-suggestions.
+`.github/workflows/claude-review.yml` runs an AI code review **on request only**. Comment this on
+any open pull request:
 
-It is **advisory and can never block a merge**, in two independent ways: it is not in the required
-status checks, and its step is marked `continue-on-error` so an outage does not put a red cross on
-a pull request whose build is green. The trade-off is that the check reports green even when the
-review did not run — if you expected a review and no comment appeared, look at the workflow run.
+```
+@claude-review
+```
 
-It authenticates with `CLAUDE_CODE_OAUTH_TOKEN`, generated with `claude setup-token` and tied to a
-Claude subscription, rather than metered API credits. If that secret is absent the step fails
-quietly and the pull request is unaffected.
+It stands in for the second pair of eyes that a solo repository does not otherwise have; treat its
+findings as suggestions.
+
+Nothing runs automatically, because each review costs API credits. The workflow previously
+triggered on `pull_request: [opened, synchronize]`, which meant a paid review of the whole diff on
+every push to an open branch. There is no `pull_request` trigger any more.
+
+Only users with write access can trigger it — the action checks this itself, so a comment from a
+stranger on this public repository cannot spend credits.
+
+The trigger phrase is `@claude-review` rather than the action's default `@claude`, so that it names
+what it does and leaves `@claude` free for a future conversational workflow. The review itself is a
+fixed prompt in the workflow file; text you add after the trigger phrase is not a reliable way to
+steer it.
+
+It is **advisory and can never block a merge**: it is not one of the required status checks, so a
+red cross beside it has no effect on the merge button. It is allowed to fail visibly on purpose.
+`continue-on-error` was tried and removed — it reported success while the review was silently
+failing, and a green check that means nothing is worse than an honest red one.
+
+It authenticates with `ANTHROPIC_API_KEY`, which bills API credits separately from a Claude
+subscription. Subscription auth via `claude_code_oauth_token` is documented but does not currently
+work in this action: tokens minted by `claude setup-token` are rejected with a 401 that the action
+reports as a success. See
+[issue #1614](https://github.com/anthropics/claude-code-action/issues/1614) and
+[issue #727](https://github.com/anthropics/claude-code-action/issues/727). Switch back to
+subscription auth once those are resolved.
+
+When the review fails and the reason is not obvious, set the `CLAUDE_DEBUG` repository variable to
+`true`, re-run, then unset it. It turns on the action's full JSON output, which is the only way to
+see the underlying API error. Leave it off otherwise: it prints every Claude message, including
+tool results that may contain secrets, and this repository's action logs are public.
 
 ---
 
