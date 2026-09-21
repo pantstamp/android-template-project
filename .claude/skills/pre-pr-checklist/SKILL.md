@@ -2,7 +2,8 @@
 name: pre-pr-checklist
 description: >
   Run a comprehensive pre-PR quality gate before creating a pull request.
-  Verifies build, tests, architecture rules, lint, PLAN.md coverage, and common mistakes —
+  Verifies build, tests, architecture rules, formatting, Android Lint, PLAN.md coverage,
+  and common mistakes —
   then reports go/no-go with specific issues to fix.
   Use this skill when the user is about to create a PR, has finished implementing
   a feature, wants to verify everything is ready before pushing, or mentions
@@ -69,7 +70,7 @@ to the Konsist test.
 
 Report: PASS or FAIL with the rule name and the offending class.
 
-### Check 4: Lint / Code Style
+### Check 4: Code Formatting
 
 ```bash
 ./gradlew spotlessCheck
@@ -83,7 +84,28 @@ If it fails, offer to auto-fix:
 Then re-run `spotlessCheck` to verify the fix worked. Report any remaining issues
 that couldn't be auto-fixed.
 
-### Check 5: PLAN.md Coverage
+### Check 5: Android Lint
+
+```bash
+./gradlew lint
+```
+
+This is the Android toolchain's own static analysis — unused resources, API
+level misuse, accessibility problems, manifest issues. It is distinct from
+Check 4: Spotless only reformats code, it never inspects behaviour.
+
+The project sets `abortOnError = true` and `warningsAsErrors = true`, so a
+single warning fails the build. CI runs this task on every PR, which means an
+unaddressed warning blocks the merge regardless of whether it was caught here.
+
+On failure, read the HTML report the task prints the path to — it names the
+rule, the file and the line. Fix the underlying issue. Do not add a baseline
+file or a lint suppression to make the check pass without asking the user
+first; a suppression is a decision about the project's standards, not a fix.
+
+Report: PASS or FAIL with the rule id, file and line for each violation.
+
+### Check 6: PLAN.md Coverage
 
 Read `docs/features/{feature-name}/PLAN.md` and extract:
 - Every file path listed under "Files to create"
@@ -99,7 +121,7 @@ Report:
 - Files in plan that show no changes
 - Files changed that aren't in the plan (flag for review, not necessarily wrong)
 
-### Check 6: SPEC.md Acceptance Criteria
+### Check 7: SPEC.md Acceptance Criteria
 
 Read `docs/features/{feature-name}/SPEC.md` and extract the acceptance criteria.
 For each criterion, assess whether the implementation appears to address it based
@@ -108,7 +130,7 @@ unaddressed rather than making assumptions.
 
 Report: List of criteria with COVERED / NEEDS VERIFICATION / NOT ADDRESSED.
 
-### Check 7: Common Mistakes Scan
+### Check 8: Common Mistakes Scan
 
 Scan the changed files (`git diff --name-only HEAD~1..HEAD` or the full branch diff)
 for common issues:
@@ -123,7 +145,7 @@ for common issues:
 
 Report: List of findings with file path and line number.
 
-### Check 8: Git Status
+### Check 9: Git Status
 
 ```bash
 git status
@@ -149,7 +171,8 @@ Present results as a clear go/no-go report:
   ✅ Build           PASS
   ✅ Tests           PASS (14 tests)
   ✅ Architecture    PASS (Konsist rules)
-  ✅ Lint            PASS (auto-fixed 2 issues)
+  ✅ Formatting      PASS (auto-fixed 2 issues)
+  ✅ Android Lint    PASS
   ✅ Plan coverage   PASS (12/12 files accounted for)
   ⚠️  Spec criteria   3/5 covered, 2 need manual verification
   ⚠️  Code scan       1 TODO found in WatchedMoviesViewModel.kt:42
@@ -170,7 +193,7 @@ Present results as a clear go/no-go report:
 Use these result levels:
 - **GO** — all checks pass, ready to create PR
 - **CONDITIONAL GO** — minor issues that should be reviewed but won't block
-- **NO GO** — critical failures (build, tests, architecture rules) that must be fixed first
+- **NO GO** — critical failures (build, tests, architecture rules, lint) that must be fixed first
 
 ## After the report
 
@@ -180,12 +203,12 @@ If the result is GO:
 
 If the result is CONDITIONAL GO:
 - List the specific items to address
-- Offer to fix what can be fixed automatically (TODOs, lint issues)
+- Offer to fix what can be fixed automatically (TODOs, formatting issues)
 - After fixes, re-run only the failed checks to confirm
 
 If the result is NO GO:
 - Show the errors clearly
-- Offer to help fix the build, test, or Konsist rule failures
+- Offer to help fix the build, test, Konsist rule, or lint failures
 - After fixes, re-run the full checklist from the top
 
 ## Integration with the developer skill
