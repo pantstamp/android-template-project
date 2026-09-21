@@ -76,7 +76,7 @@ fun WatchedMovieListScreen(
                     Text(
                         text = stringResource(id = R.string.watched_empty_state),
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        modifier = Modifier.padding(horizontal = 16.dp),
                     )
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxSize().align(Alignment.TopStart)) {
