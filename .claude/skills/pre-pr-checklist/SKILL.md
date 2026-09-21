@@ -54,15 +54,15 @@ the assertion that failed).
 ### Check 3: Lint / Code Style
 
 ```bash
-./gradlew ktlintCheck
+./gradlew spotlessCheck
 ```
 
 If it fails, offer to auto-fix:
 ```bash
-./gradlew ktlintFormat
+./gradlew spotlessApply
 ```
 
-Then re-run `ktlintCheck` to verify the fix worked. Report any remaining issues
+Then re-run `spotlessCheck` to verify the fix worked. Report any remaining issues
 that couldn't be auto-fixed.
 
 ### Check 4: PLAN.md Coverage

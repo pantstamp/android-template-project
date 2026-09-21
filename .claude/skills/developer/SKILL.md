@@ -123,7 +123,7 @@ Once the pre-PR checklist passes (or the user skips it):
 ```bash
 ./gradlew assembleDebug
 ./gradlew testDebugUnitTest
-./gradlew ktlintFormat
+./gradlew spotlessApply
 ```
 
 **b) Commit:**
