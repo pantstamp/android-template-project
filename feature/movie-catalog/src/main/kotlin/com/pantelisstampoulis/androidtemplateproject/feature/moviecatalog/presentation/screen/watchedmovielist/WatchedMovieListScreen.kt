@@ -22,10 +22,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -64,13 +66,18 @@ fun WatchedMovieListScreen(
             state.errorRes != null -> {
                 Text(
                     text = stringResource(id = state.errorRes),
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
             }
 
             state.data != null -> {
                 if (state.data.isEmpty()) {
-                    Text(text = stringResource(id = R.string.watched_empty_state))
+                    Text(
+                        text = stringResource(id = R.string.watched_empty_state),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxSize().align(Alignment.TopStart)) {
                         items(state.data, key = { it.movieId }) { movie ->
