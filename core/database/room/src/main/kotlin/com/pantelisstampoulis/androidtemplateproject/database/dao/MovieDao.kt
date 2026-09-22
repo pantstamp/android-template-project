@@ -25,7 +25,7 @@ interface MovieDao {
         WHERE id = :movieId
     """,
     )
-    fun getMovieEntity(movieId: Int): MovieEntity?
+    suspend fun getMovieEntity(movieId: Int): MovieEntity?
 
     @Query(value = "SELECT * FROM movies")
     fun getMovieEntities(): Flow<List<MovieEntity>>

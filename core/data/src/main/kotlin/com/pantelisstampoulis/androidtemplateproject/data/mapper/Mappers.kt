@@ -6,6 +6,6 @@ import com.pantelisstampoulis.androidtemplateproject.data.mapper.movie.MovieDoma
 internal class Mappers(
     val movieDataMapper: MovieDataMapper,
     val movieDomainMapper: MovieDomainMapper,
-    val errorDomainMapper: ErrorDomainMapper,
+    val errorClassifier: ErrorClassifier,
     val watchedMovieDomainMapper: WatchedMovieDomainMapper,
 )

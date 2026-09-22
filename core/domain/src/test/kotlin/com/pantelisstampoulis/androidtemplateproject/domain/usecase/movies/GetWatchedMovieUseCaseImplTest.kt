@@ -7,7 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.pantelisstampoulis.androidtemplateproject.domain.ResultState
 import com.pantelisstampoulis.androidtemplateproject.domain.repository.MoviesRepository
 import com.pantelisstampoulis.androidtemplateproject.logging.Logger
-import com.pantelisstampoulis.androidtemplateproject.model.error.ErrorModel
+import com.pantelisstampoulis.androidtemplateproject.model.error.DomainError
 import com.pantelisstampoulis.androidtemplateproject.test.doubles.model.DomainTestDoubleFactory
 import io.mockative.Mock
 import io.mockative.every
@@ -57,16 +57,32 @@ class GetWatchedMovieUseCaseImplTest {
     }
 
     @Test
-    fun shouldEmitLoadingThenErrorWhenWatchedMovieNotFound() = runTest {
+    fun shouldEmitLoadingThenSuccessWithNullWhenWatchedMovieNotFound() = runTest {
         val movieId = 42
-        every { repository.getWatchedMovie(movieId) }
-            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+        every { repository.getWatchedMovie(movieId) }.returns(flowOf(ResultState.Success(null)))
 
         useCase(movieId).test {
             assertThat(awaitItem()).isEqualTo(ResultState.Loading)
             val result = awaitItem()
+            // Not rated yet is a normal outcome, so it arrives as Success(null).
+            assertThat(result).isInstanceOf(ResultState.Success::class.java)
+            assertThat((result as ResultState.Success).data).isNull()
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun shouldEmitLoadingThenErrorWhenRepositoryFails() = runTest {
+        val movieId = 42
+        every { repository.getWatchedMovie(movieId) }
+            .returns(flowOf(ResultState.Error(DomainError.ServerError("db unavailable"))))
+
+        useCase(movieId).test {
+            assertThat(awaitItem()).isEqualTo(ResultState.Loading)
+            val result = awaitItem()
+            // The error channel is now reserved for real failures.
             assertThat(result).isInstanceOf(ResultState.Error::class.java)
-            assertThat((result as ResultState.Error).error).isInstanceOf(ErrorModel.NotFound::class.java)
+            assertThat((result as ResultState.Error).error).isInstanceOf(DomainError.ServerError::class.java)
             awaitComplete()
         }
     }

@@ -11,6 +11,7 @@ import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.SaveW
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.SaveWatchedMovieUseCase
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.mapper.MovieUiMapper
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.MovieUiModel
+import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.MviViewModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.UiState
 import kotlinx.coroutines.launch
@@ -37,6 +38,7 @@ class MovieDetailsViewModel(
                                     this.copy(
                                         isLoading = false,
                                         errorMessage = null,
+                                        movie = it,
                                         data = mapper.fromDomainToUi(it),
                                     )
                                 }
@@ -55,10 +57,11 @@ class MovieDetailsViewModel(
                     getWatchedMovieUseCase(input = event.movieId).collect { resultState ->
                         resultState
                             .onSuccess { watchedMovie ->
-                                setState { copy(userRating = watchedMovie.userRating) }
+                                // null = not rated yet, which is a normal outcome
+                                setState { copy(userRating = watchedMovie?.userRating) }
                             }
                             .onError {
-                                // NotFound = not rated yet, leave userRating as null
+                                // a real failure; the rating simply stays unset
                             }
                     }
                 }
@@ -72,7 +75,7 @@ class MovieDetailsViewModel(
                     ).collect { resultState ->
                         resultState
                             .onSuccess {
-                                val movie = viewState.value.data
+                                val movie = viewState.value.movie
                                 if (movie == null) {
                                     setState { copy(isRatingInProgress = false) }
                                     setEffect { MovieDetailsSideEffect.RatingError }
@@ -90,7 +93,7 @@ class MovieDetailsViewModel(
         }
     }
 
-    private suspend fun saveRating(movie: MovieUiModel, rating: Int) {
+    private suspend fun saveRating(movie: Movie, rating: Int) {
         saveWatchedMovieUseCase.invoke(
             SaveWatchedMovieInput(
                 movieId = movie.id,
@@ -98,7 +101,7 @@ class MovieDetailsViewModel(
                 posterUrl = movie.posterPath,
                 overview = movie.overview,
                 publicRating = movie.voteAverage,
-                releaseDate = movie.releaseYear,
+                releaseDate = movie.releaseDate,
                 userRating = rating,
             ),
         ).collect { saveResult ->
@@ -118,6 +121,12 @@ class MovieDetailsViewModel(
 data class MovieDetailsUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
+    /**
+     * The domain movie, kept so that domain operations use domain data. [data] is the same
+     * movie formatted for display, and its [MovieUiModel.releaseYear] is a truncated year
+     * that must never be persisted as a release date.
+     */
+    val movie: Movie? = null,
     val data: MovieUiModel? = null,
     val userRating: Int? = null,
     val isRatingInProgress: Boolean = false,

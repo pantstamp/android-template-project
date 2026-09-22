@@ -6,6 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.pantelisstampoulis.androidtemplateproject.database.mapper.Mappers
 import com.pantelisstampoulis.androidtemplateproject.database.mapper.MovieDbMapper
+import com.pantelisstampoulis.androidtemplateproject.database.mapper.WatchedMovieDbMapper
 import com.pantelisstampoulis.androidtemplateproject.test.doubles.database.DatabaseTestDoubleFactory
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.test.runTest
@@ -28,7 +29,10 @@ class RoomDataSourceTest {
             AppDatabase::class.java,
         ).allowMainThreadQueries().build()
 
-        mappers = Mappers(MovieDbMapper())
+        mappers = Mappers(
+            movieDbMapper = MovieDbMapper(),
+            watchedMovieDbMapper = WatchedMovieDbMapper(),
+        )
 
         roomDataSource = RoomDataSource(database, mappers)
     }

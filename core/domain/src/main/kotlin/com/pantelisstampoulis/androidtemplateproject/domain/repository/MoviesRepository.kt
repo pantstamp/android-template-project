@@ -25,5 +25,9 @@ interface MoviesRepository {
 
     fun getWatchedMovies(): Flow<ResultState<List<WatchedMovie>>>
 
-    fun getWatchedMovie(movieId: Int): Flow<ResultState<WatchedMovie>>
+    /**
+     * Emits the watched movie for [movieId], or `Success(null)` when the movie has not been
+     * rated. Absence is a normal outcome here, not an error.
+     */
+    fun getWatchedMovie(movieId: Int): Flow<ResultState<WatchedMovie?>>
 }
