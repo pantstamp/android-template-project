@@ -146,9 +146,17 @@ All mappers implement typed interfaces from `:architecture:mapper` (Konsist-enfo
 - `ApiToDomainMapper<ApiModel, DomainModel>` → `fromApiToDomain()`
 - `DbToDomainMapper<DbModel, DomainModel>` → `fromDbToDomain()`
 - `ApiToDbMapper<ApiModel, DbModel>` → `fromApiToDb()`
-- `DbToEntityMapper<DbModel, Entity>` → `fromDbToEntity()`
-- `EntityToDbMapper<Entity, DbModel>` → `fromEntityToDb()`
+- `DbModelToEntityMapper<DbModel, Entity>` → `fromDbModelToEntity()`
+- `EntityToDbModelMapper<Entity, DbModel>` → `fromEntityToDbModel()`
 - `DomainToUiMapper<DomainModel, UiModel>` → `fromDomainToUi()`
+
+**`DbModel` and `Entity` are not the same layer.** `DbModel` lives in `:core:database:api`
+and is database-agnostic — `:core:database:noop` implements against it too. `Entity` lives in
+`:core:database:room` and is Room's `@Entity`, i.e. the storage representation. So
+`fromEntityToDbModel()` converts *away* from storage toward the shared abstraction, and
+`fromDbModelToEntity()` goes the other way. In these two names `DbModel` is a type, not a
+destination — which is why they are spelled out rather than shortened to `Db` as the
+cross-layer mappers above do.
 
 The `*Mapper` name is a promise that the class maps one model to another and declares
 that in its type. If a class does something else, give it a different name rather than

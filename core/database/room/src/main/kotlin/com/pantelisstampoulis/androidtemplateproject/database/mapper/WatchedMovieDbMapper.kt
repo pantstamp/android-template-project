@@ -1,15 +1,15 @@
 package com.pantelisstampoulis.androidtemplateproject.database.mapper
 
-import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.DbToEntityMapper
-import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.EntityToDbMapper
+import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.DbModelToEntityMapper
+import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.EntityToDbModelMapper
 import com.pantelisstampoulis.androidtemplateproject.database.model.WatchedMovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.database.model.WatchedMovieEntity
 
 internal class WatchedMovieDbMapper :
-    DbToEntityMapper<WatchedMovieDbModel, WatchedMovieEntity>,
-    EntityToDbMapper<WatchedMovieEntity, WatchedMovieDbModel> {
+    DbModelToEntityMapper<WatchedMovieDbModel, WatchedMovieEntity>,
+    EntityToDbModelMapper<WatchedMovieEntity, WatchedMovieDbModel> {
 
-    override fun fromDbToEntity(dbModel: WatchedMovieDbModel): WatchedMovieEntity = WatchedMovieEntity(
+    override fun fromDbModelToEntity(dbModel: WatchedMovieDbModel): WatchedMovieEntity = WatchedMovieEntity(
         movieId = dbModel.movieId,
         title = dbModel.title,
         posterUrl = dbModel.posterUrl,
@@ -20,7 +20,7 @@ internal class WatchedMovieDbMapper :
         ratedAt = dbModel.ratedAt,
     )
 
-    override fun fromEntityToDb(entity: WatchedMovieEntity): WatchedMovieDbModel = WatchedMovieDbModel(
+    override fun fromEntityToDbModel(entity: WatchedMovieEntity): WatchedMovieDbModel = WatchedMovieDbModel(
         movieId = entity.movieId,
         title = entity.title,
         posterUrl = entity.posterUrl,

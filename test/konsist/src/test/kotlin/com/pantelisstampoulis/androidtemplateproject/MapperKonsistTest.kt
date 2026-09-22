@@ -54,9 +54,9 @@ class MapperKonsistTest {
             "ApiToDomainMapper",
             "ApiToDbMapper",
             "DbToDomainMapper",
-            "DbToEntityMapper",
+            "DbModelToEntityMapper",
             "DomainToUiMapper",
-            "EntityToDbMapper",
+            "EntityToDbModelMapper",
         )
     }
 }

@@ -1,15 +1,15 @@
 package com.pantelisstampoulis.androidtemplateproject.database.mapper
 
-import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.DbToEntityMapper
-import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.EntityToDbMapper
+import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.DbModelToEntityMapper
+import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.EntityToDbModelMapper
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieEntity
 
 internal class MovieDbMapper :
-    DbToEntityMapper<MovieDbModel, MovieEntity>,
-    EntityToDbMapper<MovieEntity, MovieDbModel> {
+    DbModelToEntityMapper<MovieDbModel, MovieEntity>,
+    EntityToDbModelMapper<MovieEntity, MovieDbModel> {
 
-    override fun fromDbToEntity(dbModel: MovieDbModel): MovieEntity = MovieEntity(
+    override fun fromDbModelToEntity(dbModel: MovieDbModel): MovieEntity = MovieEntity(
         id = dbModel.id,
         adult = dbModel.adult,
         backdropPath = dbModel.backdropPath,
@@ -26,7 +26,7 @@ internal class MovieDbMapper :
         voteCount = dbModel.voteCount,
     )
 
-    override fun fromEntityToDb(entity: MovieEntity): MovieDbModel = MovieDbModel(
+    override fun fromEntityToDbModel(entity: MovieEntity): MovieDbModel = MovieDbModel(
         id = entity.id,
         adult = entity.adult,
         backdropPath = entity.backdropPath,
