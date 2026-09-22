@@ -15,6 +15,7 @@ import com.pantelisstampoulis.androidtemplateproject.test.doubles.model.DomainTe
 import io.mockative.Mock
 import io.mockative.any
 import io.mockative.every
+import io.mockative.matches
 import io.mockative.mock
 import io.mockative.verify
 import kotlinx.coroutines.Dispatchers
@@ -82,8 +83,7 @@ class MovieDetailsViewModelTest : KoinTest {
     fun shouldEmitLoadingStateWhenFetchingMovieDetailsStarts() = runTest {
         every { getMovieUseCase(any()) }
             .returns(flow { emit(ResultState.Loading) })
-        every { getWatchedMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
+        every { getWatchedMovieUseCase(any()) }.returns(flowOf(ResultState.Success(null)))
 
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
 
@@ -106,8 +106,7 @@ class MovieDetailsViewModelTest : KoinTest {
 
         every { getMovieUseCase(any()) }
             .returns(flowOf(ResultState.Success(domainMovie)))
-        every { getWatchedMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
+        every { getWatchedMovieUseCase(any()) }.returns(flowOf(ResultState.Success(null)))
 
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
 
@@ -131,8 +130,7 @@ class MovieDetailsViewModelTest : KoinTest {
 
         every { getMovieUseCase(any()) }
             .returns(flowOf(ResultState.Error(errorState)))
-        every { getWatchedMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
+        every { getWatchedMovieUseCase(any()) }.returns(flowOf(ResultState.Success(null)))
 
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
 
@@ -173,8 +171,7 @@ class MovieDetailsViewModelTest : KoinTest {
     fun shouldLeaveUserRatingNullWhenMovieNotRated() = runTest {
         every { getMovieUseCase(any()) }
             .returns(flowOf(ResultState.Error(DomainError.NotFound())))
-        every { getWatchedMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
+        every { getWatchedMovieUseCase(any()) }.returns(flowOf(ResultState.Success(null)))
 
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
 
@@ -194,8 +191,7 @@ class MovieDetailsViewModelTest : KoinTest {
         // Load movie into state first
         every { getMovieUseCase(any()) }
             .returns(flowOf(ResultState.Success(domainMovie)))
-        every { getWatchedMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
+        every { getWatchedMovieUseCase(any()) }.returns(flowOf(ResultState.Success(null)))
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = domainMovie.id))
         advanceUntilIdle()
 
@@ -225,11 +221,35 @@ class MovieDetailsViewModelTest : KoinTest {
     }
 
     @Test
+    fun shouldPersistFullReleaseDateNotTruncatedYearWhenRating() = runTest {
+        // Regression test for a PR #14 review finding: the ViewModel read releaseDate off the
+        // UI model, whose releaseYear is the date truncated to 4 characters, and persisted
+        // "2014" into a column holding a full release date. It read back correctly only
+        // because the UI mapper truncates again on the way out.
+        val fullReleaseDate = "2014-03-07"
+        val domainMovie = DomainTestDoubleFactory.provideMovieModel().copy(releaseDate = fullReleaseDate)
+
+        every { getMovieUseCase(any()) }.returns(flowOf(ResultState.Success(domainMovie)))
+        every { getWatchedMovieUseCase(any()) }.returns(flowOf(ResultState.Success(null)))
+        viewModel.setEvent(MovieDetailsEvent.Init(movieId = domainMovie.id))
+        advanceUntilIdle()
+
+        every { rateMovieUseCase(any()) }.returns(flowOf(ResultState.Success(Unit)))
+        // Stubbed for the full date only: passing the truncated year leaves the call unstubbed.
+        every { saveWatchedMovieUseCase(matches { it.releaseDate == fullReleaseDate }) }
+            .returns(flowOf(ResultState.Success(Unit)))
+
+        viewModel.setEvent(MovieDetailsEvent.RateMovie(movieId = domainMovie.id, rating = 7f))
+        advanceUntilIdle()
+
+        verify { saveWatchedMovieUseCase(matches { it.releaseDate == fullReleaseDate }) }.wasInvoked()
+    }
+
+    @Test
     fun shouldEmitErrorSnackbarWhenNetworkRatingFails() = runTest {
         every { getMovieUseCase(any()) }
             .returns(flowOf(ResultState.Error(DomainError.NotFound())))
-        every { getWatchedMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
+        every { getWatchedMovieUseCase(any()) }.returns(flowOf(ResultState.Success(null)))
 
         every { rateMovieUseCase(any()) }
             .returns(flowOf(ResultState.Error(DomainError.ServerError("Network error"))))
@@ -260,8 +280,7 @@ class MovieDetailsViewModelTest : KoinTest {
 
         every { getMovieUseCase(any()) }
             .returns(flowOf(ResultState.Success(domainMovie)))
-        every { getWatchedMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
+        every { getWatchedMovieUseCase(any()) }.returns(flowOf(ResultState.Success(null)))
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = domainMovie.id))
         advanceUntilIdle()
 

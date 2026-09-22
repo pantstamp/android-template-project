@@ -272,14 +272,15 @@ class MoviesRepositoryImplTest : KoinTest {
     }
 
     @Test
-    fun shouldReturnErrorWhenWatchedMovieNotFound() = runTest {
+    fun shouldReturnSuccessWithNullWhenWatchedMovieNotFound() = runTest {
         val movieId = 42
         coEvery { databaseDataSource.getWatchedMovie(movieId) }.returns(null)
 
         repository.getWatchedMovie(movieId).test {
             val result = awaitItem()
-            assertThat(result).isInstanceOf(ResultState.Error::class.java)
-            assertThat((result as ResultState.Error).error).isInstanceOf(DomainError.NotFound::class.java)
+            // Not rated yet is a normal outcome, so it is Success(null) rather than an error.
+            assertThat(result).isInstanceOf(ResultState.Success::class.java)
+            assertThat((result as ResultState.Success).data).isNull()
             coVerify { databaseDataSource.getWatchedMovie(movieId) }.wasInvoked(exactly = once)
             awaitComplete()
         }

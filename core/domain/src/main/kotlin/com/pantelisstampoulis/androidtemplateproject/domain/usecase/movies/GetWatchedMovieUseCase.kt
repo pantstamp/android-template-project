@@ -9,7 +9,7 @@ import com.pantelisstampoulis.androidtemplateproject.model.movies.WatchedMovie
 import kotlinx.coroutines.flow.Flow
 import kotlin.coroutines.CoroutineContext
 
-interface GetWatchedMovieUseCase : UseCase<Int, WatchedMovie>
+interface GetWatchedMovieUseCase : UseCase<Int, WatchedMovie?>
 
 internal class GetWatchedMovieUseCaseImpl(
     private val moviesRepository: MoviesRepository,
@@ -17,6 +17,6 @@ internal class GetWatchedMovieUseCaseImpl(
     private val logger: Logger,
 ) : GetWatchedMovieUseCase {
 
-    override operator fun invoke(input: Int): Flow<ResultState<WatchedMovie>> = moviesRepository.getWatchedMovie(input)
+    override operator fun invoke(input: Int): Flow<ResultState<WatchedMovie?>> = moviesRepository.getWatchedMovie(input)
         .onStartCatch(coroutineContext = coroutineContext, logger = logger)
 }

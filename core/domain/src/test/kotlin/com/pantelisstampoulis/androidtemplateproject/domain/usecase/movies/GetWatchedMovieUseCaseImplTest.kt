@@ -57,16 +57,32 @@ class GetWatchedMovieUseCaseImplTest {
     }
 
     @Test
-    fun shouldEmitLoadingThenErrorWhenWatchedMovieNotFound() = runTest {
+    fun shouldEmitLoadingThenSuccessWithNullWhenWatchedMovieNotFound() = runTest {
         val movieId = 42
-        every { repository.getWatchedMovie(movieId) }
-            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
+        every { repository.getWatchedMovie(movieId) }.returns(flowOf(ResultState.Success(null)))
 
         useCase(movieId).test {
             assertThat(awaitItem()).isEqualTo(ResultState.Loading)
             val result = awaitItem()
+            // Not rated yet is a normal outcome, so it arrives as Success(null).
+            assertThat(result).isInstanceOf(ResultState.Success::class.java)
+            assertThat((result as ResultState.Success).data).isNull()
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun shouldEmitLoadingThenErrorWhenRepositoryFails() = runTest {
+        val movieId = 42
+        every { repository.getWatchedMovie(movieId) }
+            .returns(flowOf(ResultState.Error(DomainError.ServerError("db unavailable"))))
+
+        useCase(movieId).test {
+            assertThat(awaitItem()).isEqualTo(ResultState.Loading)
+            val result = awaitItem()
+            // The error channel is now reserved for real failures.
             assertThat(result).isInstanceOf(ResultState.Error::class.java)
-            assertThat((result as ResultState.Error).error).isInstanceOf(DomainError.NotFound::class.java)
+            assertThat((result as ResultState.Error).error).isInstanceOf(DomainError.ServerError::class.java)
             awaitComplete()
         }
     }

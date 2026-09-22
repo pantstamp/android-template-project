@@ -100,11 +100,9 @@ internal class MoviesRepositoryImpl(
         )
     }
 
-    override fun getWatchedMovie(movieId: Int): Flow<ResultState<WatchedMovie>> = flow {
+    override fun getWatchedMovie(movieId: Int): Flow<ResultState<WatchedMovie?>> = flow {
         val dbModel = databaseDataSource.getWatchedMovie(movieId)
-        dbModel?.let {
-            emit(ResultState.Success(mappers.watchedMovieDomainMapper.fromDbToDomain(it)))
-        } ?: emit(ResultState.Error(DomainError.NotFound()))
+        emit(ResultState.Success(dbModel?.let(mappers.watchedMovieDomainMapper::fromDbToDomain)))
     }
 
     private suspend fun FlowCollector<ResultState<List<Movie>>>.fetchMoviesFromNetwork() {
