@@ -7,25 +7,28 @@ import com.lemonappdev.konsist.api.verify.assertTrue
 import kotlin.test.Test
 
 /**
- * CLAUDE.md states: "All mappers implement typed interfaces from `:architecture:mapper`".
- *
- * That rule lived only in prose until this test existed, which is why [PR #14][pr] merged a
- * mapper that violated it — the review caught it, nothing enforced it, and it survived the
- * merge.
+ * CLAUDE.md states that mappers declare what they map in their type. That rule lived only in
+ * prose until this test existed, which is why [PR #14][pr] merged a mapper that violated it —
+ * the review caught it, nothing enforced it, and it survived the merge.
  *
  * The rule takes the name at its word: a class called `*Mapper` maps one model to another and
- * says so in its type. Anything that does a different job should carry a different name rather
- * than an exemption here — `ErrorClassifier` is the worked example, since it turns a
- * [NetworkResult][nr] envelope into an error category rather than mapping model to model.
+ * says so by implementing a mapper interface. Anything doing a different job should carry a
+ * different name rather than an exemption here — `ErrorClassifier` is the worked example,
+ * since it turns a `NetworkResult` envelope into an error category rather than mapping model
+ * to model.
+ *
+ * The interface is matched by its `Mapper` suffix rather than against a fixed list, because a
+ * mapper interface does not have to live in `:architecture:mapper`. That module holds only the
+ * boundaries that outlive an implementation choice; a mapping between a `DbModel` and a
+ * library-specific type belongs to the module implementing it.
  *
  * [pr]: https://github.com/pantstamp/android-template-project/pull/14
- * [nr]: com.pantelisstampoulis.androidtemplateproject.network.NetworkResult
  */
 @Suppress("ConstPropertyName")
 class MapperKonsistTest {
 
     @Test
-    fun `Classes named '*Mapper' should implement a mapper interface from 'architecture mapper'`() {
+    fun `Classes named '*Mapper' should implement a mapper interface`() {
         Konsist
             .scopeFromProduction()
             .classes()
@@ -37,7 +40,7 @@ class MapperKonsistTest {
                 // part before '<' rather than the whole string.
                 val parents = declaration.parents().map { it.name.substringBefore(delimiter = '<') }
                 println("Class: ${declaration.name}, parents: $parents.")
-                parents.any { parentName -> parentName in MapperInterfaces }
+                parents.any { parentName -> parentName.endsWith(MapperSuffix) }
             }
     }
 
@@ -49,14 +52,5 @@ class MapperKonsistTest {
          * itself, so the rule does not apply to it.
          */
         private val MapperHolders = arrayOf("Mappers")
-
-        private val MapperInterfaces = setOf(
-            "ApiToDomainMapper",
-            "ApiToDbMapper",
-            "DbToDomainMapper",
-            "DbModelToEntityMapper",
-            "DomainToUiMapper",
-            "EntityToDbModelMapper",
-        )
     }
 }

@@ -142,21 +142,29 @@ toolchain does not catch.
   and resolve them in the composable.
 
 ### Mappers
-All mappers implement typed interfaces from `:architecture:mapper` (Konsist-enforced):
+Every mapper declares what it maps by implementing a mapper interface (Konsist-enforced: a
+class named `*Mapper` must implement an interface whose name ends in `Mapper`).
+
+`:architecture:mapper` holds only the boundaries that outlive an implementation choice:
 - `ApiToDomainMapper<ApiModel, DomainModel>` → `fromApiToDomain()`
 - `DbToDomainMapper<DbModel, DomainModel>` → `fromDbToDomain()`
 - `ApiToDbMapper<ApiModel, DbModel>` → `fromApiToDb()`
-- `DbModelToEntityMapper<DbModel, Entity>` → `fromDbModelToEntity()`
-- `EntityToDbModelMapper<Entity, DbModel>` → `fromEntityToDbModel()`
 - `DomainToUiMapper<DomainModel, UiModel>` → `fromDomainToUi()`
 
-**`DbModel` and `Entity` are not the same layer.** `DbModel` lives in `:core:database:api`
-and is database-agnostic — `:core:database:noop` implements against it too. `Entity` lives in
-`:core:database:room` and is Room's `@Entity`, i.e. the storage representation. So
-`fromEntityToDbModel()` converts *away* from storage toward the shared abstraction, and
-`fromDbModelToEntity()` goes the other way. In these two names `DbModel` is a type, not a
-destination — which is why they are spelled out rather than shortened to `Db` as the
-cross-layer mappers above do.
+Every model named there is a domain or abstraction model. Swap Retrofit or Room and all four
+survive untouched — that is the test for whether an interface belongs in this module.
+
+**A mapping involving a library-specific type belongs to the module implementing it, not
+here.** `:core:database:room` declares its own `internal DbModelToEntityMapper` /
+`EntityToDbModelMapper` for converting between `DbModel` and Room entities. An `Entity` is
+Room's concept and exists only in that module — `:core:database:api`, `:core:database:noop`
+and `:core:data` never see one. Putting that contract in `:architecture:mapper` would make the
+stable part of the design name a type belonging to a swappable one.
+
+`DbModel` and `Entity` are not the same layer. `DbModel` lives in `:core:database:api` and is
+database-agnostic; `Entity` is the storage representation. `fromEntityToDbModel()` converts
+*away* from storage toward the shared abstraction. `DbModel` is spelled out in those two names
+because there it is a type, not a destination.
 
 The `*Mapper` name is a promise that the class maps one model to another and declares
 that in its type. If a class does something else, give it a different name rather than
@@ -176,7 +184,7 @@ so it is not called a mapper.
 | Repository impl | `RepositoryImpl` | `..data..repository` |
 | Network models | `ApiModel` | `..network.model` |
 | Database models | `DbModel` or `Entity` | `..database.model` |
-| Mappers | `Mapper` | must implement a `:architecture:mapper` interface |
+| Mappers | `Mapper` | must implement an interface whose name ends in `Mapper` |
 
 - `ApiModel` classes: must be `data class`, `@Serializable`, all `val` with `@SerialName`
 - `DbModel`/`Entity` classes: must be `data class`, all `val`, no functions

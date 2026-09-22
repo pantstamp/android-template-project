@@ -1,7 +1,5 @@
 package com.pantelisstampoulis.androidtemplateproject.database.mapper
 
-import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.DbModelToEntityMapper
-import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.EntityToDbModelMapper
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.database.model.MovieEntity
 
