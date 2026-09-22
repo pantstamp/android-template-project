@@ -8,6 +8,11 @@
 - Build/run via Android Studio or `./gradlew assembleDebug`.
 - Run all tests: `./gradlew test`
 - Run Konsist architecture tests: `./gradlew :test:konsist:test`
+- **Instrumented tests (`src/androidTest`) are not compiled by CI.** Neither `test` nor
+  `assembleDebug` touches them, so they can sit broken indefinitely —
+  `core/database/room`'s have not compiled since PR #14. If you change a constructor
+  an `androidTest` source uses, check it yourself:
+  `./gradlew :core:database:room:compileDebugAndroidTestKotlin`
 - Run Spotless check: `./gradlew spotlessCheck` — fix: `./gradlew spotlessApply`
 - Run Android Lint: `./gradlew lint` (`abortOnError = true`, `warningsAsErrors = true`)
 - CI (`.github/workflows/build.yml`) runs all of the above on every PR.
@@ -104,12 +109,52 @@ database ──┤──► data ──► domain ──► model
 // onLoading { }, onSuccess { data -> }, onError { error -> }
 ```
 
+The error payload is `DomainError` (`:core:model`, `..model.error`). Not named `Error`:
+`ResultState` already nests a class of that name and `kotlin.Error` is default-imported.
+
+**Absence is not an error.** "No row found" is a normal outcome — model it as
+`Success(null)` with a nullable type, not `Error(DomainError.NotFound())`. Reserving the
+error channel for real failures keeps it meaningful when one occurs, and spares every
+caller an `onError` branch that silently swallows the non-error case.
+
+### Flow and coroutines
+
+Every rule here comes from a review finding that compiled, passed all five CI checks, and
+failed only under cancellation, a race, or repeated navigation. These are the mistakes the
+toolchain does not catch.
+
+- **Compose derived flows with `emitAll`**, not `flow { inner.collect { emit(it) } }`.
+  The nested form does not propagate upstream cancellation reliably.
+- **Never `.collect` a second flow inside the collector of a first.** Chain with
+  `flatMapLatest`, or extract a private helper that launches the second collection
+  separately. Nested collection blocks the outer stream and is hard to test.
+- **A Room-backed `Flow` never completes.** Collecting one from a lifecycle event
+  (`ON_RESUME`, `LifecycleEventEffect`) leaks a collector per event — after *N* tab
+  switches, *N* collectors race to set state. Subscribe once in `init {}`; if a reload
+  must be triggerable, cancel the previous `Job` first.
+- **A state flag set before `launch` must be reset on every exit path**, including early
+  returns inside `onSuccess` / `onError`. A missed reset leaves the UI stuck with no
+  feedback.
+- **Inject time, never read it.** Take a `clock: () -> Long` rather than calling
+  `System.currentTimeMillis()` in a repository, or the value cannot be asserted in tests.
+- **Keep user-facing strings out of ViewModels.** They have no `Context` and cannot be
+  localised. Use typed side effects (`RatingSaved` / `RatingError`) or `@StringRes` ids
+  and resolve them in the composable.
+
 ### Mappers
-All mappers implement typed interfaces from `:architecture:mapper`:
+All mappers implement typed interfaces from `:architecture:mapper` (Konsist-enforced):
 - `ApiToDomainMapper<ApiModel, DomainModel>` → `fromApiToDomain()`
 - `DbToDomainMapper<DbModel, DomainModel>` → `fromDbToDomain()`
 - `ApiToDbMapper<ApiModel, DbModel>` → `fromApiToDb()`
+- `DbToEntityMapper<DbModel, Entity>` → `fromDbToEntity()`
+- `EntityToDbMapper<Entity, DbModel>` → `fromEntityToDb()`
 - `DomainToUiMapper<DomainModel, UiModel>` → `fromDomainToUi()`
+
+The `*Mapper` name is a promise that the class maps one model to another and declares
+that in its type. If a class does something else, give it a different name rather than
+an exemption — `ErrorClassifier` turns a `NetworkResult` envelope into a `DomainError`
+category, which is a partial, many-to-one classification rather than a model mapping,
+so it is not called a mapper.
 
 ---
 
@@ -123,6 +168,7 @@ All mappers implement typed interfaces from `:architecture:mapper`:
 | Repository impl | `RepositoryImpl` | `..data..repository` |
 | Network models | `ApiModel` | `..network.model` |
 | Database models | `DbModel` or `Entity` | `..database.model` |
+| Mappers | `Mapper` | must implement a `:architecture:mapper` interface |
 
 - `ApiModel` classes: must be `data class`, `@Serializable`, all `val` with `@SerialName`
 - `DbModel`/`Entity` classes: must be `data class`, all `val`, no functions
@@ -130,6 +176,8 @@ All mappers implement typed interfaces from `:architecture:mapper`:
 - `DatabaseDataSource` impl: must be `internal`, all non-override properties `private val`
 - No `m` prefix on fields (e.g. `mValue` is forbidden)
 - `companion object` must be last declaration in a class
+- **`@Dao` functions must be `suspend` or return `Flow`** — a function that is neither is a
+  blocking query, and Room throws if it reaches the main thread. Konsist-enforced.
 
 ---
 
