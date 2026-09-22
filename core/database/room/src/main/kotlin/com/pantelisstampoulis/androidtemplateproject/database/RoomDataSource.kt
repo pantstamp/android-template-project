@@ -12,32 +12,32 @@ internal class RoomDataSource(
 ) : DatabaseDataSource {
 
     override suspend fun insertMovies(movies: List<MovieDbModel>) {
-        db.movieDao().insertMovies(movies.map { mappers.movieDbMapper.toDb(it) })
+        db.movieDao().insertMovies(movies.map { mappers.movieDbMapper.fromDbToEntity(it) })
     }
 
     override suspend fun getMovies(): Flow<List<MovieDbModel>> =
         db.movieDao().getMovieEntities().map { movieEntityList ->
             movieEntityList.map { movieEntity ->
-                mappers.movieDbMapper.mapFromDb(movieEntity)
+                mappers.movieDbMapper.fromEntityToDb(movieEntity)
             }
         }
 
     override suspend fun getMovie(movieId: Int): MovieDbModel? =
         db.movieDao().getMovieEntity(movieId)?.let { movieEntity ->
-            mappers.movieDbMapper.mapFromDb(movieEntity)
+            mappers.movieDbMapper.fromEntityToDb(movieEntity)
         }
 
     override suspend fun insertWatchedMovie(movie: WatchedMovieDbModel) {
-        db.watchedMovieDao().insertWatchedMovie(mappers.watchedMovieDbMapper.toDb(movie))
+        db.watchedMovieDao().insertWatchedMovie(mappers.watchedMovieDbMapper.fromDbToEntity(movie))
     }
 
     override suspend fun getWatchedMovies(): Flow<List<WatchedMovieDbModel>> =
         db.watchedMovieDao().getWatchedMovieEntities().map { entities ->
-            entities.map { mappers.watchedMovieDbMapper.mapFromDb(it) }
+            entities.map { mappers.watchedMovieDbMapper.fromEntityToDb(it) }
         }
 
     override suspend fun getWatchedMovie(movieId: Int): WatchedMovieDbModel? =
         db.watchedMovieDao().getWatchedMovieEntity(movieId)?.let {
-            mappers.watchedMovieDbMapper.mapFromDb(it)
+            mappers.watchedMovieDbMapper.fromEntityToDb(it)
         }
 }

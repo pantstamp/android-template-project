@@ -3,9 +3,9 @@ package com.pantelisstampoulis.androidtemplateproject.data.mapper
 import com.pantelisstampoulis.androidtemplateproject.model.error.ErrorModel
 import com.pantelisstampoulis.androidtemplateproject.network.NetworkResult
 
-internal class ErrorDomainMapper {
+internal class ErrorClassifier {
 
-    fun mapNetworkResultToErrorModel(result: NetworkResult<*>): ErrorModel? = when (result) {
+    fun toErrorModel(result: NetworkResult<*>): ErrorModel? = when (result) {
         is NetworkResult.Error -> when (result.code) {
             400 -> ErrorModel.BadRequest(result.message)
             401 -> ErrorModel.Unauthorized(result.message)

@@ -59,7 +59,7 @@ internal class MoviesRepositoryImpl(
         if (networkResult.isSuccess()) {
             emit(ResultState.Success(Unit))
         } else {
-            val errorModel = mappers.errorDomainMapper.mapNetworkResultToErrorModel(networkResult)
+            val errorModel = mappers.errorClassifier.toErrorModel(networkResult)
             errorModel?.let { emit(ResultState.Error(it)) }
         }
     }
@@ -117,7 +117,7 @@ internal class MoviesRepositoryImpl(
             }
 
             is NetworkResult.Error, is NetworkResult.Exception -> {
-                val errorModel = mappers.errorDomainMapper.mapNetworkResultToErrorModel(moviesNetworkResult)
+                val errorModel = mappers.errorClassifier.toErrorModel(moviesNetworkResult)
                 errorModel?.let { emit(ResultState.Error(it)) }
             }
         }

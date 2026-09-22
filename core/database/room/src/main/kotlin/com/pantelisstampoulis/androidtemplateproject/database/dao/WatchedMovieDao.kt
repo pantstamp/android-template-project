@@ -17,5 +17,5 @@ interface WatchedMovieDao {
     fun getWatchedMovieEntities(): Flow<List<WatchedMovieEntity>>
 
     @Query("SELECT * FROM watched_movies WHERE movieId = :movieId")
-    fun getWatchedMovieEntity(movieId: Int): WatchedMovieEntity?
+    suspend fun getWatchedMovieEntity(movieId: Int): WatchedMovieEntity?
 }

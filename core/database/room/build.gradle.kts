@@ -13,6 +13,7 @@ android {
 
 dependencies {
     implementation(projects.core.database.api)
+    implementation(projects.architecture.mapper)
 
     implementation(libs.retrofit.core)
     implementation(libs.okhttp.logging)
