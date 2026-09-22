@@ -109,8 +109,9 @@ of degradation (slower responses, less precise output) and proactively manage:
 After all phases are complete, suggest running the pre-PR checklist:
 
 "All phases are done. Want me to run the pre-PR quality gate before
-creating the PR? It checks build, tests, lint, plan coverage, and
-scans for common mistakes."
+creating the PR? It checks the things CI can't — whether the plan was
+followed, whether the spec's acceptance criteria hold, and whether any
+debug leftovers made it into the diff — then runs a CI pre-flight."
 
 If the user agrees, hand off to the **pre-pr-checklist** skill.
 If they skip it, proceed directly to PR creation.
@@ -119,12 +120,28 @@ If they skip it, proceed directly to PR creation.
 
 Once the pre-PR checklist passes (or the user skips it):
 
-**a) Final verification** (skip if the pre-PR checklist already ran these):
+**a) Final verification** — only if the user skipped the quality gate.
+
+The gate's Part 2 pre-flight already mirrors CI. Rather than restating a
+subset of it here, run the same command it runs:
+
 ```bash
-./gradlew assembleDebug
-./gradlew testDebugUnitTest
+./gradlew spotlessCheck :test:konsist:test test assembleDebug lint
+```
+
+If the gate ran, skip this — it has already passed. This fallback exists
+because the gate is optional, and skipping it should not mean pushing a
+branch with an unrun Konsist rule or lint warning; those fail CI either
+way, just later and at the cost of a review cycle.
+
+**a2) Format before committing:**
+```bash
 ./gradlew spotlessApply
 ```
+
+This one runs regardless. It rewrites files, so it has to happen before
+`git add` or the formatting will not be staged. It is a commit-hygiene
+step, not a check.
 
 **b) Commit:**
 ```bash
