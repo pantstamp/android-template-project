@@ -7,7 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.pantelisstampoulis.androidtemplateproject.domain.ResultState
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetWatchedMoviesUseCase
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.mapper.WatchedMovieUiMapper
-import com.pantelisstampoulis.androidtemplateproject.model.error.ErrorModel
+import com.pantelisstampoulis.androidtemplateproject.model.error.DomainError
 import com.pantelisstampoulis.androidtemplateproject.test.doubles.model.DomainTestDoubleFactory
 import io.mockative.Mock
 import io.mockative.any
@@ -108,7 +108,7 @@ class WatchedMovieListViewModelTest : KoinTest {
     @Test
     fun shouldEmitErrorMessageWhenFetchFails() = runTest {
         every { getWatchedMoviesUseCase(any()) }
-            .returns(flowOf(ResultState.Error(ErrorModel.ServerError("Server error"))))
+            .returns(flowOf(ResultState.Error(DomainError.ServerError("Server error"))))
 
         val vm = viewModel
         advanceUntilIdle()

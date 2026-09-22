@@ -10,7 +10,7 @@ import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetWa
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.RateMovieUseCase
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.SaveWatchedMovieUseCase
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.mapper.MovieUiMapper
-import com.pantelisstampoulis.androidtemplateproject.model.error.ErrorModel
+import com.pantelisstampoulis.androidtemplateproject.model.error.DomainError
 import com.pantelisstampoulis.androidtemplateproject.test.doubles.model.DomainTestDoubleFactory
 import io.mockative.Mock
 import io.mockative.any
@@ -83,7 +83,7 @@ class MovieDetailsViewModelTest : KoinTest {
         every { getMovieUseCase(any()) }
             .returns(flow { emit(ResultState.Loading) })
         every { getWatchedMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
 
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
 
@@ -107,7 +107,7 @@ class MovieDetailsViewModelTest : KoinTest {
         every { getMovieUseCase(any()) }
             .returns(flowOf(ResultState.Success(domainMovie)))
         every { getWatchedMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
 
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
 
@@ -127,12 +127,12 @@ class MovieDetailsViewModelTest : KoinTest {
     @Test
     fun shouldEmitErrorStateWhenFetchingMovieDetailsFails() = runTest {
         val errorMessage = "Failed to load movie details"
-        val errorState = ErrorModel.NotFound(errorMessage)
+        val errorState = DomainError.NotFound(errorMessage)
 
         every { getMovieUseCase(any()) }
             .returns(flowOf(ResultState.Error(errorState)))
         every { getWatchedMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
 
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
 
@@ -154,7 +154,7 @@ class MovieDetailsViewModelTest : KoinTest {
         val watchedMovie = DomainTestDoubleFactory.provideWatchedMovieModel()
 
         every { getMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
         every { getWatchedMovieUseCase(any()) }
             .returns(flowOf(ResultState.Success(watchedMovie)))
 
@@ -172,9 +172,9 @@ class MovieDetailsViewModelTest : KoinTest {
     @Test
     fun shouldLeaveUserRatingNullWhenMovieNotRated() = runTest {
         every { getMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
         every { getWatchedMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
 
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
 
@@ -195,7 +195,7 @@ class MovieDetailsViewModelTest : KoinTest {
         every { getMovieUseCase(any()) }
             .returns(flowOf(ResultState.Success(domainMovie)))
         every { getWatchedMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = domainMovie.id))
         advanceUntilIdle()
 
@@ -227,12 +227,12 @@ class MovieDetailsViewModelTest : KoinTest {
     @Test
     fun shouldEmitErrorSnackbarWhenNetworkRatingFails() = runTest {
         every { getMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
         every { getWatchedMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
 
         every { rateMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(ErrorModel.ServerError("Network error"))))
+            .returns(flowOf(ResultState.Error(DomainError.ServerError("Network error"))))
 
         viewModel.setEvent(MovieDetailsEvent.RateMovie(movieId = 123, rating = 5f))
 
@@ -261,13 +261,13 @@ class MovieDetailsViewModelTest : KoinTest {
         every { getMovieUseCase(any()) }
             .returns(flowOf(ResultState.Success(domainMovie)))
         every { getWatchedMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = domainMovie.id))
         advanceUntilIdle()
 
         every { rateMovieUseCase(any()) }.returns(flowOf(ResultState.Success(Unit)))
         every { saveWatchedMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(ErrorModel.Unknown("db error"))))
+            .returns(flowOf(ResultState.Error(DomainError.Unknown("db error"))))
 
         viewModel.setEvent(MovieDetailsEvent.RateMovie(movieId = domainMovie.id, rating = 5f))
 

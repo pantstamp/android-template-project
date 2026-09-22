@@ -6,7 +6,7 @@ import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.database.model.WatchedMovieDbModel
 import com.pantelisstampoulis.androidtemplateproject.domain.ResultState
 import com.pantelisstampoulis.androidtemplateproject.domain.repository.MoviesRepository
-import com.pantelisstampoulis.androidtemplateproject.model.error.ErrorModel
+import com.pantelisstampoulis.androidtemplateproject.model.error.DomainError
 import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
 import com.pantelisstampoulis.androidtemplateproject.model.movies.WatchedMovie
 import com.pantelisstampoulis.androidtemplateproject.network.NetworkDataSource
@@ -35,7 +35,7 @@ internal class MoviesRepositoryImpl(
             val movie = mappers.movieDomainMapper.fromDbToDomain(movieDbModel)
             emit(ResultState.Success(movie))
         } ?: run {
-            emit(ResultState.Error(ErrorModel.NotFound()))
+            emit(ResultState.Error(DomainError.NotFound()))
         }
     }
 
@@ -59,8 +59,8 @@ internal class MoviesRepositoryImpl(
         if (networkResult.isSuccess()) {
             emit(ResultState.Success(Unit))
         } else {
-            val errorModel = mappers.errorClassifier.toErrorModel(networkResult)
-            errorModel?.let { emit(ResultState.Error(it)) }
+            val domainError = mappers.errorClassifier.toDomainError(networkResult)
+            domainError?.let { emit(ResultState.Error(it)) }
         }
     }
 
@@ -104,7 +104,7 @@ internal class MoviesRepositoryImpl(
         val dbModel = databaseDataSource.getWatchedMovie(movieId)
         dbModel?.let {
             emit(ResultState.Success(mappers.watchedMovieDomainMapper.fromDbToDomain(it)))
-        } ?: emit(ResultState.Error(ErrorModel.NotFound()))
+        } ?: emit(ResultState.Error(DomainError.NotFound()))
     }
 
     private suspend fun FlowCollector<ResultState<List<Movie>>>.fetchMoviesFromNetwork() {
@@ -117,8 +117,8 @@ internal class MoviesRepositoryImpl(
             }
 
             is NetworkResult.Error, is NetworkResult.Exception -> {
-                val errorModel = mappers.errorClassifier.toErrorModel(moviesNetworkResult)
-                errorModel?.let { emit(ResultState.Error(it)) }
+                val domainError = mappers.errorClassifier.toDomainError(moviesNetworkResult)
+                domainError?.let { emit(ResultState.Error(it)) }
             }
         }
     }

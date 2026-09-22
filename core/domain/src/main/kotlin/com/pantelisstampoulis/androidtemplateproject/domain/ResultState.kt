@@ -1,7 +1,7 @@
 package com.pantelisstampoulis.androidtemplateproject.domain
 
 import com.pantelisstampoulis.androidtemplateproject.logging.Logger
-import com.pantelisstampoulis.androidtemplateproject.model.error.ErrorModel
+import com.pantelisstampoulis.androidtemplateproject.model.error.DomainError
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
@@ -29,7 +29,7 @@ sealed class ResultState<out T> {
 
     data object Loading : ResultState<Nothing>()
 
-    data class Error(val error: ErrorModel) : ResultState<Nothing>()
+    data class Error(val error: DomainError) : ResultState<Nothing>()
 }
 
 fun <T> Flow<ResultState<T>>.onStartCatch(coroutineContext: CoroutineContext, logger: Logger) = this
@@ -40,7 +40,7 @@ fun <T> Flow<ResultState<T>>.onStartCatch(coroutineContext: CoroutineContext, lo
         logger.e(throwable = throwable) {
             "Exception caught in use case"
         }
-        emit(value = ResultState.Error(ErrorModel.Unknown(throwable.message)))
+        emit(value = ResultState.Error(DomainError.Unknown(throwable.message)))
     }
     .cancellable()
     .flowOn(context = coroutineContext)
@@ -88,7 +88,7 @@ inline fun <T> ResultState<T>.onLoading(action: () -> Unit): ResultState<T> = wh
  * @return The original [ResultState] after performing the action if it's a [ResultState.Error],
  * otherwise returns the original [ResultState] without any changes.
  */
-inline fun <T> ResultState<T>.onError(action: (ErrorModel) -> Unit): ResultState<T> = when (this) {
+inline fun <T> ResultState<T>.onError(action: (DomainError) -> Unit): ResultState<T> = when (this) {
     is ResultState.Error -> apply { action(this.error) }
     else -> this
 }

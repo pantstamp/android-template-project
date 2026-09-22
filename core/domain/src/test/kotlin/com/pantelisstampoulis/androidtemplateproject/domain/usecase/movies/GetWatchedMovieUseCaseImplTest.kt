@@ -7,7 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.pantelisstampoulis.androidtemplateproject.domain.ResultState
 import com.pantelisstampoulis.androidtemplateproject.domain.repository.MoviesRepository
 import com.pantelisstampoulis.androidtemplateproject.logging.Logger
-import com.pantelisstampoulis.androidtemplateproject.model.error.ErrorModel
+import com.pantelisstampoulis.androidtemplateproject.model.error.DomainError
 import com.pantelisstampoulis.androidtemplateproject.test.doubles.model.DomainTestDoubleFactory
 import io.mockative.Mock
 import io.mockative.every
@@ -60,13 +60,13 @@ class GetWatchedMovieUseCaseImplTest {
     fun shouldEmitLoadingThenErrorWhenWatchedMovieNotFound() = runTest {
         val movieId = 42
         every { repository.getWatchedMovie(movieId) }
-            .returns(flowOf(ResultState.Error(ErrorModel.NotFound())))
+            .returns(flowOf(ResultState.Error(DomainError.NotFound())))
 
         useCase(movieId).test {
             assertThat(awaitItem()).isEqualTo(ResultState.Loading)
             val result = awaitItem()
             assertThat(result).isInstanceOf(ResultState.Error::class.java)
-            assertThat((result as ResultState.Error).error).isInstanceOf(ErrorModel.NotFound::class.java)
+            assertThat((result as ResultState.Error).error).isInstanceOf(DomainError.NotFound::class.java)
             awaitComplete()
         }
     }

@@ -7,7 +7,7 @@ import com.pantelisstampoulis.androidtemplateproject.data.mapper.Mappers
 import com.pantelisstampoulis.androidtemplateproject.database.DatabaseDataSource
 import com.pantelisstampoulis.androidtemplateproject.domain.ResultState
 import com.pantelisstampoulis.androidtemplateproject.domain.repository.MoviesRepository
-import com.pantelisstampoulis.androidtemplateproject.model.error.ErrorModel
+import com.pantelisstampoulis.androidtemplateproject.model.error.DomainError
 import com.pantelisstampoulis.androidtemplateproject.network.NetworkDataSource
 import com.pantelisstampoulis.androidtemplateproject.network.NetworkResult
 import com.pantelisstampoulis.androidtemplateproject.network.request.RateMovieRequest
@@ -172,7 +172,7 @@ class MoviesRepositoryImplTest : KoinTest {
         repository.getMovie(movieId).test {
             val result = awaitItem()
             assertThat(result).isInstanceOf(ResultState.Error::class.java)
-            assertThat((result as ResultState.Error).error).isInstanceOf(ErrorModel.NotFound::class.java)
+            assertThat((result as ResultState.Error).error).isInstanceOf(DomainError.NotFound::class.java)
             coVerify { databaseDataSource.getMovie(movieId) }.wasInvoked(exactly = once)
             awaitComplete()
         }
@@ -206,7 +206,7 @@ class MoviesRepositoryImplTest : KoinTest {
         repository.rateMovie(movieId, rating).test {
             val result = awaitItem()
             assertThat(result).isInstanceOf(ResultState.Error::class.java)
-            assertThat((result as ResultState.Error).error).isInstanceOf(ErrorModel.ServerError::class.java)
+            assertThat((result as ResultState.Error).error).isInstanceOf(DomainError.ServerError::class.java)
             coVerify { networkDataSource.rateMovie(movieId, RateMovieRequest(rating)) }.wasInvoked(exactly = once)
             awaitComplete()
         }
@@ -279,7 +279,7 @@ class MoviesRepositoryImplTest : KoinTest {
         repository.getWatchedMovie(movieId).test {
             val result = awaitItem()
             assertThat(result).isInstanceOf(ResultState.Error::class.java)
-            assertThat((result as ResultState.Error).error).isInstanceOf(ErrorModel.NotFound::class.java)
+            assertThat((result as ResultState.Error).error).isInstanceOf(DomainError.NotFound::class.java)
             coVerify { databaseDataSource.getWatchedMovie(movieId) }.wasInvoked(exactly = once)
             awaitComplete()
         }

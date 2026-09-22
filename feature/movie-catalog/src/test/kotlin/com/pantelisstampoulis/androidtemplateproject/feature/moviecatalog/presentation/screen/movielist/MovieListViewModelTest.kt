@@ -7,7 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.pantelisstampoulis.androidtemplateproject.domain.ResultState
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetMoviesUseCase
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.mapper.MovieUiMapper
-import com.pantelisstampoulis.androidtemplateproject.model.error.ErrorModel
+import com.pantelisstampoulis.androidtemplateproject.model.error.DomainError
 import com.pantelisstampoulis.androidtemplateproject.test.doubles.model.DomainTestDoubleFactory
 import io.mockative.Mock
 import io.mockative.any
@@ -133,7 +133,7 @@ class MovieListViewModelTest : KoinTest {
     fun shouldEmitErrorStateWhenFetchingMoviesFails() = runTest {
         // Given
         val errorMessage = "Server error"
-        val errorState = ErrorModel.ServerError(errorMessage)
+        val errorState = DomainError.ServerError(errorMessage)
 
         every { getMoviesUseCase(any()) }.returns(flowOf(ResultState.Error(errorState)))
 
