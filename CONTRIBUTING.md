@@ -207,3 +207,7 @@ Larger features are specced and planned before implementation, under
 [`docs/features/watched-movies/`](docs/features/watched-movies/) is a worked example. The
 `.claude/skills/` directory automates this flow, but the structure is useful regardless of whether
 it is driven by an assistant.
+
+If you are using the skills, [`docs/AI_WORKFLOW.md`](docs/AI_WORKFLOW.md) is the step-by-step
+guide: what to run at each stage, what to check before moving on, and where the human
+checkpoints are.

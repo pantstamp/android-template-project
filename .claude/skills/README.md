@@ -52,83 +52,25 @@ project root.
 
 ## Usage
 
-### Stage 1 — Product Owner / BA
+**The step-by-step guide for this project is [`docs/AI_WORKFLOW.md`](../../docs/AI_WORKFLOW.md)** —
+what to type at each stage, what to check before moving on, and where the human
+checkpoints are. It is kept in one place on purpose; duplicating the walkthrough here
+would leave two copies to drift apart.
 
-```
-I want to implement a new feature. Here are the requirements:
+At a glance:
 
-Feature: User Profiles
-Users should be able to create a profile with their name,
-avatar, and favorite genres...
+| Stage | Skill | Produces |
+|---|---|---|
+| 1 | `/product-owner` | `SPEC.md` |
+| 2 | `/architect` | `PLAN.md` |
+| 3 | `/developer` | code, on `feature/{feature-name}` |
+| 4 | `/pre-pr-checklist` | GO / NO GO |
+| 5 | comment `@claude-review` on the PR | inline review comments |
+| 6 | `/retrospective` | `RETRO.md` + CLAUDE.md additions |
 
-Run a BA session and produce a SPEC.md.
-```
-
-Claude will interview you one topic at a time, then save
-`docs/features/user-profiles/SPEC.md`.
-
-### Stage 2 — Architect
-
-```
-Create an implementation plan for the user-profiles feature.
-```
-
-Claude reads the SPEC.md, studies the codebase, proposes a phased plan,
-discusses it with you, then saves `docs/features/user-profiles/PLAN.md`.
-
-Tip: switch to Opus for this stage (`/model opus`) for deeper reasoning.
-
-### Stage 3 — Developer
-
-```
-Implement the user-profiles feature.
-```
-
-Claude reads the PLAN.md, creates the feature branch, and implements
-phase by phase — waiting for your approval between each phase. After
-all phases pass, it creates the PR.
-
-Tip: switch to Sonnet for this stage (`/model sonnet`) for faster coding.
-
-### Quality Gate — Pre-PR Checklist
-
-After all phases pass, before creating the PR:
-
-```
-Run pre-PR checks for the user-profiles feature.
-```
-
-Claude runs build, tests, lint, PLAN.md coverage, SPEC.md acceptance
-criteria, and scans for TODOs and debug leftovers. Reports GO /
-CONDITIONAL GO / NO GO. On GO, create the PR.
-
-### Stage 4 — Automated Review
-
-No skill needed — this is handled by your `claude-review.yml` GitHub
-Actions workflow. It triggers automatically on PR creation.
-
-### Triage review comments
-
-After the automated review posts inline comments:
-
-```
-Fetch the inline review comments from PR #XX in this repo using gh api.
-Walk me through each one. For each finding, review it and show me the
-code and the suggestion, then wait for my decision before proceeding.
-```
-
-### Stage 5 — Post-Merge Retrospective
-
-After merging the PR:
-
-```
-Run a retrospective for the user-profiles feature, PR #XX.
-```
-
-Claude reads the review comments, analyzes what went well and what went
-wrong, produces `docs/features/user-profiles/RETRO.md`, and suggests
-CLAUDE.md updates. Approve the updates and each feature makes the next
-one better.
+Stage 5 is not a skill. It runs in GitHub Actions
+(`.github/workflows/claude-review.yml`) and is **opt-in**: reviews cost API credits, so
+nothing happens on push — comment `@claude-review` on the pull request to request one.
 
 ## Resuming work
 
