@@ -1,85 +1,29 @@
 # AI-Assisted Android Development — Skills
 
-Five reusable skills for the AI agent pipeline:
-
-```
-Stage 1: Product Owner/BA  →  Stage 2: Architect  →  Stage 3: Developer
-     (product-owner skill)    (architect skill)     (developer skill)
-                                                          ↓
-                                                    Quality Gate
-                                                 (pre-pr-checklist skill)
-                                                          ↓
-                              Stage 5: Retro     ←  Stage 4: Reviewer
-                           (retrospective skill)    (GitHub Actions)
-```
-
-## Installation
-
-Copy the skill folders into your project's `.claude/skills/` directory:
-
-```bash
-mkdir -p .claude/skills
-cp -r product-owner .claude/skills/
-cp -r architect .claude/skills/
-cp -r developer .claude/skills/
-cp -r pre-pr-checklist .claude/skills/
-cp -r retrospective .claude/skills/
-```
-
-Claude Code automatically picks up skills from `.claude/skills/` when you launch it
-from the project root.
-
-## Feature file structure
-
-Each feature gets its own directory under `docs/features/`:
-
-```
-docs/
-└── features/
-    ├── watched-movies/
-    │   ├── SPEC.md      ← produced by product-owner skill
-    │   ├── PLAN.md      ← produced by architect skill
-    │   └── RETRO.md     ← produced by retrospective skill
-    ├── user-profiles/
-    │   ├── SPEC.md
-    │   ├── PLAN.md
-    │   └── RETRO.md
-    └── ...
-```
-
-This keeps a history of decisions per feature. No more overwriting files in the
-project root.
-
-## Usage
-
-**The step-by-step guide for this project is [`docs/AI_WORKFLOW.md`](../../docs/AI_WORKFLOW.md)** —
-what to type at each stage, what to check before moving on, and where the human
-checkpoints are. It is kept in one place on purpose; duplicating the walkthrough here
-would leave two copies to drift apart.
-
-At a glance:
+Six skills for the feature pipeline. **The step-by-step guide is
+[`docs/AI_WORKFLOW.md`](../../docs/AI_WORKFLOW.md)** — what to type at each stage, what to check
+before moving on, and where the human checkpoints are. It is kept in one place on purpose so
+two copies cannot drift.
 
 | Stage | Skill | Produces |
 |---|---|---|
-| 1 | `/product-owner` | `SPEC.md` |
-| 2 | `/architect` | `PLAN.md` |
-| 3 | `/developer` | code, on `feature/{feature-name}` |
-| 4 | `/pre-pr-checklist` | GO / NO GO |
-| 5 | comment `@claude-review` on the PR | inline review comments |
-| 6 | `/retrospective` | `RETRO.md` + CLAUDE.md additions |
+| 1. Spec | `/product-owner` | the branch + `SPEC.md` (committed) |
+| 2. Plan | `/architect` | `PLAN.md` (committed) |
+| 3. Build | `/developer` | one commit per approved phase, then the PR |
+| 4. Gate | `/pre-pr-checklist` | GO / CONDITIONAL GO / NO GO |
+| 5. Review | comment `@claude-review` on the PR, then `/review-triage` | review fixes + thread replies |
+| 6. Learn | `/retrospective` | `RETRO.md` + routed rule changes, on a docs branch |
 
-Stage 5 is not a skill. It runs in GitHub Actions
-(`.github/workflows/claude-review.yml`) and is **opt-in**: reviews cost API credits, so
-nothing happens on push — comment `@claude-review` on the pull request to request one.
+The review itself is not a skill: it runs in GitHub Actions
+(`.github/workflows/claude-review.yml`) and is opt-in, because it costs API credits.
 
-## Resuming work
+Everything for one change lives in `docs/features/{feature-name}/` (`SPEC.md`, `PLAN.md`,
+`RETRO.md`), on the change's own branch (`feature/…` or `fix/…`).
 
-If context gets heavy mid-implementation, clear and resume:
+## Maintaining these skills
 
-```
-/clear
-Read docs/features/user-profiles/PLAN.md and CLAUDE.md.
-Phases 1 and 2 are complete. Continue with Phase 3.
-```
-
-This works because PLAN.md is self-contained.
+Skills hold **process**. Lessons from a retrospective go where they belong — project rules in
+`CLAUDE.md`, mechanical checks in Konsist or lint, history in `RETRO.md` — and only a change to
+*how a stage works* goes into a skill, written as a general step with no feature names, phase
+numbers or counts. The test: would the sentence still be true and useful if that feature had
+never existed?

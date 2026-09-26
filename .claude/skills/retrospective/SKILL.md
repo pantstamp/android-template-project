@@ -1,170 +1,119 @@
 ---
 name: retrospective
 description: >
-  Run a post-merge retrospective for a completed feature. Reads the PR review
-  comments, analyzes what Claude got right and wrong during implementation,
-  and produces a RETRO.md with lessons learned and actionable improvements
-  for CLAUDE.md.
-  Use this skill after merging a feature PR, or when the user mentions
-  "retrospective", "retro", "lessons learned", "what went wrong", "post-mortem",
-  "what should we improve", "update CLAUDE.md from review", or "what did the
-  reviewer find". Also trigger when the user wants to analyze review findings
-  across multiple features to spot patterns.
+  Runs a post-merge retrospective for a feature's pull request: reads the review comments, the
+  diff, the fix commits, SPEC.md and PLAN.md, writes a RETRO.md comparing against earlier
+  retros, and routes each lesson to CLAUDE.md, a Konsist or lint rule, a skill, or the review
+  prompt. Use after a
+  PR is merged when the user asks for a retro, retrospective, lessons learned, or to turn
+  review findings into project rules.
 ---
 
 # Post-Merge Retrospective
 
-This skill produces a brief lessons-learned document after a feature is merged.
-It matters because the patterns Claude gets wrong tend to repeat — if Claude
-generated a non-suspend DAO method once, it'll do it again on the next feature
-unless something changes. The retrospective captures these patterns and turns
-them into concrete CLAUDE.md improvements, so each feature makes the next one
-better.
+Mistakes repeat unless something changes. This turns a merged PR's review findings into
+durable changes — project rules, mechanical checks, or process — and records what happened.
 
 ## Inputs
 
-The user provides:
-- **Feature name** — used to locate `docs/features/{feature-name}/`
-- **PR number** — used to fetch review comments from GitHub
+- **Feature name** — locates `docs/features/{feature-name}/`
+- **PR number**
 
-If not specified, infer from the current branch or ask.
+If not given, infer from the branch or ask.
 
 ## Workflow
 
-### 1. Gather data
+### 1. Branch
 
-Read these sources to build the full picture:
+The feature branch is merged, so work on a new one:
 
-**a) PR review comments:**
 ```bash
-gh api repos/{owner}/{repo}/pulls/{pr_number}/comments
+git checkout master && git pull --ff-only
+git checkout -b docs/{feature-name}-retro
 ```
 
-Extract each comment's: file path, line, body (which includes severity and
-the suggested fix).
+### 2. Gather
 
-**b) The PR diff — what actually changed:**
-```bash
-gh pr diff {pr_number}
-```
+- Inline review comments: `gh api repos/{owner}/{repo}/pulls/{n}/comments` — path, line,
+  severity, suggestion, and whether a reply says it was fixed
+- The review summary: `gh api repos/{owner}/{repo}/issues/{n}/comments`
+- The PR diff (`gh pr diff {n}`) and its commits; compare the original commit with any fix
+  commits
+- Timeline: comment times against the last commit and the merge — any comment newer than the
+  last commit was merged unaddressed
+- SPEC.md and PLAN.md
+- Earlier `docs/features/*/RETRO.md` — for the comparison and for repeats
+- **Ask the user** what they found outside review (manual testing, Android Studio, lint or CI
+  failures during implementation)
 
-**c) The feature's SPEC.md and PLAN.md** from `docs/features/{feature-name}/`
-to understand what was intended.
+### 3. Analyse
 
-**d) Any fix commits** — if the user triaged review comments and pushed fixes,
-compare the original implementation to the fixes to understand what changed.
+Classify each finding: **fixed**, **skipped** (why — false positive, trade-off, deferred), or
+**merged unaddressed**. For each fixed one, find the **root cause stage**: did the spec, the
+plan, or the implementation introduce it? A plan-level defect is implemented faithfully, so
+only the architect's self-checks could have caught it.
 
-### 2. Analyze
+Look for patterns: the same mistake in several places, **a repeat of a lesson from an earlier
+retro** (a lesson that never became a rule), framework-specific mistakes (Compose, coroutines,
+Room) that suggest an outdated or incorrect pattern, and what the gate or reviewer should have
+caught.
 
-Categorize each review finding into one of these buckets:
+### 4. Route each lesson
 
-- **Caught and fixed** — reviewer found it, user fixed it. This is the most
-  valuable category because it reveals what Claude's implementation stage
-  gets wrong.
-- **Caught but skipped** — reviewer found it, user decided not to fix. Worth
-  noting why — was it a false positive? A style preference? A known tradeoff?
-- **Not caught** — issues the user found during manual testing or code review
-  in Android Studio that the automated reviewer missed. Ask the user if there
-  were any of these.
+For every lesson, pick exactly one destination:
 
-For the "caught and fixed" category, look for patterns:
-- Same type of mistake across multiple files (e.g., missing error handling)
-- Mistakes that could have been prevented by a CLAUDE.md rule
-- Mistakes that the pre-PR checklist should have caught
-- Framework-specific issues (Compose, Coroutines, Room) that suggest Claude
-  used an outdated or incorrect pattern
+| The lesson is… | It goes in… |
+|---|---|
+| A rule about the code | **CLAUDE.md** — the rule plus a one-line reason |
+| Mechanically checkable | **A Konsist or lint rule** — prose gets violated, a rule can't be |
+| About how a pipeline stage works | **The skill** — as a general process step |
+| Something the automated reviewer should check | **The review prompt** in `.github/workflows/claude-review.yml` |
+| What happened and why | **RETRO.md only** |
 
-### 3. Produce RETRO.md
+**Test for anything going into CLAUDE.md, a skill or the review prompt: would it still be true and useful if this
+feature had never existed?** If not, it is history — keep it in RETRO.md. Write rules as the
+mechanism ("a condition that treats `null` and empty alike needs a test for each"), never as
+the incident ("in feature X, phase 2 missed…"): no feature names, phase numbers, file names or
+counts. A new Konsist or lint rule must be shown to fail on the code that prompted it.
 
-Save to:
-```
-docs/features/{feature-name}/RETRO.md
-```
+### 5. Write RETRO.md
 
-### RETRO.md structure
+Save to `docs/features/{feature-name}/RETRO.md`:
 
 ```markdown
 # Retrospective: {Feature Name}
 
-PR: #{pr_number}
-Date: {date}
+PR: #{n} · Merged: {date}
 
 ## Summary
-One paragraph — what was built, how many review findings, how many fixed.
+What was built; findings by severity; how many fixed; how many merged unaddressed.
+
+## Compared with earlier retros
+The same metrics side by side (findings by severity, fixed before merge, merged unaddressed,
+review waves). Say which *kind* of finding changed, not just the count.
 
 ## What went well
-Things Claude got right — patterns followed correctly, good architectural
-decisions, clean code areas.
+Correct patterns and decisions, with evidence from the diff.
 
 ## What the reviewer caught
-
-### Critical / Major (fixed)
-For each:
-- **Issue**: what was wrong
-- **File**: where
-- **Root cause**: why Claude generated it this way
-- **Fix applied**: what changed
-- **Prevention**: how to avoid this next time
-
-### Minor / Suggestions (fixed or skipped)
-Brief list with outcome (fixed / skipped / deferred).
+Per finding: issue · file · root cause (and which stage introduced it) · fix · prevention.
 
 ## Issues found outside review
-Anything the user found during manual testing or Android Studio review
-that the automated reviewer missed.
 
 ## Patterns to watch
-Recurring themes across this feature's findings. Examples:
-- "Claude defaults to OnConflictStrategy.ABORT instead of REPLACE"
-- "Claude forgets to make DAO write methods suspend"
-- "Missing error handling on repository methods"
 
-## Recommended CLAUDE.md updates
-Specific lines to add to CLAUDE.md based on this retro. Format as
-ready-to-copy text:
+## Recommended changes
+### CLAUDE.md
+### Konsist / lint
+### Skills
+### Review prompt
+Ready-to-paste text, each passing the test in step 4.
 
-> When writing Room DAOs, always use `suspend` for write operations
-> and return `Flow<T>` for read operations. Use
-> `OnConflictStrategy.REPLACE` unless there's an explicit reason not to.
-
-## Recommended review checklist updates
-If the reviewer missed something that it should check for, note it here.
+## Baseline for next time
+The metrics table, and the target for the next feature.
 ```
 
-### 4. Suggest CLAUDE.md updates
+### 6. Apply with approval
 
-After saving RETRO.md, present the recommended CLAUDE.md additions and ask
-the user if they want to apply them. If yes, read the current CLAUDE.md,
-find the appropriate section, and add the new rules.
-
-This is the key step that closes the loop — review findings become
-project rules that prevent the same mistakes on future features.
-
-### 5. Cross-feature patterns (optional)
-
-If there are multiple RETRO.md files in `docs/features/`, offer to scan
-them for cross-feature patterns:
-
-"You now have retros for {N} features. Want me to look across them for
-recurring patterns? This can surface systemic issues worth addressing
-in CLAUDE.md."
-
-Read all RETRO.md files, identify findings that appear in 2+ features,
-and present them as high-confidence CLAUDE.md additions.
-
-## When to run this
-
-The natural moment is right after merging the PR:
-
-1. Merge the PR on GitHub
-2. Back in Claude Code terminal:
-   ```
-   Run a retrospective for the user-profiles feature, PR #XX.
-   ```
-3. Review the RETRO.md
-4. Approve or edit the CLAUDE.md updates
-5. Commit both files
-
-Over time, this builds a knowledge base in `docs/features/` that makes
-CLAUDE.md increasingly precise, which makes each subsequent feature's
-implementation and review cleaner.
+Present the recommended changes and ask which to apply. Apply the approved ones in the files
+they belong to, commit them with RETRO.md, and open a docs PR.

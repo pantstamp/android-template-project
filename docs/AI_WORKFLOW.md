@@ -1,7 +1,7 @@
 # Implementing a feature with the AI pipeline
 
-This project ships five Claude Code skills that cover a feature from raw idea to
-post-merge retrospective. This is the guide to using them.
+This project ships six Claude Code skills that cover a feature or fix from raw idea
+to post-merge retrospective. This is the guide to using them.
 
 The skills are not a replacement for judgment. Each stage ends at a point where
 you decide whether to continue, and the guide calls out what to actually look at
@@ -13,14 +13,16 @@ before you do.
 
 | Stage | Skill | Produces | You decide |
 |---|---|---|---|
-| 1. Spec | `/product-owner` | `SPEC.md` | Are the acceptance criteria right? |
+| 1. Spec | `/product-owner` | the branch + `SPEC.md` | Are the acceptance criteria right? |
 | 2. Plan | `/architect` | `PLAN.md` | Are the phases right? |
-| 3. Build | `/developer` | code, on a branch | After **every phase** |
+| 3. Build | `/developer` | a commit per phase, then the PR | After **every phase** |
 | 4. Gate | `/pre-pr-checklist` | GO / NO GO | Ship it or fix it |
-| 5. Review | `@claude-review` comment | PR comments | Which findings to act on |
-| 6. Learn | `/retrospective` | `RETRO.md` + CLAUDE.md edits | Which lessons to keep |
+| 5. Review | `@claude-review`, then `/review-triage` | PR comments → fixes | Which findings to act on |
+| 6. Learn | `/retrospective` | `RETRO.md` + rule changes | Which lessons to keep |
 
-Everything for one feature lives in `docs/features/{feature-name}/`:
+The whole change happens on one branch — `feature/{name}` or `fix/{name}` — created in
+stage 1. Each stage commits its output there, so nothing sits untracked on `master` between
+stages. Everything for one change lives in `docs/features/{feature-name}/`:
 
 ```
 docs/features/watched-movies/
@@ -41,7 +43,7 @@ first run to see what each document looks like when finished.
   empty `BuildConfig` field rather than a build failure, so the app builds either
   way — only live API calls fail.
 - **`gh` authenticated** (`gh auth status`). Stages 5 and 6 read the PR through it.
-- Start from an up-to-date `master`.
+- A clean working tree. Stage 1 checks out an up-to-date `master` and branches from it.
 
 ---
 
@@ -65,7 +67,14 @@ spec is better than an assumption baked into the code. If a question reveals the
 feature is bigger than you thought, this is the cheapest possible moment to cut
 scope.
 
-**Output**: `docs/features/{feature-name}/SPEC.md`
+You can also start from a GitHub issue ("we want to work on issue 23"). Claude reads it,
+then checks the causes the issue names against the code before interviewing you — issues
+describe symptoms well and causes only partially.
+
+Before the interview, Claude creates the branch from an up-to-date `master`. It will stop
+and ask if your working tree is dirty.
+
+**Output**: `docs/features/{feature-name}/SPEC.md`, committed on the branch once you approve it.
 
 **Check before moving on**: the acceptance criteria. Stage 4 will test the
 implementation against them one by one, so a vague criterion becomes an
@@ -90,8 +99,8 @@ codebase the feature touches. Then it stops.
 You get a one-page outline in plain language — two or three sentences per phase,
 no file paths — and the decisions it wants from you:
 
-> Four phases: schema and DAO, then the repository and use cases, then the screen,
-> then tests.
+> Three phases: schema and DAO, then the repository and use cases, then the screen —
+> each with its own tests.
 >
 > Two things I need from you:
 > - The spec doesn't say whether ratings sync or stay local. Which?
@@ -109,9 +118,11 @@ there to catch a wrong shape, not to add ceremony.
 
 ### Then the detailed plan
 
-Phases are normally bottom-up — data, domain, UI, tests — because each one is
-independently buildable and a defect found in the data layer is far cheaper than
-the same defect found after the UI is on top of it.
+Phases are dependency-ordered — usually data, then domain, then presentation, using
+only the layers the change touches. Each phase includes its own tests and is
+independently buildable, because a defect found in the data layer is far cheaper than
+the same defect found after the UI is on top of it. A phase that adds a screen also
+lists a `@Preview` for each visual state.
 
 Before showing you the detail, it checks the plan against a few design questions
 the Konsist rules cannot: whether each use case does one thing, whether an
@@ -129,7 +140,7 @@ those are the questions to push on.**
 > **Tip**: switch to Opus for this stage (`/model opus`). Planning is where
 > deeper reasoning pays for itself; the plan's quality bounds everything after it.
 
-**Output**: `docs/features/{feature-name}/PLAN.md`
+**Output**: `docs/features/{feature-name}/PLAN.md`, committed on the branch once you approve it.
 
 **Check before moving on**: read the whole plan. Specifically —
 
@@ -164,12 +175,13 @@ The plan must be self-contained. That is what makes stage 3 resumable after a
 Implement the user-profiles feature.
 ```
 
-Claude creates `feature/{feature-name}`, then works **one phase at a time**:
+Claude checks out the branch from stage 1, then works **one phase at a time**:
 
 1. Implements exactly what the phase specifies — no extras, no "while I'm here"
 2. Runs that phase's verification from the plan
 3. Reports files changed, decisions made, and the verification result
 4. **Stops and waits for you**
+5. Commits the phase once you approve it
 
 > **Tip**: switch to Sonnet for this stage (`/model sonnet`). Execution against a
 > good plan does not need the heavier model, and you will iterate faster.
@@ -184,11 +196,15 @@ Say "continue" when you are satisfied. Say what is wrong when you are not.
 
 ### Per-phase verification is deliberately narrow
 
-Each phase runs only what the plan specifies — typically `assembleDebug` or
-`testDebugUnitTest`. It does **not** run the full CI set, on purpose: a
-half-built feature will legitimately fail `lint` on a string resource that a
-later phase consumes, and failures you are trained to ignore are worse than no
-check at all.
+Each phase runs only what the plan specifies — typically its module's tests and
+`assembleDebug`. It does not run the full CI set: failures you are trained to ignore
+are worse than no check at all.
+
+The exception is `lint`, for any phase that touches a composable or `res/`. Lint is
+the only check that sees Compose and resource misuse, so leaving it to the end moves
+the failure a phase or more away from its cause. The plan makes this possible by
+adding each resource in the phase that first uses it — otherwise a half-built feature
+would fail lint on a resource that a later phase consumes.
 
 ### If the context window fills up
 
@@ -204,7 +220,7 @@ Or start clean:
 /clear
 Read docs/features/user-profiles/PLAN.md and CLAUDE.md.
 We are implementing the user-profiles feature.
-Phases 1 through 2 are complete. Continue with Phase 3.
+Phases 1 through 2 are committed. Continue with Phase 3.
 ```
 
 This works because the plan is self-contained. It is also why stage 2 is worth
@@ -290,12 +306,15 @@ It posts inline comments tagged by severity, plus a summary.
 ### Triage the findings
 
 ```
-Fetch the inline review comments from PR #XX using gh api.
-Walk me through each one. For each finding, show me the code and the
-suggestion, then wait for my decision before proceeding.
+/review-triage
+
+Go through the review comments on PR #XX.
 ```
 
-Not every finding deserves a fix. Some are wrong. Decide per finding.
+Claude presents one finding at a time — the code, the claim, its own assessment and a
+proposed change — and waits for your decision. Not every finding deserves a fix; some are
+wrong. After the last one it verifies, commits, pushes, and (with your go-ahead) replies on
+each thread.
 
 ### Before you merge, check for comments newer than your last commit
 
@@ -308,7 +327,8 @@ gh api repos/{owner}/{repo}/pulls/{n}/comments \
   --jq '.[] | select(.created_at > "<your last commit time>") | {path, line, body}'
 ```
 
-If that returns anything, it is by definition unaddressed. A second review round
+`/review-triage` runs this check for you before you merge. If it returns anything, it
+is by definition unaddressed. A second review round
 is exactly when attention is lowest — the work feels finished and the new
 comments look like an echo of ones you already handled.
 
@@ -324,8 +344,10 @@ After merging:
 Run a retrospective for the user-profiles feature, PR #XX.
 ```
 
-Claude pulls the review comments, counts findings by severity, works out which
-patterns repeat, and writes `RETRO.md` with proposed `CLAUDE.md` additions.
+Claude works on a new `docs/{feature-name}-retro` branch (the feature branch is merged).
+It pulls the review comments, counts findings by severity, compares against earlier
+retros, and writes `RETRO.md` with proposed changes, then opens a docs PR with the ones
+you approve.
 
 **This is the step that closes the loop.** A mistake Claude made once it will
 make again, unless something changes. Two things can change:
@@ -342,6 +364,12 @@ Prefer the Konsist rule whenever the finding can be expressed as one. When you
 add a rule, check it fails on the code that prompted it before you fix that code
 — a rule that cannot go red is not enforcing anything.
 
+A third destination exists for lessons about the **process**: the skill for that stage.
+Keep skills free of history. A skill gets a general step ("add each resource in the
+phase that first uses it"), never an incident ("in feature X, phase 2 missed…"). The
+test for anything going into `CLAUDE.md` or a skill: would it still be true and useful if
+that feature had never existed? If not, it belongs in `RETRO.md`.
+
 `docs/features/watched-movies/RETRO.md` is a worked example, including the
 baseline numbers a future retrospective is compared against.
 
@@ -354,7 +382,8 @@ baseline numbers a future retrospective is compared against.
 /architect       → PLAN.md      → approve the outline, then read the plan
 /developer       → code         → review after every phase
 /pre-pr-checklist→ GO / NO GO   → act on CONDITIONAL GO
-@claude-review   → PR comments  → triage, and check for late ones
+@claude-review   → PR comments
+/review-triage   → fixes        → decide per finding, check for late ones
 /retrospective   → RETRO.md     → turn lessons into rules
 ```
 

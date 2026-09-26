@@ -87,6 +87,11 @@ database ──┤──► data ──► domain ──► model
 - ViewModels extend `MviViewModel<Event, UiState, SideEffect>` from `:core:presentation:mvi`
 - `Event` = user intent (sealed interface, one per screen)
 - `UiState` = immutable data class implementing `UiState` interface
+- `UiState` defaults describe a neutral state (not loading, no error, no data). If the
+  ViewModel starts in a particular state — e.g. loading, because `init {}` starts a fetch —
+  pass it as `initialState = FooUiState(isLoading = true)`. A default that encodes ViewModel
+  behaviour makes every other construction (`FooUiState(data = …)` in a preview or test)
+  render something else.
 - `SideEffect` = one-time effects (navigation, toasts) via `Channel`
 - ViewModels call `setState { copy(...) }`, `setEffect { ... }`, never expose mutable state
 - UI collects `viewState` as `StateFlow`, `effect` as `Flow`
@@ -140,6 +145,19 @@ toolchain does not catch.
 - **Keep user-facing strings out of ViewModels.** They have no `Context` and cannot be
   localised. Use typed side effects (`RatingSaved` / `RatingError`) or `@StringRes` ids
   and resolve them in the composable.
+
+### Compose
+
+- **Read resources through Compose, not `LocalContext`.** In composition use
+  `stringResource()`; in a callback outside composition (e.g. an `ObserveEffects` handler
+  showing a Toast) capture `val resources = LocalResources.current` during composition and
+  call `resources.getString()`. `LocalContext.current.getString()` fails lint
+  (`LocalContextGetResourceValueCall`) under `warningsAsErrors`.
+- **Every visual state a screen can render gets a `@Preview`** — loading, each error
+  variant, empty, content. CI compiles previews but never renders them, so open them in
+  Android Studio before calling them done. Screens that call `getKoin()` throw in a preview
+  until [#25](https://github.com/pantstamp/android-template-project/issues/25) lands; wrap
+  them in `KoinApplicationPreview` (see `MovieListPreviewKoin` in `MovieListScreen.kt`).
 
 ### Mappers
 Every mapper declares what it maps by implementing a mapper interface (Konsist-enforced: a
@@ -229,6 +247,7 @@ so it is not called a mapper.
 - **Logger in use case tests**: do not mock `Logger` — use an inline no-op object instead. Mockative stubs are not set up for `logger.e(...)`, so an unstubbed call inside `onStartCatch`'s `catch` block will propagate as an uncaught exception that Turbine surfaces as a flow error.
 - **Adding tests to a module that has none**: add `id(libs.plugins.custom.testing.get().pluginId)` to the module's `build.gradle.kts` first. Without it, test dependencies (Mockative, Turbine, Truth, test doubles) are not on the classpath.
 - **Event and SideEffect files**: each screen puts its `*Event` and `*SideEffect` in separate files (not co-located in the ViewModel file). Follow this convention when creating new screens.
+- **Test the branches, not just the listed cases.** When a condition treats two different states the same (e.g. `hasMovies` is false for both `null` and an empty list), test both sides. When a new code path can be reached from more than one caller (e.g. `ignoreCache = true` and `false`), test each one. Assert the same side effects (e.g. "nothing written") across neighbouring tests.
 
 ---
 
