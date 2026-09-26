@@ -107,7 +107,17 @@ For each layer, specify:
 - Which **existing files** will be modified and what changes are needed
 - What **new files** need to be created, with exact file paths
 - **Class names, method signatures, and key implementation details**
-- The **verification step** to confirm the phase is complete (build command or test)
+- The **verification step** to confirm the phase is complete (build command or test).
+  If the phase touches a composable or anything under `res/`, the command includes `lint`.
+  The project runs lint with `warningsAsErrors`, and lint is the only check that sees
+  Compose resource misuse. In discover-load-error-recovery, Phase 2's check was
+  `testDebugUnitTest assembleDebug spotlessCheck`. A `LocalContext.current.getString()` it
+  added went unnoticed until Phase 3's check ran lint, a phase later than it should have.
+- For a phase that adds or changes a screen, the **`@Preview`s to add**: one per visual
+  state the screen can render (loading, each error variant, empty, content), listed next to
+  the composables. CI compiles previews but never renders them, so they are often the only
+  way to see a state that can't be reached on a device. In discover-load-error-recovery the
+  plan left them out, the empty state was never seen, and review had to ask for them.
 
 #### Before presenting it, answer these
 
@@ -129,6 +139,8 @@ run in verification and in CI. Spend the effort on what they can't check:
   to Room, Retrofit or Compose named in `:architecture:mapper` or `:core:model` is the
   signal. `:architecture:mapper` holds only boundaries that survive swapping the library.
 - **Does every phase leave the project compiling on its own?**
+- **Does every phase that touches a composable or a resource run `lint`, and does every
+  new screen state have a preview listed?**
 
 If any answer is uncomfortable, change the plan before presenting it — or raise it as an
 open question when you do.
@@ -201,7 +213,16 @@ If applicable — migration SQL, version bump, etc.
 (Same structure as Phase 1)
 
 ## Phase 3: UI Layer
-(Same structure as Phase 1)
+(Same structure as Phase 1, plus:)
+
+### Previews to add
+- `PreviewFooLoading`, `PreviewFooError`, `PreviewFooEmpty`, `PreviewFooContent` — one per
+  visual state, with the `UiState` each one renders
+
+### Verification
+```bash
+./gradlew assembleDebug lint
+```
 
 ## Phase 4: Testing
 
