@@ -77,10 +77,12 @@ A pre-existing TODO in a touched file is not this change's to report.
 ```
 
 Same tasks and order as `.github/workflows/build.yml` — **if the workflow changes, change this
-line.** On failure:
+line.** Gradle keeps the requested order, so the cheap checks fail first and the run stops at
+the first failure; keep that order. On failure:
 - **`:test:konsist:test`** — fix the code to match the rule. Changing a rule is a conversation
   with the user, not a silent edit.
-- **`lint`** (`warningsAsErrors`) — fix the cause. No baseline or suppression without asking.
+- **`lint`** (`warningsAsErrors`) — read the HTML report the task links to, and fix the cause.
+  No baseline or suppression without asking.
 - **`spotlessCheck`** — run `./gradlew spotlessApply` and re-run. The only failure here that
   needs no judgment call.
 

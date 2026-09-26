@@ -45,8 +45,9 @@ Fix nothing at this stage and do not widen scope to absorb cleanup.
 
 ### 2. Agree the shape before the detail
 
-Present a one-page **outline** in plain language and wait for approval: two or three
-sentences per phase (what it builds, how you'll know it works), no file paths or signatures.
+Present a one-page **outline** and wait for approval. Someone who has not read the codebase
+should be able to follow it: two or three sentences per phase (what it builds, how you'll
+know it works), no file paths or signatures.
 
 The value is in **the decisions, not the phase list**. Surface every real fork:
 - "The spec doesn't say whether ratings sync. Local only, or sync?"
@@ -104,7 +105,8 @@ If an answer is uncomfortable, change the plan or raise it as an open question.
 
 ### 4. Discuss with the user
 
-Walk through the plan phase by phase in plain words, then let them read the detail. A phase
+Walk through the plan phase by phase in plain words, then let them read the detail. Ask for
+what the codebase can't tell you: upcoming changes, team preferences, constraints. A phase
 that can't be described in two or three plain sentences is usually phased wrong. Iterate
 until they approve.
 

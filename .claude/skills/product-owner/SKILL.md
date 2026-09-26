@@ -64,8 +64,15 @@ For each topic:
 - Propose a default with its reason ("I'd suggest X because Y — does that work?")
 - Wait for the answer before the next topic
 
-Cover what applies: core behaviour, edge cases (empty states, boundaries, concurrency), error
-handling, lifecycle, offline, accessibility, data concerns, UI/UX open questions.
+Cover what applies:
+- **Core behaviour** — triggers and outcomes
+- **Edge cases** — empty states, boundary values, concurrent operations
+- **Error handling** — network failures, database errors, invalid input
+- **Lifecycle** — rotation, process death, back navigation
+- **Offline** — what works offline, what is cached, sync strategy
+- **Accessibility** — content descriptions, touch targets, screen reader behaviour
+- **Data** — storage limits, migration, data loss
+- **UI/UX open questions** — naming, visual treatment, interaction patterns
 
 ### 5. Write and commit SPEC.md
 

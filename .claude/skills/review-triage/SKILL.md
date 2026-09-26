@@ -51,7 +51,7 @@ test, confirm it fails when the behaviour it guards is broken.
 After the last finding, run the CI mirror from the pre-pr-checklist skill (Part 2), then:
 
 ```bash
-git add -A
+git add {files changed for the accepted findings}
 git commit -m "{type}({feature-name}): address review feedback on PR #{n}"
 git push
 ```

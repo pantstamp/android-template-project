@@ -53,7 +53,9 @@ plan, or the implementation introduce it? A plan-level defect is implemented fai
 only the architect's self-checks could have caught it.
 
 Look for patterns: the same mistake in several places, **a repeat of a lesson from an earlier
-retro** (a lesson that never became a rule), and what the gate or reviewer should have caught.
+retro** (a lesson that never became a rule), framework-specific mistakes (Compose, coroutines,
+Room) that suggest an outdated or incorrect pattern, and what the gate or reviewer should have
+caught.
 
 ### 4. Route each lesson
 
@@ -64,9 +66,10 @@ For every lesson, pick exactly one destination:
 | A rule about the code | **CLAUDE.md** — the rule plus a one-line reason |
 | Mechanically checkable | **A Konsist or lint rule** — prose gets violated, a rule can't be |
 | About how a pipeline stage works | **The skill** — as a general process step |
+| Something the automated reviewer should check | **The review prompt** in `.github/workflows/claude-review.yml` |
 | What happened and why | **RETRO.md only** |
 
-**Test for anything going into CLAUDE.md or a skill: would it still be true and useful if this
+**Test for anything going into CLAUDE.md, a skill or the review prompt: would it still be true and useful if this
 feature had never existed?** If not, it is history — keep it in RETRO.md. Write rules as the
 mechanism ("a condition that treats `null` and empty alike needs a test for each"), never as
 the incident ("in feature X, phase 2 missed…"): no feature names, phase numbers, file names or
@@ -102,6 +105,7 @@ Per finding: issue · file · root cause (and which stage introduced it) · fix 
 ### CLAUDE.md
 ### Konsist / lint
 ### Skills
+### Review prompt
 Ready-to-paste text, each passing the test in step 4.
 
 ## Baseline for next time

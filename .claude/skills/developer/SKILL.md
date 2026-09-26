@@ -57,10 +57,13 @@ done differently from the plan and why, and the verification result.
 
 **d) Wait for approval.** Do not start the next phase until the user says to continue.
 
-**e) Commit the approved phase:**
+**e) Commit the approved phase.** Check `git status` against the phase's file list first, and
+stage those files by name — not `git add -A`, which also sweeps in scratch files and IDE state.
+Ask about anything unexpected.
 
 ```bash
-git add -A
+git status --short
+git add {files from this phase}
 git commit -m "{type}({feature-name}): {phase title from the plan}"
 ```
 
@@ -89,7 +92,7 @@ hand off to the **pre-pr-checklist** skill.
 
 - **If the gate was skipped**, run its Part 2 pre-flight command from the pre-pr-checklist
   skill first. It mirrors CI; skipping the gate should not mean pushing a branch CI rejects.
-- **Always** run `./gradlew spotlessApply` and commit any changes it makes.
+- **Always** run `./gradlew spotlessApply` and commit any files it reformatted.
 
 Then push and open the PR. Use the plan's phase titles as the structure of the description,
 not a fixed list of layers:
