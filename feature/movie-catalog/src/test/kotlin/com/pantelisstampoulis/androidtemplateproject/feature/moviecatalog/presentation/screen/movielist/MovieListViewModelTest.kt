@@ -8,18 +8,23 @@ import com.pantelisstampoulis.androidtemplateproject.domain.ResultState
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetMoviesUseCase
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.mapper.MovieUiMapper
 import com.pantelisstampoulis.androidtemplateproject.model.error.DomainError
+import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
 import com.pantelisstampoulis.androidtemplateproject.test.doubles.model.DomainTestDoubleFactory
 import io.mockative.Mock
 import io.mockative.any
 import io.mockative.every
 import io.mockative.mock
+import io.mockative.once
 import io.mockative.verify
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -38,7 +43,7 @@ class MovieListViewModelTest : KoinTest {
 
     private val uiMapper: MovieUiMapper by inject()
 
-    // Inject the ViewModel
+    // Lazy: construction starts the initial load, so stub the use case before touching it.
     private val viewModel: MovieListViewModel by inject()
 
     // Use TestDispatcher for coroutines testing
@@ -67,98 +72,194 @@ class MovieListViewModelTest : KoinTest {
     }
 
     @Test
-    fun shouldEmitLoadingStateWhenFetchingMoviesStarts() = runTest {
-        every { getMoviesUseCase(any()) }
-            .returns(
-                flow {
-                    emit(ResultState.Loading) // Emit loading state
-                },
-            )
+    fun shouldShowLoadingThenMoviesOnInitialLoad() = runTest {
+        val movies = provideMovies()
+        every { getMoviesUseCase(false) }.returns(delayedSuccess(movies))
 
-        viewModel.setEvent(MovieListEvent.GetMovies(ignoreCache = false))
+        val vm = viewModel
+        runCurrent()
+
+        assertThat(vm.viewState.value.isLoading).isTrue()
+        assertThat(vm.viewState.value.data).isNull()
 
         advanceUntilIdle()
 
-        // Then: verifying that the state emits loading first, followed by success
-        viewModel.viewState.test {
-            // First emission should indicate loading
-            val firstItem = awaitItem()
-            assertThat(firstItem.isLoading).isTrue() // Expecting the loading state
-            assertThat(firstItem.data).isNull() // No data yet, just loading
-
-            cancelAndIgnoreRemainingEvents()
-        }
-
-        // Verify that the use case was invoked with the correct argument
-        verify { getMoviesUseCase(any()) }.wasInvoked()
+        val state = vm.viewState.value
+        assertThat(state.isLoading).isFalse()
+        assertThat(state.error).isNull()
+        assertThat(state.data).isEqualTo(movies.toUi())
+        verify { getMoviesUseCase(false) }.wasInvoked(exactly = once)
     }
 
     @Test
-    fun shouldEmitSuccessStateWhenFetchingMovies() = runTest {
-        // Given
-        val domainMovies = listOf(
-            DomainTestDoubleFactory.provideMovieModel(),
-            DomainTestDoubleFactory.provideMovieModel(),
-        )
-        val uiMovies = domainMovies.map { uiMapper.fromDomainToUi(it) }
+    fun shouldShowOfflineErrorWhenFirstLoadFailsWithNoNetwork() = runTest {
+        every { getMoviesUseCase(false) }
+            .returns(flowOf(ResultState.Error(DomainError.NoNetworkConnection())))
 
-        every { getMoviesUseCase(any()) }
-            .returns(
-                flow {
-                    emit(ResultState.Success(domainMovies)) // Emit success state
-                },
-            )
-
-        // When
-        viewModel.setEvent(MovieListEvent.GetMovies(ignoreCache = false))
-
-        // Ensure that all the coroutines and state emissions have been processed
+        val vm = viewModel
         advanceUntilIdle()
 
-        // Then
-        viewModel.viewState.test {
-            val firstItem = awaitItem()
-            assertThat(firstItem.isLoading).isFalse() // Loading should be done
-            assertThat(firstItem.errorMessage).isNull() // No error should be present
-            assertThat(firstItem.data).isEqualTo(uiMovies) // Data should now be present
-
-            cancelAndIgnoreRemainingEvents()
+        val state = vm.viewState.value
+        assertThat(state.error).isEqualTo(MovieListError.Offline)
+        assertThat(state.isLoading).isFalse()
+        assertThat(state.data).isNull()
+        vm.effect.test {
+            expectNoEvents()
         }
-
-        // Verify that the use case was invoked with the correct argument
-        verify { getMoviesUseCase(any()) }.wasInvoked()
     }
 
     @Test
-    fun shouldEmitErrorStateWhenFetchingMoviesFails() = runTest {
-        // Given
-        val errorMessage = "Server error"
-        val errorState = DomainError.ServerError(errorMessage)
+    fun shouldShowGenericErrorWhenFirstLoadFailsWithOtherError() = runTest {
+        every { getMoviesUseCase(false) }
+            .returns(flowOf(ResultState.Error(DomainError.ServerError())))
 
-        every { getMoviesUseCase(any()) }.returns(flowOf(ResultState.Error(errorState)))
+        val vm = viewModel
+        advanceUntilIdle()
 
-        // When
-        viewModel.setEvent(MovieListEvent.GetMovies(ignoreCache = false))
+        assertThat(vm.viewState.value.error).isEqualTo(MovieListError.Generic)
+    }
 
-        // Then
-        viewModel.viewState.test {
-            val firstItem = awaitItem()
-            assertThat(firstItem.isLoading).isFalse()
-            assertThat(firstItem.errorMessage).isNull()
-            assertThat(firstItem.data).isNull()
+    @Test
+    fun shouldShowEmptyStateWhenFirstLoadReturnsNoMovies() = runTest {
+        every { getMoviesUseCase(false) }.returns(flowOf(ResultState.Success(emptyList())))
 
-            // Check side effect for showing toast
-            viewModel.effect.test {
-                val toastEffect = awaitItem()
-                assertThat(toastEffect).isEqualTo(MovieListSideEffect.ShowToast(errorMessage))
-            }
+        val vm = viewModel
+        advanceUntilIdle()
 
-            cancelAndIgnoreRemainingEvents()
+        val state = vm.viewState.value
+        assertThat(state.data).isEmpty()
+        assertThat(state.error).isNull()
+        assertThat(state.isLoading).isFalse()
+    }
+
+    @Test
+    fun shouldShowLoadingThenMoviesWhenRetryingAfterFailure() = runTest {
+        val movies = provideMovies()
+        every { getMoviesUseCase(false) }
+            .returns(flowOf(ResultState.Error(DomainError.ServerError())))
+        every { getMoviesUseCase(true) }.returns(delayedSuccess(movies))
+
+        val vm = viewModel
+        advanceUntilIdle()
+
+        vm.setEvent(MovieListEvent.Refresh)
+        runCurrent()
+
+        assertThat(vm.viewState.value.isLoading).isTrue()
+        assertThat(vm.viewState.value.isRefreshing).isFalse()
+        assertThat(vm.viewState.value.error).isNull()
+
+        advanceUntilIdle()
+
+        assertThat(vm.viewState.value.data).isEqualTo(movies.toUi())
+        assertThat(vm.viewState.value.error).isNull()
+        assertThat(vm.viewState.value.isLoading).isFalse()
+    }
+
+    @Test
+    fun shouldShowErrorAgainWhenRetryFails() = runTest {
+        every { getMoviesUseCase(false) }
+            .returns(flowOf(ResultState.Error(DomainError.ServerError())))
+        every { getMoviesUseCase(true) }
+            .returns(flowOf(ResultState.Error(DomainError.NoNetworkConnection())))
+
+        val vm = viewModel
+        advanceUntilIdle()
+
+        vm.setEvent(MovieListEvent.Refresh)
+        advanceUntilIdle()
+
+        assertThat(vm.viewState.value.error).isEqualTo(MovieListError.Offline)
+        assertThat(vm.viewState.value.isLoading).isFalse()
+    }
+
+    @Test
+    fun shouldShowLoadingWhenRetryingFromEmptyState() = runTest {
+        val movies = provideMovies()
+        every { getMoviesUseCase(false) }.returns(flowOf(ResultState.Success(emptyList())))
+        every { getMoviesUseCase(true) }.returns(delayedSuccess(movies))
+
+        val vm = viewModel
+        advanceUntilIdle()
+
+        vm.setEvent(MovieListEvent.Refresh)
+        runCurrent()
+
+        assertThat(vm.viewState.value.isLoading).isTrue()
+        assertThat(vm.viewState.value.isRefreshing).isFalse()
+
+        advanceUntilIdle()
+
+        assertThat(vm.viewState.value.data).isEqualTo(movies.toUi())
+    }
+
+    @Test
+    fun shouldRefreshWithoutFullScreenLoadingWhenMoviesShowing() = runTest {
+        val oldMovies = provideMovies()
+        val newMovies = provideMovies()
+        every { getMoviesUseCase(false) }.returns(flowOf(ResultState.Success(oldMovies)))
+        every { getMoviesUseCase(true) }.returns(delayedSuccess(newMovies))
+
+        val vm = viewModel
+        advanceUntilIdle()
+
+        vm.setEvent(MovieListEvent.Refresh)
+        runCurrent()
+
+        assertThat(vm.viewState.value.isRefreshing).isTrue()
+        assertThat(vm.viewState.value.isLoading).isFalse()
+        assertThat(vm.viewState.value.data).isEqualTo(oldMovies.toUi())
+
+        advanceUntilIdle()
+
+        assertThat(vm.viewState.value.isRefreshing).isFalse()
+        assertThat(vm.viewState.value.data).isEqualTo(newMovies.toUi())
+    }
+
+    @Test
+    fun shouldKeepMoviesAndSendRefreshFailedWhenRefreshFails() = runTest {
+        val movies = provideMovies()
+        every { getMoviesUseCase(false) }.returns(flowOf(ResultState.Success(movies)))
+        every { getMoviesUseCase(true) }
+            .returns(flowOf(ResultState.Error(DomainError.NoNetworkConnection())))
+
+        val vm = viewModel
+        advanceUntilIdle()
+
+        vm.setEvent(MovieListEvent.Refresh)
+        advanceUntilIdle()
+
+        val state = vm.viewState.value
+        assertThat(state.data).isEqualTo(movies.toUi())
+        assertThat(state.error).isNull()
+        assertThat(state.isRefreshing).isFalse()
+        assertThat(state.isLoading).isFalse()
+        vm.effect.test {
+            assertThat(awaitItem()).isEqualTo(MovieListSideEffect.RefreshFailed(MovieListError.Offline))
         }
+    }
+
+    @Test
+    fun shouldApplyOnlyLatestLoadWhenRefreshStartsDuringLoad() = runTest {
+        val staleMovies = provideMovies()
+        val latestMovies = provideMovies()
+        every { getMoviesUseCase(false) }.returns(delayedSuccess(staleMovies))
+        every { getMoviesUseCase(true) }.returns(flowOf(ResultState.Success(latestMovies)))
+
+        val vm = viewModel
+        runCurrent()
+
+        vm.setEvent(MovieListEvent.Refresh)
+        advanceUntilIdle()
+
+        assertThat(vm.viewState.value.data).isEqualTo(latestMovies.toUi())
     }
 
     @Test
     fun shouldNavigateToMovieDetailsWhenShowMovieDetailsEventIsTriggered() = runTest {
+        // init starts the initial load, so the use case needs a stub even here.
+        every { getMoviesUseCase(any()) }.returns(emptyFlow())
+
         // When
         viewModel.setEvent(MovieListEvent.ShowMovieDetails(movieId = 123))
 
@@ -169,5 +270,20 @@ class MovieListViewModelTest : KoinTest {
 
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    private fun provideMovies(): List<Movie> = listOf(
+        DomainTestDoubleFactory.provideMovieModel(),
+        DomainTestDoubleFactory.provideMovieModel(),
+    )
+
+    private fun List<Movie>.toUi() = map { uiMapper.fromDomainToUi(it) }
+
+    // Suspends between Loading and Success so the loading state is observable;
+    // without the delay StateFlow conflates the two.
+    private fun delayedSuccess(movies: List<Movie>) = flow {
+        emit(ResultState.Loading)
+        delay(1_000)
+        emit(ResultState.Success(movies))
     }
 }

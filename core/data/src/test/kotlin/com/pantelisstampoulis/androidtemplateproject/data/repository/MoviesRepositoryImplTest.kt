@@ -148,6 +148,37 @@ class MoviesRepositoryImplTest : KoinTest {
     }
 
     @Test
+    fun shouldReturnCachedMoviesWhenRefreshReturnsEmptyList() = runTest {
+        val mockMovieDbList = listOf(
+            DatabaseTestDoubleFactory.provideMovieDbModel(),
+            DatabaseTestDoubleFactory.provideMovieDbModel(),
+        )
+        val mockMovieList = mockMovieDbList.map { dataMappers.movieDomainMapper.fromDbToDomain(it) }
+
+        coEvery { databaseDataSource.getMovies() }.returns(flowOf(mockMovieDbList))
+        coEvery { networkDataSource.getMovies() }.returns(NetworkResult.Success(emptyList()))
+
+        repository.getMovies(ignoreCache = true).test {
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(ResultState.Success::class.java)
+            assertThat((result as ResultState.Success).data).isEqualTo(mockMovieList)
+            coVerify { networkDataSource.getMovies() }.wasInvoked(exactly = once)
+            coVerify { databaseDataSource.insertMovies(any()) }.wasNotInvoked()
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun shouldReturnEmptyListWhenNetworkReturnsEmptyAndCacheIsEmpty() = runTest {
+        assertEmptyResultWithoutWrite(ignoreCache = false)
+    }
+
+    @Test
+    fun shouldReturnEmptyListWhenRetryReturnsEmptyAndCacheIsEmpty() = runTest {
+        assertEmptyResultWithoutWrite(ignoreCache = true)
+    }
+
+    @Test
     fun shouldReturnMovieFromDatabaseWhenMovieExists() = runTest {
         val movieId = 1
         val mockMovieDbModel = DatabaseTestDoubleFactory.provideMovieDbModel()
@@ -282,6 +313,18 @@ class MoviesRepositoryImplTest : KoinTest {
             assertThat(result).isInstanceOf(ResultState.Success::class.java)
             assertThat((result as ResultState.Success).data).isNull()
             coVerify { databaseDataSource.getWatchedMovie(movieId) }.wasInvoked(exactly = once)
+            awaitComplete()
+        }
+    }
+
+    private suspend fun assertEmptyResultWithoutWrite(ignoreCache: Boolean) {
+        coEvery { databaseDataSource.getMovies() }.returns(flowOf(emptyList()))
+        coEvery { networkDataSource.getMovies() }.returns(NetworkResult.Success(emptyList()))
+
+        repository.getMovies(ignoreCache = ignoreCache).test {
+            assertThat(awaitItem()).isEqualTo(ResultState.Success(emptyList<Any>()))
+            coVerify { networkDataSource.getMovies() }.wasInvoked(exactly = once)
+            coVerify { databaseDataSource.insertMovies(any()) }.wasNotInvoked()
             awaitComplete()
         }
     }

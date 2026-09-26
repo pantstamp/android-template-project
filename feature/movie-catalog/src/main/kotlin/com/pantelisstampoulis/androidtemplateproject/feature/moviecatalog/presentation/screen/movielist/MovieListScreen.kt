@@ -1,6 +1,8 @@
 package com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.movielist
 
 import android.widget.Toast
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,25 +16,28 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.compose.AsyncImage
 import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
@@ -42,9 +47,14 @@ import com.pantelisstampoulis.androidtemplateproject.presentation.common.ui.uico
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import com.pantelisstampoulis.androidtemplateproject.presentation.theme.StarYellow
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import org.koin.compose.KoinApplicationPreview
 import org.koin.compose.getKoin
 import org.koin.core.qualifier.named
+import org.koin.dsl.module
 import kotlin.coroutines.CoroutineContext
 
 @Composable
@@ -55,6 +65,8 @@ fun MovieListScreen(
     onMovieClicked: (Int) -> Unit,
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
+    val movies = state.data
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -62,28 +74,33 @@ fun MovieListScreen(
         contentAlignment = Alignment.Center,
     ) {
         when {
+            !movies.isNullOrEmpty() -> {
+                MovieList(
+                    movies = movies,
+                    isRefreshing = state.isRefreshing,
+                    onEvent = onEvent,
+                )
+            }
+
             state.isLoading -> {
                 CircularProgressIndicator()
             }
 
-            state.errorMessage != null -> {
-                Text(
-                    text = state.errorMessage,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 16.dp),
+            state.error != null -> {
+                MovieListStatus(
+                    messageRes = state.error.messageRes(),
+                    iconRes = state.error.iconRes(),
+                    onRetry = { onEvent(MovieListEvent.Refresh) },
                 )
             }
 
-            state.data != null -> {
-                MovieList(
-                    movies = state.data,
-                    onEvent = onEvent,
+            movies != null -> {
+                MovieListStatus(
+                    messageRes = R.string.movie_list_empty,
+                    iconRes = null,
+                    onRetry = { onEvent(MovieListEvent.Refresh) },
                 )
             }
-        }
-
-        LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
-            onEvent(MovieListEvent.GetMovies())
         }
 
         ObserveEffects(
@@ -92,8 +109,9 @@ fun MovieListScreen(
             lifecycleOwner = LocalLifecycleOwner.current,
         ) { sideEffect ->
             when (sideEffect) {
-                is MovieListSideEffect.ShowToast ->
-                    Toast.makeText(context, sideEffect.text, Toast.LENGTH_SHORT).show()
+                is MovieListSideEffect.RefreshFailed ->
+                    Toast.makeText(context, resources.getString(sideEffect.error.messageRes()), Toast.LENGTH_SHORT)
+                        .show()
 
                 is MovieListSideEffect.NavigateToMovieDetails -> {
                     onMovieClicked(sideEffect.movieId)
@@ -104,11 +122,12 @@ fun MovieListScreen(
 }
 
 @Composable
-fun MovieList(movies: ImmutableList<MovieUiModel>, onEvent: (MovieListEvent) -> Unit, modifier: Modifier = Modifier) {
-    var isRefreshing by remember {
-        mutableStateOf(false)
-    }
-
+fun MovieList(
+    movies: ImmutableList<MovieUiModel>,
+    isRefreshing: Boolean,
+    onEvent: (MovieListEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     PullToRefreshLazyColumn(
         items = movies,
         key = { movie ->
@@ -125,9 +144,58 @@ fun MovieList(movies: ImmutableList<MovieUiModel>, onEvent: (MovieListEvent) -> 
         },
         isRefreshing = isRefreshing,
         onRefresh = {
-            onEvent(MovieListEvent.GetMovies(ignoreCache = true))
+            onEvent(MovieListEvent.Refresh)
         },
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MovieListStatus(
+    @StringRes messageRes: Int,
+    @DrawableRes iconRes: Int?,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    PullToRefreshBox(
+        // A retry swaps this whole state for the full-screen spinner, so the indicator never shows.
+        isRefreshing = false,
+        onRefresh = onRetry,
+        modifier = modifier.fillMaxSize(),
+    ) {
+        // PullToRefreshBox only reacts to nested scroll, so the content must be scrollable.
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillParentMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    if (iconRes != null) {
+                        Icon(
+                            painter = painterResource(id = iconRes),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(48.dp),
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                    Text(
+                        text = stringResource(id = messageRes),
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Button(onClick = onRetry) {
+                        Text(text = stringResource(id = R.string.action_retry))
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -197,4 +265,73 @@ fun MovieRow(movie: MovieUiModel, onClick: () -> Unit, modifier: Modifier = Modi
             }
         }
     }
+}
+
+@StringRes
+private fun MovieListError.messageRes(): Int = when (this) {
+    MovieListError.Offline -> R.string.movie_list_error_offline
+    MovieListError.Generic -> R.string.movie_list_error_generic
+}
+
+@DrawableRes
+private fun MovieListError.iconRes(): Int = when (this) {
+    MovieListError.Offline -> R.drawable.ic_cloud_off
+    MovieListError.Generic -> R.drawable.ic_error
+}
+
+@Preview
+@Composable
+fun PreviewMovieListOfflineError() {
+    MovieListPreviewKoin {
+        MovieListScreen(
+            state = MovieListUiState(error = MovieListError.Offline),
+            effect = emptyFlow(),
+            onEvent = {},
+            onMovieClicked = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewMovieListGenericError() {
+    MovieListPreviewKoin {
+        MovieListScreen(
+            state = MovieListUiState(error = MovieListError.Generic),
+            effect = emptyFlow(),
+            onEvent = {},
+            onMovieClicked = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewMovieListEmpty() {
+    MovieListPreviewKoin {
+        MovieListScreen(
+            state = MovieListUiState(data = persistentListOf()),
+            effect = emptyFlow(),
+            onEvent = {},
+            onMovieClicked = {},
+        )
+    }
+}
+
+// MovieListScreen resolves its effect dispatcher through getKoin(), and a preview has no
+// started Koin application, so previews supply a local one with just that binding.
+@Composable
+private fun MovieListPreviewKoin(content: @Composable () -> Unit) {
+    KoinApplicationPreview(
+        application = {
+            modules(
+                module {
+                    single<CoroutineContext>(named(CoroutinesDispatchers.MainImmediate)) {
+                        Dispatchers.Main.immediate
+                    }
+                },
+            )
+        },
+        content = content,
+    )
 }

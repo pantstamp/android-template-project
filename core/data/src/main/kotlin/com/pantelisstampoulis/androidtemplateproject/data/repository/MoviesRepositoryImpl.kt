@@ -40,17 +40,11 @@ internal class MoviesRepositoryImpl(
     }
 
     override fun getMovies(ignoreCache: Boolean): Flow<ResultState<List<Movie>>> = flow {
-        val movies = databaseDataSource.getMovies().firstOrNull() // Collect the first emission or null
-        if (movies.isNullOrEmpty()) {
-            // No movies in the database, fetch from network
-            fetchMoviesFromNetwork()
+        val movies = databaseDataSource.getMovies().firstOrNull().orEmpty() // Collect the first emission
+        if (movies.isNotEmpty() && !ignoreCache) {
+            emitMoviesFromDb(movies)
         } else {
-            // Movies are present in the database
-            if (!ignoreCache) {
-                emitMoviesFromDb(movies)
-            } else {
-                fetchMoviesFromNetwork()
-            }
+            fetchMoviesFromNetwork(cachedMovies = movies)
         }
     }
 
@@ -105,13 +99,21 @@ internal class MoviesRepositoryImpl(
         emit(ResultState.Success(dbModel?.let(mappers.watchedMovieDomainMapper::fromDbToDomain)))
     }
 
-    private suspend fun FlowCollector<ResultState<List<Movie>>>.fetchMoviesFromNetwork() {
+    private suspend fun FlowCollector<ResultState<List<Movie>>>.fetchMoviesFromNetwork(
+        cachedMovies: List<MovieDbModel>,
+    ) {
         when (val moviesNetworkResult = networkDataSource.getMovies()) {
             is NetworkResult.Success -> {
                 val movieList = moviesNetworkResult.data.map(mappers.movieDataMapper::fromApiToDb)
-                // save movies to database
-                databaseDataSource.insertMovies(movieList)
-                emitMoviesFromDb(movieList)
+                if (movieList.isEmpty()) {
+                    // An empty response does not invalidate the cache: serve what we already have.
+                    // With nothing cached this emits Success(emptyList()), which the UI shows as empty.
+                    emitMoviesFromDb(cachedMovies)
+                } else {
+                    // save movies to database
+                    databaseDataSource.insertMovies(movieList)
+                    emitMoviesFromDb(movieList)
+                }
             }
 
             is NetworkResult.Error, is NetworkResult.Exception -> {
