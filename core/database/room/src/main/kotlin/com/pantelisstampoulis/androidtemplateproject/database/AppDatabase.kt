@@ -12,7 +12,7 @@ import com.pantelisstampoulis.androidtemplateproject.database.model.WatchedMovie
         MovieEntity::class,
         WatchedMovieEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 internal abstract class AppDatabase : RoomDatabase() {
