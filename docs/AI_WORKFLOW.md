@@ -113,6 +113,19 @@ Phases are normally bottom-up — data, domain, UI, tests — because each one i
 independently buildable and a defect found in the data layer is far cheaper than
 the same defect found after the UI is on top of it.
 
+Before showing you the detail, it checks the plan against a few design questions
+the Konsist rules cannot: whether each use case does one thing, whether an
+interface is growing past what its callers need, whether an abstraction is being
+introduced for a single implementor that will never have another, and whether a
+library-specific type is leaking into a module meant to outlive that library.
+
+Most of Clean Architecture and dependency inversion here is already enforced by
+the build, so the plan does not restate it in prose — the layer rules, ViewModels
+taking use cases rather than repositories, mappers implementing an interface and
+`@Dao` functions being suspend all fail CI if broken. The four questions above are
+the ones that need a reader instead. **If a plan smells structurally wrong to you,
+those are the questions to push on.**
+
 > **Tip**: switch to Opus for this stage (`/model opus`). Planning is where
 > deeper reasoning pays for itself; the plan's quality bounds everything after it.
 
