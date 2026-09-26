@@ -83,8 +83,31 @@ Create an implementation plan for the user-profiles feature.
 ```
 
 Claude reads the spec, `CLAUDE.md`, the architecture docs and the parts of the
-codebase the feature touches, then proposes a phased plan and discusses it with
-you before writing anything.
+codebase the feature touches. Then it stops.
+
+### It agrees the shape with you before writing the detail
+
+You get a one-page outline in plain language — two or three sentences per phase,
+no file paths — and the decisions it wants from you:
+
+> Four phases: schema and DAO, then the repository and use cases, then the screen,
+> then tests.
+>
+> Two things I need from you:
+> - The spec doesn't say whether ratings sync or stay local. Which?
+> - Phase 1 needs a schema migration. That's the one irreversible step.
+
+Answer the questions, push back on the shape, or say go ahead. **This is your
+decision point**, and it is deliberately before the detail exists: a plan for a
+feature of ordinary size runs past a thousand lines — the watched-movies spec was
+156 lines and produced a 1,313-line plan. Nobody meaningfully approves a
+thousand-line document, and changing the phasing once it is written throws away
+everything downstream.
+
+For a small feature the outline may be a few lines. That is fine — the gate is
+there to catch a wrong shape, not to add ceremony.
+
+### Then the detailed plan
 
 Phases are normally bottom-up — data, domain, UI, tests — because each one is
 independently buildable and a defect found in the data layer is far cheaper than
@@ -102,6 +125,16 @@ the same defect found after the UI is on top of it.
 - **Does it follow existing patterns?** The plan should reuse what the codebase
   already does. A new library or a new pattern appearing here is worth
   questioning — it is easier to argue about now than after it is written.
+- **The `Observations on existing code` section**, if there is one. Two kinds of
+  entry: *deviations*, where the plan deliberately does not follow an existing
+  pattern and says why, and *notes*, where it spotted a problem nearby that this
+  feature does not touch. Deviations need your agreement. Notes are yours to
+  triage — they are not work for this feature, and the plan will not do them.
+
+  This section exists because "follow the existing pattern" propagates existing
+  defects. `WatchedMovieDao.getWatchedMovieEntity()` was written as a blocking
+  query because `MovieDao.getMovieEntity()` already was one, and the same defect
+  shipped twice.
 - **Is each phase independently verifiable?** Each should end with a command that
   passes.
 
@@ -305,7 +338,7 @@ baseline numbers a future retrospective is compared against.
 
 ```
 /product-owner   → SPEC.md      → read the acceptance criteria
-/architect       → PLAN.md      → read the whole plan
+/architect       → PLAN.md      → approve the outline, then read the plan
 /developer       → code         → review after every phase
 /pre-pr-checklist→ GO / NO GO   → act on CONDITIONAL GO
 @claude-review   → PR comments  → triage, and check for late ones
