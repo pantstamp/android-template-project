@@ -113,6 +113,15 @@ rewriting the entire test suite against a new API for no functional gain.
 The branch model, CI gates and release process are described in
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## AI-assisted development
+
+The project ships five Claude Code skills covering a feature from requirements to
+post-merge retrospective: spec, plan, phased implementation, a pre-PR quality gate, and a
+retrospective that turns review findings into enforced rules.
+[`docs/AI_WORKFLOW.md`](docs/AI_WORKFLOW.md) is the step-by-step guide, and
+[`docs/features/watched-movies/`](docs/features/watched-movies/) is a worked example of what
+each stage produces.
+
 ## Roadmap
 
 The template is complete and buildable as it stands — everything below is about breadth, not
