@@ -148,6 +148,39 @@ class MoviesRepositoryImplTest : KoinTest {
     }
 
     @Test
+    fun shouldReturnCachedMoviesWhenRefreshReturnsEmptyList() = runTest {
+        val mockMovieDbList = listOf(
+            DatabaseTestDoubleFactory.provideMovieDbModel(),
+            DatabaseTestDoubleFactory.provideMovieDbModel(),
+        )
+        val mockMovieList = mockMovieDbList.map { dataMappers.movieDomainMapper.fromDbToDomain(it) }
+
+        coEvery { databaseDataSource.getMovies() }.returns(flowOf(mockMovieDbList))
+        coEvery { networkDataSource.getMovies() }.returns(NetworkResult.Success(emptyList()))
+
+        repository.getMovies(ignoreCache = true).test {
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(ResultState.Success::class.java)
+            assertThat((result as ResultState.Success).data).isEqualTo(mockMovieList)
+            coVerify { networkDataSource.getMovies() }.wasInvoked(exactly = once)
+            coVerify { databaseDataSource.insertMovies(any()) }.wasNotInvoked()
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun shouldReturnEmptyListWhenNetworkReturnsEmptyAndCacheIsEmpty() = runTest {
+        coEvery { databaseDataSource.getMovies() }.returns(flowOf(emptyList()))
+        coEvery { networkDataSource.getMovies() }.returns(NetworkResult.Success(emptyList()))
+
+        repository.getMovies(ignoreCache = false).test {
+            val result = awaitItem()
+            assertThat(result).isEqualTo(ResultState.Success(emptyList<Any>()))
+            awaitComplete()
+        }
+    }
+
+    @Test
     fun shouldReturnMovieFromDatabaseWhenMovieExists() = runTest {
         val movieId = 1
         val mockMovieDbModel = DatabaseTestDoubleFactory.provideMovieDbModel()

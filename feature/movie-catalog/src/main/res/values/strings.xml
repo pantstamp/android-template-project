@@ -7,6 +7,12 @@
     <string name="snackbar_rating_saved">Rating saved</string>
     <string name="snackbar_rating_error">Something went wrong. Please try again.</string>
 
+    <!-- Movie list (Discover) screen -->
+    <string name="movie_list_error_offline">You\'re offline. Check your connection and try again.</string>
+    <string name="movie_list_error_generic">Couldn\'t load movies. Please try again.</string>
+    <string name="movie_list_empty">No movies to show right now.</string>
+    <string name="action_retry">Retry</string>
+
     <!-- Watched movie list screen -->
     <string name="error_generic">An error occurred</string>
     <string name="tab_discover">Discover</string>
