@@ -38,9 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.compose.AsyncImage
-import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.UserRatingBar
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.MovieUiModel
@@ -48,9 +46,6 @@ import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEff
 import com.pantelisstampoulis.androidtemplateproject.presentation.theme.StarYellow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import org.koin.compose.getKoin
-import org.koin.core.qualifier.named
-import kotlin.coroutines.CoroutineContext
 
 @Composable
 fun MovieDetailsScreen(
@@ -105,11 +100,7 @@ fun MovieDetailsScreen(
                 onEvent(MovieDetailsEvent.Init(movieId))
             }
 
-            ObserveEffects(
-                effect = effect,
-                coroutineContext = getKoin().get<CoroutineContext>(named(CoroutinesDispatchers.MainImmediate)),
-                lifecycleOwner = LocalLifecycleOwner.current,
-            ) { sideEffect ->
+            ObserveEffects(effect = effect) { sideEffect ->
                 when (sideEffect) {
                     MovieDetailsSideEffect.RatingSaved ->
                         coroutineScope.launch {

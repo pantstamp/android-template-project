@@ -30,9 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.compose.AsyncImage
-import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.WatchedMovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
@@ -40,9 +38,6 @@ import com.pantelisstampoulis.androidtemplateproject.presentation.theme.StarYell
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import org.koin.compose.getKoin
-import org.koin.core.qualifier.named
-import kotlin.coroutines.CoroutineContext
 
 @Composable
 fun WatchedMovieListScreen(
@@ -91,11 +86,7 @@ fun WatchedMovieListScreen(
             }
         }
 
-        ObserveEffects(
-            effect = effect,
-            coroutineContext = getKoin().get<CoroutineContext>(named(CoroutinesDispatchers.MainImmediate)),
-            lifecycleOwner = LocalLifecycleOwner.current,
-        ) { sideEffect ->
+        ObserveEffects(effect = effect) { sideEffect ->
             when (sideEffect) {
                 is WatchedMovieListSideEffect.NavigateToMovieDetails ->
                     onMovieClicked(sideEffect.movieId)
