@@ -170,14 +170,12 @@ class MoviesRepositoryImplTest : KoinTest {
 
     @Test
     fun shouldReturnEmptyListWhenNetworkReturnsEmptyAndCacheIsEmpty() = runTest {
-        coEvery { databaseDataSource.getMovies() }.returns(flowOf(emptyList()))
-        coEvery { networkDataSource.getMovies() }.returns(NetworkResult.Success(emptyList()))
+        assertEmptyResultWithoutWrite(ignoreCache = false)
+    }
 
-        repository.getMovies(ignoreCache = false).test {
-            val result = awaitItem()
-            assertThat(result).isEqualTo(ResultState.Success(emptyList<Any>()))
-            awaitComplete()
-        }
+    @Test
+    fun shouldReturnEmptyListWhenRetryReturnsEmptyAndCacheIsEmpty() = runTest {
+        assertEmptyResultWithoutWrite(ignoreCache = true)
     }
 
     @Test
@@ -315,6 +313,18 @@ class MoviesRepositoryImplTest : KoinTest {
             assertThat(result).isInstanceOf(ResultState.Success::class.java)
             assertThat((result as ResultState.Success).data).isNull()
             coVerify { databaseDataSource.getWatchedMovie(movieId) }.wasInvoked(exactly = once)
+            awaitComplete()
+        }
+    }
+
+    private suspend fun assertEmptyResultWithoutWrite(ignoreCache: Boolean) {
+        coEvery { databaseDataSource.getMovies() }.returns(flowOf(emptyList()))
+        coEvery { networkDataSource.getMovies() }.returns(NetworkResult.Success(emptyList()))
+
+        repository.getMovies(ignoreCache = ignoreCache).test {
+            assertThat(awaitItem()).isEqualTo(ResultState.Success(emptyList<Any>()))
+            coVerify { networkDataSource.getMovies() }.wasInvoked(exactly = once)
+            coVerify { databaseDataSource.insertMovies(any()) }.wasNotInvoked()
             awaitComplete()
         }
     }

@@ -17,7 +17,8 @@ class MovieListViewModel(
     private val getMoviesUseCase: GetMoviesUseCase,
     private val mapper: MovieUiMapper,
 ) : MviViewModel<MovieListEvent, MovieListUiState, MovieListSideEffect>(
-    initialState = MovieListUiState(),
+    // init starts the first load, so the first frame shows the spinner rather than blank.
+    initialState = MovieListUiState(isLoading = true),
 ) {
 
     // Declared before init: property initialisers and init blocks run in declaration order.
@@ -78,8 +79,7 @@ class MovieListViewModel(
 }
 
 data class MovieListUiState(
-    // True initially because init starts the first load, so the first frame is not blank.
-    val isLoading: Boolean = true,
+    val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     // Set only when there are no movies to show; a failed refresh over a list is a side effect.
     val error: MovieListError? = null,

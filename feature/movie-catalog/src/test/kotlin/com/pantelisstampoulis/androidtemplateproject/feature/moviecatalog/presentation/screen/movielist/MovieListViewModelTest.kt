@@ -174,6 +174,26 @@ class MovieListViewModelTest : KoinTest {
     }
 
     @Test
+    fun shouldShowLoadingWhenRetryingFromEmptyState() = runTest {
+        val movies = provideMovies()
+        every { getMoviesUseCase(false) }.returns(flowOf(ResultState.Success(emptyList())))
+        every { getMoviesUseCase(true) }.returns(delayedSuccess(movies))
+
+        val vm = viewModel
+        advanceUntilIdle()
+
+        vm.setEvent(MovieListEvent.Refresh)
+        runCurrent()
+
+        assertThat(vm.viewState.value.isLoading).isTrue()
+        assertThat(vm.viewState.value.isRefreshing).isFalse()
+
+        advanceUntilIdle()
+
+        assertThat(vm.viewState.value.data).isEqualTo(movies.toUi())
+    }
+
+    @Test
     fun shouldRefreshWithoutFullScreenLoadingWhenMoviesShowing() = runTest {
         val oldMovies = provideMovies()
         val newMovies = provideMovies()

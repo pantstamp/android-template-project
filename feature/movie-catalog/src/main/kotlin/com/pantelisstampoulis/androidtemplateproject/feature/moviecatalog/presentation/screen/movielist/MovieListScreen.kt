@@ -36,6 +36,7 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.compose.AsyncImage
@@ -46,9 +47,14 @@ import com.pantelisstampoulis.androidtemplateproject.presentation.common.ui.uico
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import com.pantelisstampoulis.androidtemplateproject.presentation.theme.StarYellow
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import org.koin.compose.KoinApplicationPreview
 import org.koin.compose.getKoin
 import org.koin.core.qualifier.named
+import org.koin.dsl.module
 import kotlin.coroutines.CoroutineContext
 
 @Composable
@@ -271,4 +277,61 @@ private fun MovieListError.messageRes(): Int = when (this) {
 private fun MovieListError.iconRes(): Int = when (this) {
     MovieListError.Offline -> R.drawable.ic_cloud_off
     MovieListError.Generic -> R.drawable.ic_error
+}
+
+@Preview
+@Composable
+fun PreviewMovieListOfflineError() {
+    MovieListPreviewKoin {
+        MovieListScreen(
+            state = MovieListUiState(error = MovieListError.Offline),
+            effect = emptyFlow(),
+            onEvent = {},
+            onMovieClicked = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewMovieListGenericError() {
+    MovieListPreviewKoin {
+        MovieListScreen(
+            state = MovieListUiState(error = MovieListError.Generic),
+            effect = emptyFlow(),
+            onEvent = {},
+            onMovieClicked = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewMovieListEmpty() {
+    MovieListPreviewKoin {
+        MovieListScreen(
+            state = MovieListUiState(data = persistentListOf()),
+            effect = emptyFlow(),
+            onEvent = {},
+            onMovieClicked = {},
+        )
+    }
+}
+
+// MovieListScreen resolves its effect dispatcher through getKoin(), and a preview has no
+// started Koin application, so previews supply a local one with just that binding.
+@Composable
+private fun MovieListPreviewKoin(content: @Composable () -> Unit) {
+    KoinApplicationPreview(
+        application = {
+            modules(
+                module {
+                    single<CoroutineContext>(named(CoroutinesDispatchers.MainImmediate)) {
+                        Dispatchers.Main.immediate
+                    }
+                },
+            )
+        },
+        content = content,
+    )
 }
