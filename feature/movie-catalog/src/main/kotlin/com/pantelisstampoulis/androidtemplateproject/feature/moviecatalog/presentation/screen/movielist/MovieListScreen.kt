@@ -267,6 +267,23 @@ private fun MovieListError.iconRes(): Int = when (this) {
     MovieListError.Generic -> R.drawable.ic_error
 }
 
+private val previewMovie = MovieUiModel(
+    id = 1,
+    adult = false,
+    backdropPath = null,
+    genreStringId = R.string.genre_science_fiction,
+    originalLanguage = "en",
+    originalTitle = "Interstellar",
+    overview = "A team of explorers travel through a wormhole in space.",
+    popularity = 100.0,
+    posterPath = null,
+    releaseYear = "2014",
+    title = "Interstellar",
+    video = false,
+    voteAverage = 8.6,
+    voteCount = 30000,
+)
+
 @Preview
 @Composable
 fun PreviewMovieListOfflineError() {
@@ -294,6 +311,42 @@ fun PreviewMovieListGenericError() {
 fun PreviewMovieListEmpty() {
     MovieListScreen(
         state = MovieListUiState(data = persistentListOf()),
+        effect = emptyFlow(),
+        onEvent = {},
+        onMovieClicked = {},
+    )
+}
+
+@Preview
+@Composable
+fun PreviewMovieListLoading() {
+    MovieListScreen(
+        state = MovieListUiState(isLoading = true),
+        effect = emptyFlow(),
+        onEvent = {},
+        onMovieClicked = {},
+    )
+}
+
+@Preview
+@Composable
+fun PreviewMovieListWithData() {
+    MovieListScreen(
+        state = MovieListUiState(data = persistentListOf(previewMovie, previewMovie.copy(id = 2, title = "Dune"))),
+        effect = emptyFlow(),
+        onEvent = {},
+        onMovieClicked = {},
+    )
+}
+
+@Preview
+@Composable
+fun PreviewMovieListRefreshing() {
+    MovieListScreen(
+        state = MovieListUiState(
+            isRefreshing = true,
+            data = persistentListOf(previewMovie, previewMovie.copy(id = 2, title = "Dune")),
+        ),
         effect = emptyFlow(),
         onEvent = {},
         onMovieClicked = {},

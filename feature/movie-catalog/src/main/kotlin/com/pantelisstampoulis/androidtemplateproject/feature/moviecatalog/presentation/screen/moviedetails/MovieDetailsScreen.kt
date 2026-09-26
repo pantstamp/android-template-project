@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -45,6 +46,7 @@ import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presen
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import com.pantelisstampoulis.androidtemplateproject.presentation.theme.StarYellow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 
 @Composable
@@ -246,4 +248,65 @@ fun RateMovie(
             }
         }
     }
+}
+
+private val previewMovie = MovieUiModel(
+    id = 1,
+    adult = false,
+    backdropPath = null,
+    genreStringId = R.string.genre_science_fiction,
+    originalLanguage = "en",
+    originalTitle = "Interstellar",
+    overview = "A team of explorers travel through a wormhole in space.",
+    popularity = 100.0,
+    posterPath = null,
+    releaseYear = "2014",
+    title = "Interstellar",
+    video = false,
+    voteAverage = 8.6,
+    voteCount = 30000,
+)
+
+@Preview
+@Composable
+fun PreviewMovieDetailsLoading() {
+    MovieDetailsScreen(
+        state = MovieDetailsUiState(isLoading = true),
+        effect = emptyFlow(),
+        onEvent = {},
+        movieId = 1,
+    )
+}
+
+@Preview
+@Composable
+fun PreviewMovieDetailsError() {
+    MovieDetailsScreen(
+        state = MovieDetailsUiState(errorMessage = "Movie not found"),
+        effect = emptyFlow(),
+        onEvent = {},
+        movieId = 1,
+    )
+}
+
+@Preview
+@Composable
+fun PreviewMovieDetailsWithData() {
+    MovieDetailsScreen(
+        state = MovieDetailsUiState(data = previewMovie, userRating = 8),
+        effect = emptyFlow(),
+        onEvent = {},
+        movieId = 1,
+    )
+}
+
+@Preview
+@Composable
+fun PreviewMovieDetailsRatingInProgress() {
+    MovieDetailsScreen(
+        state = MovieDetailsUiState(data = previewMovie, isRatingInProgress = true),
+        effect = emptyFlow(),
+        onEvent = {},
+        movieId = 1,
+    )
 }

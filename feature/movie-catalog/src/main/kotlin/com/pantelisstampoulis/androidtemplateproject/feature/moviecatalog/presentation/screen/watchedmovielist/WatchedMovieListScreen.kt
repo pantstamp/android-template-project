@@ -230,3 +230,14 @@ fun PreviewWatchedMovieListWithData() {
         onMovieClicked = {},
     )
 }
+
+@Preview
+@Composable
+fun PreviewWatchedMovieListError() {
+    WatchedMovieListScreen(
+        state = WatchedMovieListUiState(errorRes = R.string.error_generic),
+        effect = emptyFlow(),
+        onEvent = {},
+        onMovieClicked = {},
+    )
+}
