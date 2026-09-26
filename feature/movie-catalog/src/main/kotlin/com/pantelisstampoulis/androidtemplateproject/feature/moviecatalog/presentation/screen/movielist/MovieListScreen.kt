@@ -38,9 +38,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.compose.AsyncImage
-import com.pantelisstampoulis.androidtemplateproject.dispatcher.CoroutinesDispatchers
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.common.ui.uicomponent.PullToRefreshLazyColumn
@@ -48,14 +46,8 @@ import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEff
 import com.pantelisstampoulis.androidtemplateproject.presentation.theme.StarYellow
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import org.koin.compose.KoinApplicationPreview
-import org.koin.compose.getKoin
-import org.koin.core.qualifier.named
-import org.koin.dsl.module
-import kotlin.coroutines.CoroutineContext
 
 @Composable
 fun MovieListScreen(
@@ -103,11 +95,7 @@ fun MovieListScreen(
             }
         }
 
-        ObserveEffects(
-            effect = effect,
-            coroutineContext = getKoin().get<CoroutineContext>(named(CoroutinesDispatchers.MainImmediate)),
-            lifecycleOwner = LocalLifecycleOwner.current,
-        ) { sideEffect ->
+        ObserveEffects(effect = effect) { sideEffect ->
             when (sideEffect) {
                 is MovieListSideEffect.RefreshFailed ->
                     Toast.makeText(context, resources.getString(sideEffect.error.messageRes()), Toast.LENGTH_SHORT)
@@ -279,59 +267,88 @@ private fun MovieListError.iconRes(): Int = when (this) {
     MovieListError.Generic -> R.drawable.ic_error
 }
 
+private val previewMovie = MovieUiModel(
+    id = 1,
+    adult = false,
+    backdropPath = null,
+    genreStringId = R.string.genre_science_fiction,
+    originalLanguage = "en",
+    originalTitle = "Interstellar",
+    overview = "A team of explorers travel through a wormhole in space.",
+    popularity = 100.0,
+    posterPath = null,
+    releaseYear = "2014",
+    title = "Interstellar",
+    video = false,
+    voteAverage = 8.6,
+    voteCount = 30000,
+)
+
 @Preview
 @Composable
 fun PreviewMovieListOfflineError() {
-    MovieListPreviewKoin {
-        MovieListScreen(
-            state = MovieListUiState(error = MovieListError.Offline),
-            effect = emptyFlow(),
-            onEvent = {},
-            onMovieClicked = {},
-        )
-    }
+    MovieListScreen(
+        state = MovieListUiState(error = MovieListError.Offline),
+        effect = emptyFlow(),
+        onEvent = {},
+        onMovieClicked = {},
+    )
 }
 
 @Preview
 @Composable
 fun PreviewMovieListGenericError() {
-    MovieListPreviewKoin {
-        MovieListScreen(
-            state = MovieListUiState(error = MovieListError.Generic),
-            effect = emptyFlow(),
-            onEvent = {},
-            onMovieClicked = {},
-        )
-    }
+    MovieListScreen(
+        state = MovieListUiState(error = MovieListError.Generic),
+        effect = emptyFlow(),
+        onEvent = {},
+        onMovieClicked = {},
+    )
 }
 
 @Preview
 @Composable
 fun PreviewMovieListEmpty() {
-    MovieListPreviewKoin {
-        MovieListScreen(
-            state = MovieListUiState(data = persistentListOf()),
-            effect = emptyFlow(),
-            onEvent = {},
-            onMovieClicked = {},
-        )
-    }
+    MovieListScreen(
+        state = MovieListUiState(data = persistentListOf()),
+        effect = emptyFlow(),
+        onEvent = {},
+        onMovieClicked = {},
+    )
 }
 
-// MovieListScreen resolves its effect dispatcher through getKoin(), and a preview has no
-// started Koin application, so previews supply a local one with just that binding.
+@Preview
 @Composable
-private fun MovieListPreviewKoin(content: @Composable () -> Unit) {
-    KoinApplicationPreview(
-        application = {
-            modules(
-                module {
-                    single<CoroutineContext>(named(CoroutinesDispatchers.MainImmediate)) {
-                        Dispatchers.Main.immediate
-                    }
-                },
-            )
-        },
-        content = content,
+fun PreviewMovieListLoading() {
+    MovieListScreen(
+        state = MovieListUiState(isLoading = true),
+        effect = emptyFlow(),
+        onEvent = {},
+        onMovieClicked = {},
+    )
+}
+
+@Preview
+@Composable
+fun PreviewMovieListWithData() {
+    MovieListScreen(
+        state = MovieListUiState(data = persistentListOf(previewMovie, previewMovie.copy(id = 2, title = "Dune"))),
+        effect = emptyFlow(),
+        onEvent = {},
+        onMovieClicked = {},
+    )
+}
+
+@Preview
+@Composable
+fun PreviewMovieListRefreshing() {
+    MovieListScreen(
+        state = MovieListUiState(
+            isRefreshing = true,
+            data = persistentListOf(previewMovie, previewMovie.copy(id = 2, title = "Dune")),
+        ),
+        effect = emptyFlow(),
+        onEvent = {},
+        onMovieClicked = {},
     )
 }

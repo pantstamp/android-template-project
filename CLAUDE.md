@@ -155,9 +155,12 @@ toolchain does not catch.
   (`LocalContextGetResourceValueCall`) under `warningsAsErrors`.
 - **Every visual state a screen can render gets a `@Preview`** — loading, each error
   variant, empty, content. CI compiles previews but never renders them, so open them in
-  Android Studio before calling them done. Screens that call `getKoin()` throw in a preview
-  until [#25](https://github.com/pantstamp/android-template-project/issues/25) lands; wrap
-  them in `KoinApplicationPreview` (see `MovieListPreviewKoin` in `MovieListScreen.kt`).
+  Android Studio before calling them done.
+- **Previews render only because screens take state, effects and callbacks and nothing
+  else.** No Koin lookups in presentation composables: `getKoin()`, `koinInject()` and
+  `KoinApplicationPreview` throw or mask the problem in a preview, which never starts Koin.
+  Resolve dependencies at the navigation layer (`koinViewModel()` in `*Navigation.kt`).
+  Konsist-enforced (`PresentationLayerKonsistTest`).
 
 ### Mappers
 Every mapper declares what it maps by implementing a mapper interface (Konsist-enforced: a
