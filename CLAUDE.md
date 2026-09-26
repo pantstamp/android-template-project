@@ -152,8 +152,7 @@ toolchain does not catch.
   `stringResource()`; in a callback outside composition (e.g. an `ObserveEffects` handler
   showing a Toast) capture `val resources = LocalResources.current` during composition and
   call `resources.getString()`. `LocalContext.current.getString()` fails lint
-  (`LocalContextGetResourceValueCall`) under `warningsAsErrors` — this has come up in two
-  features.
+  (`LocalContextGetResourceValueCall`) under `warningsAsErrors`.
 - **Every visual state a screen can render gets a `@Preview`** — loading, each error
   variant, empty, content. CI compiles previews but never renders them, so open them in
   Android Studio before calling them done. Screens that call `getKoin()` throw in a preview
