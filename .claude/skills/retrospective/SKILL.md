@@ -3,7 +3,8 @@ name: retrospective
 description: >
   Runs a post-merge retrospective for a feature's pull request: reads the review comments, the
   diff, the fix commits, SPEC.md and PLAN.md, writes a RETRO.md comparing against earlier
-  retros, and routes each lesson to CLAUDE.md, a Konsist or lint rule, or a skill. Use after a
+  retros, and routes each lesson to CLAUDE.md, a Konsist or lint rule, a skill, or the review
+  prompt. Use after a
   PR is merged when the user asks for a retro, retrospective, lessons learned, or to turn
   review findings into project rules.
 ---
