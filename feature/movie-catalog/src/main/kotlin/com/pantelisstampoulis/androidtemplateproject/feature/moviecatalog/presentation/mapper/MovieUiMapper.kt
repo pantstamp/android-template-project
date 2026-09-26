@@ -24,7 +24,7 @@ class MovieUiMapper : DomainToUiMapper<Movie, MovieUiModel> {
         voteCount = domainModel.voteCount,
     )
 
-    private fun getGenreStringResource(genreId: Int): Int = when (genreId) {
+    private fun getGenreStringResource(genreId: Int?): Int = when (genreId) {
         28 -> R.string.genre_action
         12 -> R.string.genre_adventure
         16 -> R.string.genre_animation
@@ -47,5 +47,8 @@ class MovieUiMapper : DomainToUiMapper<Movie, MovieUiModel> {
         else -> R.string.genre_unknown // Default case if genre ID doesn't match
     }
 
-    private fun extractYearFromDate(dateString: String): String = dateString.substring(0, 4)
+    private fun extractYearFromDate(dateString: String?): String = dateString
+        ?.split("-")
+        ?.firstOrNull()
+        .orEmpty()
 }

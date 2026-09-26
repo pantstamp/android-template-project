@@ -8,6 +8,7 @@ import com.pantelisstampoulis.androidtemplateproject.database.mapper.Mappers
 import com.pantelisstampoulis.androidtemplateproject.database.mapper.MovieDbMapper
 import com.pantelisstampoulis.androidtemplateproject.database.mapper.WatchedMovieDbMapper
 import com.pantelisstampoulis.androidtemplateproject.database.migration.MIGRATION_1_2
+import com.pantelisstampoulis.androidtemplateproject.database.migration.MIGRATION_2_3
 import org.koin.core.module.Module
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -29,7 +30,7 @@ val databaseModule: Module = module {
             get(),
             AppDatabase::class.java,
             "app-database",
-        ).addMigrations(MIGRATION_1_2).build()
+        ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
     }
 
     single {

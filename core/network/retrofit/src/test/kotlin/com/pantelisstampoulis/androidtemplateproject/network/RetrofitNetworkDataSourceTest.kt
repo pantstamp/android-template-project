@@ -58,6 +58,50 @@ class RetrofitNetworkDataSourceTest : KoinTest {
     }
 
     @Test
+    fun `test getMovies success when optional fields are null or empty`() = runTest {
+        // Given
+        val jsonResponse = loadFileText(this, "/json/tmdb_movie_discover_missing_optional_fields.json")
+        val mockResponse = MockResponse()
+            .setResponseCode(200)
+            .setBody(jsonResponse)
+        mockWebServer.enqueue(mockResponse)
+
+        // When
+        val result = dataSource.getMovies()
+
+        // Then
+        assertThat(result).isInstanceOf(NetworkResult.Success::class.java)
+        val movies = (result as NetworkResult.Success).data
+        assertThat(movies).hasSize(3)
+        val movie = movies.single { it.id == 1580190 }
+        assertThat(movie.backdropPath).isNull()
+        assertThat(movie.posterPath).isNull()
+        assertThat(movie.genreIds).isEmpty()
+        assertThat(movie.releaseDate).isEmpty()
+    }
+
+    @Test
+    fun `test getMovies success when optional fields are missing`() = runTest {
+        // Given
+        val jsonResponse = loadFileText(this, "/json/tmdb_movie_discover_missing_optional_fields.json")
+        val mockResponse = MockResponse()
+            .setResponseCode(200)
+            .setBody(jsonResponse)
+        mockWebServer.enqueue(mockResponse)
+
+        // When
+        val result = dataSource.getMovies()
+
+        // Then
+        assertThat(result).isInstanceOf(NetworkResult.Success::class.java)
+        val movie = (result as NetworkResult.Success).data.single { it.id == 1999999 }
+        assertThat(movie.backdropPath).isNull()
+        assertThat(movie.posterPath).isNull()
+        assertThat(movie.genreIds).isEmpty()
+        assertThat(movie.releaseDate).isNull()
+    }
+
+    @Test
     fun `test getMovies 500 server error`() = runTest {
         // Given
         val mockResponse = MockResponse()
