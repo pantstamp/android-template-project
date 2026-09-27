@@ -145,6 +145,17 @@ toolchain does not catch.
 - **Keep user-facing strings out of ViewModels.** They have no `Context` and cannot be
   localised. Use typed side effects (`RatingSaved` / `RatingError`) or `@StringRes` ids
   and resolve them in the composable.
+- **A `StateFlow` is state, not an event stream.** A collector skips a value equal to the
+  last one it saw, so a change and its reversal (A → B → A) made before the collector
+  resumes arrive as nothing. If every change must trigger work, make each value distinct
+  (e.g. wrap it with a generation counter) or use a buffered `SharedFlow`.
+- **Give every `MutableSharedFlow` used with `tryEmit` an explicit `onBufferOverflow`.**
+  With the default `SUSPEND`, `tryEmit` on a full buffer returns `false` and the value is
+  lost. When a flag was set just before the emit, that is a stuck spinner. `DROP_OLDEST`
+  makes the newest request win, which is what a downstream `flatMapLatest` does anyway.
+- **An event that starts work defines what happens when work is already pending or
+  running**: ignore it, cancel and restart, or queue. Choose deliberately, and test the
+  event in that state. Retry, Refresh and query changes are the usual cases.
 
 ### Compose
 
@@ -161,6 +172,12 @@ toolchain does not catch.
   `KoinApplicationPreview` throw or mask the problem in a preview, which never starts Koin.
   Resolve dependencies at the navigation layer (`koinViewModel()` in `*Navigation.kt`).
   Konsist-enforced (`PresentationLayerKonsistTest`).
+- **A long-running effect reads callbacks through `rememberUpdatedState`.** A
+  `LaunchedEffect` keyed on something other than the callback keeps calling the lambda it
+  captured at launch.
+- **A composable used by more than one screen lives in `presentation/uicomponent`**, not in
+  one screen's package. A screen may compose another screen (`FooScreen`), but may not import
+  another screen's building blocks. Konsist-enforced (`PresentationLayerKonsistTest`).
 
 ### Mappers
 Every mapper declares what it maps by implementing a mapper interface (Konsist-enforced: a
@@ -251,6 +268,8 @@ so it is not called a mapper.
 - **Adding tests to a module that has none**: add `id(libs.plugins.custom.testing.get().pluginId)` to the module's `build.gradle.kts` first. Without it, test dependencies (Mockative, Turbine, Truth, test doubles) are not on the classpath.
 - **Event and SideEffect files**: each screen puts its `*Event` and `*SideEffect` in separate files (not co-located in the ViewModel file). Follow this convention when creating new screens.
 - **Test the branches, not just the listed cases.** When a condition treats two different states the same (e.g. `hasMovies` is false for both `null` and an empty list), test both sides. When a new code path can be reached from more than one caller (e.g. `ignoreCache = true` and `false`), test each one. Assert the same side effects (e.g. "nothing written") across neighbouring tests.
+- **Mockative consumes an invocation once a `verify` matches it.** A second `verify` on the same call sees nothing. Verify each call once, with the most specific matcher, and rely on unstubbed calls throwing (`MissingExpectationException`) to prove nothing else ran.
+- **`runTest` advances all pending virtual time before it finishes**, so work queued at the end of a test (a debounce, a `delay`) still runs. Stub every call that work will make, or the test fails with a missing expectation.
 
 ---
 

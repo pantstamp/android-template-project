@@ -100,6 +100,13 @@ Spend the effort on what the build can't check:
   default describing what the ViewModel does on start.
 - **Does every phase compile on its own, include its tests, run `lint` if it touches UI or
   resources, and list a preview per new screen state?**
+- **Is every code block in the plan held to CLAUDE.md?** The developer implements plan code
+  verbatim, so a rule broken in the plan ships. Check each snippet as you would a diff: flows,
+  effects, buffers, flags.
+- **For each event a new ViewModel handles, what happens in every state it can arrive in**
+  (idle, pending, running, error, content)? Is there a test per state that matters?
+- **Does anything two screens use stay in one screen's package?** It belongs in a shared
+  package.
 
 If an answer is uncomfortable, change the plan or raise it as an open question.
 

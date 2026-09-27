@@ -54,10 +54,46 @@ class PresentationLayerKonsistTest {
             }
     }
 
+    /**
+     * A screen package may use another screen only through its entry points: the screen itself
+     * and the types needed to drive it. A composable that two screens share belongs in
+     * `presentation/uicomponent`; importing it from another screen's package couples the two
+     * screens, and nothing stops the next import.
+     *
+     * Files directly in `..presentation.screen` (e.g. a container composing several screens)
+     * belong to no single screen and are not checked.
+     */
+    @Test
+    fun `Screen packages should import only other screens' entry points`() {
+        Konsist
+            .scopeFromProduction()
+            .files
+            .withPackage(ScreenPackage)
+            .assertFalse { file ->
+                val ownScreen = screenOf(file.packagee?.name.orEmpty()) ?: return@assertFalse false
+                file.imports.any { import ->
+                    val importedScreen = screenOf(import.name.substringBeforeLast('.'))
+                    val importedName = import.name.substringAfterLast('.')
+                    importedScreen != null &&
+                        importedScreen != ownScreen &&
+                        ScreenEntryPointSuffixes.none { importedName.endsWith(it) }
+                }
+            }
+    }
+
+    /** The screen a package belongs to: the segment after `presentation.screen`, or null. */
+    private fun screenOf(packageName: String): String? = packageName
+        .substringAfter(ScreenPackageMarker, missingDelimiterValue = "")
+        .substringBefore('.')
+        .ifEmpty { null }
+
     companion object {
         private const val ViewModelSuffix = "ViewModel"
         private const val RepositorySuffix = "Repository"
         private const val FeaturePresentationPackage = "..feature..presentation.."
         private val KoinComposePackages = listOf("org.koin.compose", "org.koin.androidx.compose")
+        private const val ScreenPackage = "..presentation.screen.."
+        private const val ScreenPackageMarker = ".presentation.screen."
+        private val ScreenEntryPointSuffixes = listOf("Screen", "UiState", "Event", "SideEffect", "ViewModel")
     }
 }

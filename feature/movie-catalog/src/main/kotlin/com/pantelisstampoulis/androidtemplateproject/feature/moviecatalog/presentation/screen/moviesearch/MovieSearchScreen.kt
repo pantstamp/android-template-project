@@ -22,7 +22,7 @@ import com.pantelisstampoulis.androidtemplateproject.presentation.common.ui.uico
 
 /** Search results in place of the Discover list, in whichever state the search is in. */
 @Composable
-fun MovieSearchResults(
+fun MovieSearchScreen(
     state: MovieSearchUiState,
     listState: LazyListState,
     onEvent: (MovieSearchEvent) -> Unit,
