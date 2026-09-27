@@ -1,6 +1,5 @@
 package com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.movielist
 
-import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -17,20 +16,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,29 +34,27 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.error.LoadError
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.PullToRefreshStatus
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.StatusMessage
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.iconRes
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.common.ui.uicomponent.PullToRefreshLazyColumn
-import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import com.pantelisstampoulis.androidtemplateproject.presentation.theme.StarYellow
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun MovieListScreen(
     state: MovieListUiState,
-    effect: Flow<MovieListSideEffect>,
     onEvent: (MovieListEvent) -> Unit,
-    onMovieClicked: (Int) -> Unit,
+    lazyListState: LazyListState,
+    modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val resources = LocalResources.current
+    // Effects are observed by DiscoverScreen: this composable leaves composition while a search
+    // is shown, and Discover's effects must not wait for the search to be cleared.
     val movies = state.data
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center,
@@ -71,6 +65,7 @@ fun MovieListScreen(
                     movies = movies,
                     isRefreshing = state.isRefreshing,
                     onEvent = onEvent,
+                    lazyListState = lazyListState,
                 )
             }
 
@@ -94,18 +89,6 @@ fun MovieListScreen(
                 )
             }
         }
-
-        ObserveEffects(effect = effect) { sideEffect ->
-            when (sideEffect) {
-                is MovieListSideEffect.RefreshFailed ->
-                    Toast.makeText(context, resources.getString(sideEffect.error.messageRes()), Toast.LENGTH_SHORT)
-                        .show()
-
-                is MovieListSideEffect.NavigateToMovieDetails -> {
-                    onMovieClicked(sideEffect.movieId)
-                }
-            }
-        }
     }
 }
 
@@ -114,6 +97,7 @@ fun MovieList(
     movies: ImmutableList<MovieUiModel>,
     isRefreshing: Boolean,
     onEvent: (MovieListEvent) -> Unit,
+    lazyListState: LazyListState,
     modifier: Modifier = Modifier,
 ) {
     PullToRefreshLazyColumn(
@@ -134,10 +118,11 @@ fun MovieList(
         onRefresh = {
             onEvent(MovieListEvent.Refresh)
         },
+        modifier = modifier,
+        lazyListState = lazyListState,
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MovieListStatus(
     @StringRes messageRes: Int,
@@ -145,23 +130,17 @@ private fun MovieListStatus(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    PullToRefreshBox(
+    PullToRefreshStatus(
         // A retry swaps this whole state for the full-screen spinner, so the indicator never shows.
         isRefreshing = false,
         onRefresh = onRetry,
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
     ) {
-        // PullToRefreshBox only reacts to nested scroll, so the content must be scrollable.
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            item {
-                StatusMessage(
-                    message = stringResource(id = messageRes),
-                    iconRes = iconRes,
-                    onRetry = onRetry,
-                    modifier = Modifier.fillParentMaxSize(),
-                )
-            }
-        }
+        StatusMessage(
+            message = stringResource(id = messageRes),
+            iconRes = iconRes,
+            onRetry = onRetry,
+        )
     }
 }
 
@@ -288,9 +267,8 @@ private val previewMovie = MovieUiModel(
 fun PreviewMovieListOfflineError() {
     MovieListScreen(
         state = MovieListUiState(error = LoadError.Offline),
-        effect = emptyFlow(),
         onEvent = {},
-        onMovieClicked = {},
+        lazyListState = rememberLazyListState(),
     )
 }
 
@@ -299,9 +277,8 @@ fun PreviewMovieListOfflineError() {
 fun PreviewMovieListGenericError() {
     MovieListScreen(
         state = MovieListUiState(error = LoadError.Generic),
-        effect = emptyFlow(),
         onEvent = {},
-        onMovieClicked = {},
+        lazyListState = rememberLazyListState(),
     )
 }
 
@@ -310,9 +287,8 @@ fun PreviewMovieListGenericError() {
 fun PreviewMovieListEmpty() {
     MovieListScreen(
         state = MovieListUiState(data = persistentListOf()),
-        effect = emptyFlow(),
         onEvent = {},
-        onMovieClicked = {},
+        lazyListState = rememberLazyListState(),
     )
 }
 
@@ -321,9 +297,8 @@ fun PreviewMovieListEmpty() {
 fun PreviewMovieListLoading() {
     MovieListScreen(
         state = MovieListUiState(isLoading = true),
-        effect = emptyFlow(),
         onEvent = {},
-        onMovieClicked = {},
+        lazyListState = rememberLazyListState(),
     )
 }
 
@@ -332,9 +307,8 @@ fun PreviewMovieListLoading() {
 fun PreviewMovieListWithData() {
     MovieListScreen(
         state = MovieListUiState(data = persistentListOf(previewMovie, previewMovie.copy(id = 2, title = "Dune"))),
-        effect = emptyFlow(),
         onEvent = {},
-        onMovieClicked = {},
+        lazyListState = rememberLazyListState(),
     )
 }
 
@@ -352,8 +326,7 @@ fun PreviewMovieListRefreshing() {
             isRefreshing = true,
             data = persistentListOf(previewMovie, previewMovie.copy(id = 2, title = "Dune")),
         ),
-        effect = emptyFlow(),
         onEvent = {},
-        onMovieClicked = {},
+        lazyListState = rememberLazyListState(),
     )
 }

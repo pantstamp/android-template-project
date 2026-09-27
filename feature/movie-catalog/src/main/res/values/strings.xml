@@ -14,6 +14,11 @@
     <string name="movie_list_empty">No movies to show right now.</string>
     <string name="action_retry">Retry</string>
 
+    <!-- Discover search -->
+    <string name="search_movies_placeholder">Search movies</string>
+    <string name="search_clear">Clear search</string>
+    <string name="search_no_results">No movies found for “%1$s”</string>
+
     <!-- Watched movie list screen -->
     <string name="error_generic">An error occurred</string>
     <string name="tab_discover">Discover</string>

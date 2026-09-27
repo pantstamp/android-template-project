@@ -10,6 +10,7 @@ import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presen
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviedetails.MovieDetailsScreen
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviedetails.MovieDetailsViewModel
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.movielist.MovieListViewModel
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviesearch.MovieSearchViewModel
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.watchedmovielist.WatchedMovieListViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -27,6 +28,9 @@ private fun NavGraphBuilder.addMovieListScreen(onMovieClicked: (Int) -> Unit) {
         val movieListViewModel = koinViewModel<MovieListViewModel>()
         val movieListState by movieListViewModel.viewState.collectAsStateWithLifecycle()
 
+        val movieSearchViewModel = koinViewModel<MovieSearchViewModel>()
+        val movieSearchState by movieSearchViewModel.viewState.collectAsStateWithLifecycle()
+
         val watchedMovieListViewModel = koinViewModel<WatchedMovieListViewModel>()
         val watchedMovieListState by watchedMovieListViewModel.viewState.collectAsStateWithLifecycle()
 
@@ -34,6 +38,9 @@ private fun NavGraphBuilder.addMovieListScreen(onMovieClicked: (Int) -> Unit) {
             movieListState = movieListState,
             movieListEffect = movieListViewModel.effect,
             onMovieListEvent = movieListViewModel::setEvent,
+            searchState = movieSearchState,
+            searchEffect = movieSearchViewModel.effect,
+            onSearchEvent = movieSearchViewModel::setEvent,
             watchedMovieListState = watchedMovieListState,
             watchedMovieListEffect = watchedMovieListViewModel.effect,
             onWatchedMovieListEvent = watchedMovieListViewModel::setEvent,
