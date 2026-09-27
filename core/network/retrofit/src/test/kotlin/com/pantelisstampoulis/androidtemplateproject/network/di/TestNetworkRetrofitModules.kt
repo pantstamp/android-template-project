@@ -5,10 +5,10 @@ import com.pantelisstampoulis.androidtemplateproject.network.RetrofitNetworkApi
 import com.pantelisstampoulis.androidtemplateproject.network.RetrofitNetworkDataSource
 import com.pantelisstampoulis.androidtemplateproject.network.adapter.NetworkResultCallAdapterFactory
 import com.pantelisstampoulis.androidtemplateproject.network.interceptor.HeaderInterceptor
+import com.pantelisstampoulis.androidtemplateproject.network.interceptor.loggingInterceptor
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.mockwebserver.MockWebServer
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
@@ -29,13 +29,9 @@ val testNetworkModule: Module = module {
 
     // Provide OkHttpClient as a singleton
     single {
-        val loggingInterceptor = HttpLoggingInterceptor().apply {
-            this.level = HttpLoggingInterceptor.Level.BODY
-        }
-
         OkHttpClient.Builder()
             .addInterceptor(HeaderInterceptor())
-            .addInterceptor(loggingInterceptor)
+            .addInterceptor(loggingInterceptor())
             .build()
     }
 
