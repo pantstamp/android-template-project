@@ -35,7 +35,7 @@ val domainModule: Module = module {
         GetMovieUseCaseImpl(
             moviesRepository = get(),
             coroutineContext = get(qualifier = named(CoroutinesDispatchers.IO)),
-            logger = getWith("GetMoviesUseCase"),
+            logger = getWith("GetMovieUseCase"),
         )
     } bind GetMovieUseCase::class
 
@@ -43,7 +43,7 @@ val domainModule: Module = module {
         RateMovieUseCaseImpl(
             moviesRepository = get(),
             coroutineContext = get(qualifier = named(CoroutinesDispatchers.IO)),
-            logger = getWith("GetMoviesUseCase"),
+            logger = getWith("RateMovieUseCase"),
         )
     } bind RateMovieUseCase::class
 
