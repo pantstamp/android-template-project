@@ -356,26 +356,18 @@ load. Discover gets it immediately; search reuses it in Phase 6.
 
 ### Files to modify
 - `feature/movie-catalog/.../presentation/screen/movielist/MovieListScreen.kt` — in `MovieRow`, replace
-  the bare `AsyncImage` with:
-  ```kotlin
-  val placeholder = painterResource(R.drawable.ic_movie_placeholder)
-  AsyncImage(
-      model = movie.posterPath,
-      contentDescription = null,
-      placeholder = placeholder,
-      error = placeholder,
-      fallback = placeholder, // posterPath == null
-      contentScale = ContentScale.Crop,
-      modifier = Modifier
-          .fillMaxHeight()
-          .aspectRatio(2f / 3f)
-          .background(MaterialTheme.colorScheme.surfaceVariant),
-  )
-  ```
-  The icon is tinted `onSurfaceVariant` through a `ColorFilter` on the placeholder painter, and centred
-  with padding, so it reads as an icon rather than a stretched image. If `AsyncImage`'s painter slots
-  can't be centred and padded, use `SubcomposeAsyncImage` with `loading`/`error` slots that render a
-  centred `Icon`. Either way, the poster area is always 100 × 150 dp.
+  the bare `AsyncImage` with a private `MoviePoster(posterUrl)`: a `Box` sized
+  `fillMaxHeight().aspectRatio(2f / 3f)` with a `surfaceVariant` background, holding a centred 40 dp
+  `Icon(ic_movie_placeholder)` tinted `onSurfaceVariant`, with the `AsyncImage` (`ContentScale.Crop`,
+  `matchParentSize()`) layered on top. While the poster loads, when it fails, or when there is none,
+  `AsyncImage` draws nothing and the icon shows; a loaded poster is opaque and covers it. The poster
+  area is always 100 × 150 dp.
+
+  *Changed during implementation (approved):* the original plan used `AsyncImage`'s
+  `placeholder`/`error`/`fallback` painters, with `SubcomposeAsyncImage` as a fallback. Painter slots are
+  drawn with the image's `ContentScale.Crop`, so the icon would be stretched and cropped, and
+  `colorFilter` would tint the real poster too. Coil advises against `SubcomposeAsyncImage` in lazy
+  lists.
 
 ### Files to create
 - `feature/movie-catalog/src/main/res/drawable/ic_movie_placeholder.xml` — Material Symbols "movie"

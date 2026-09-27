@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +28,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
@@ -173,11 +175,7 @@ fun MovieRow(movie: MovieUiModel, onClick: () -> Unit, modifier: Modifier = Modi
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
         ) {
-            AsyncImage(
-                model = movie.posterPath,
-                contentDescription = null,
-                modifier = Modifier.fillMaxHeight(),
-            )
+            MoviePoster(posterUrl = movie.posterPath)
 
             Column(
                 modifier = Modifier
@@ -229,6 +227,36 @@ fun MovieRow(movie: MovieUiModel, onClick: () -> Unit, modifier: Modifier = Modi
                 }
             }
         }
+    }
+}
+
+/**
+ * A fixed 2:3 poster area. The placeholder icon sits under the image: while the poster loads,
+ * when it fails, or when there is none, [AsyncImage] draws nothing and the icon shows; a loaded
+ * poster is opaque and covers it. Layering avoids SubcomposeAsyncImage, which Coil advises
+ * against in lazy lists.
+ */
+@Composable
+private fun MoviePoster(posterUrl: String?, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxHeight()
+            .aspectRatio(2f / 3f)
+            .background(color = MaterialTheme.colorScheme.surfaceVariant),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_movie_placeholder),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(40.dp),
+        )
+        AsyncImage(
+            model = posterUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.matchParentSize(),
+        )
     }
 }
 
@@ -308,6 +336,12 @@ fun PreviewMovieListWithData() {
         onEvent = {},
         onMovieClicked = {},
     )
+}
+
+@Preview
+@Composable
+fun PreviewMovieRowPosterPlaceholder() {
+    MovieRow(movie = previewMovie.copy(posterPath = null), onClick = {})
 }
 
 @Preview
