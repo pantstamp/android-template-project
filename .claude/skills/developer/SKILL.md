@@ -47,6 +47,10 @@ unreviewed design decision.
 the cause, and re-run. If the fix is not obvious, or it would change the plan's design, show
 the error to the user first.
 
+When checking behaviour on a device or emulator, confirm the precondition is on screen
+(screenshot or log) before acting. An action taken while a spinner is still showing tests the
+spinner.
+
 **Optional — prove a regression test can fail.** For a test that exists to guard one specific
 behaviour (a cancellation, a boundary between two states), temporarily break that behaviour,
 confirm the test fails, and restore the code. Report that you did it. A test that cannot go red

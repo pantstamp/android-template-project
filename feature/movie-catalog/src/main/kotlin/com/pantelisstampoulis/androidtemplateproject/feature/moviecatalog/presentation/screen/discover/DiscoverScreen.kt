@@ -31,7 +31,7 @@ import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presen
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.movielist.MovieListSideEffect
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.movielist.MovieListUiState
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviesearch.MovieSearchEvent
-import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviesearch.MovieSearchResults
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviesearch.MovieSearchScreen
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviesearch.MovieSearchSideEffect
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviesearch.MovieSearchUiState
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.listMessageRes
@@ -91,7 +91,7 @@ fun DiscoverScreen(
 
         Box(modifier = Modifier.weight(1f)) {
             if (searchState.isActive) {
-                MovieSearchResults(
+                MovieSearchScreen(
                     state = searchState,
                     listState = resultsListState,
                     onEvent = onSearchEvent,

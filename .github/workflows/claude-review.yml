@@ -110,6 +110,10 @@ jobs:
             - Test naming follows project convention
             - Edge cases and error scenarios covered
 
+            Before saying that a library default applies (for example a pager's page retention or a
+            flow's buffer policy), check the call site and the surrounding file for an override. The
+            diff shows only changed lines, and the relevant argument may predate the PR.
+
             Post inline comments on the specific lines where issues are found.
             Be constructive — always suggest the fix, not just the problem.
             At the end, post a summary comment with counts per severity level.
