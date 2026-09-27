@@ -471,8 +471,17 @@ shown.
   - `search(request)` returns
     `searchMoviesUseCase(request.query).map { request to it }`. The pairing tags every result with the
     request that produced it, so `reduce` never has to guess.
-  - `MutableStateFlow` already ignores a value equal to the current one. That is what makes a repeated
-    `QueryChanged` with the same trimmed text a no-op (AC27–AC28), so no `distinctUntilChanged` is needed.
+  - A repeated `QueryChanged` with the same trimmed text is a no-op because the handler returns early
+    when it equals the current active query (AC27–AC28).
+
+  *Changed during implementation:* `activeQueries` holds `ActiveQuery(text, generation)` rather than a
+  bare `String`, and every real change bumps `generation`. A `StateFlow` collector skips a value equal
+  to the last one it saw, so "matrix" → "" → "matrix" handled before the pipeline resumes would never
+  search again, leaving the spinner up. This is covered by
+  `shouldSearchAgainWhenClearedAndRetypedBeforeThePipelineRuns`. Two further additions: `reduce` ignores
+  a result whose query is no longer `activeQuery`, and `QueryChanged` also clears `error`, so a pending
+  new query shows the spinner rather than the previous query's error
+  (`shouldShowSpinnerRatherThanPreviousErrorWhileNextQueryIsPending`).
 
   **`QueryChanged(text)`** — synchronous state update, then feed the pipeline:
   ```kotlin
