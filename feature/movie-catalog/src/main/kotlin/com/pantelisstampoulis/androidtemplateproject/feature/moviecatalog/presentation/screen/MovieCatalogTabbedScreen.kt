@@ -57,9 +57,9 @@ fun MovieCatalogTabbedScreen(
     // process death, while a fresh launch starts empty.
     val searchFieldState = rememberTextFieldState()
 
-    // Back clears an active search before it leaves the app. The page check is required: the
-    // pager keeps Discover composed while Watched is shown. An open keyboard takes the first
-    // back press itself.
+    // Back clears an active search before it leaves the app. The page check is required: with
+    // beyondViewportPageCount = 1 (below), Discover stays composed while Watched is shown. An open
+    // keyboard takes the first back press itself.
     BackHandler(enabled = pagerState.currentPage == DISCOVER_PAGE && searchFieldState.text.isNotEmpty()) {
         searchFieldState.clearText()
     }

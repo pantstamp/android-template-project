@@ -236,3 +236,6 @@ Each state below has a `@Preview`, and each has been opened in Android Studio:
 - Caching search results or fetched movie details, in memory or on disk
 - Re-rating an already-rated movie (`WatchedMovieDao` insert uses `ABORT`); this predates search
 - Movie Details re-running its load on rotation (issue #27)
+- Offline Movie Details for a watched movie that is not in the Discover table: it shows the offline state.
+  A fallback to `watched_movies` would give only partial data (no genre); decided with the Discover-cache
+  change in #30.

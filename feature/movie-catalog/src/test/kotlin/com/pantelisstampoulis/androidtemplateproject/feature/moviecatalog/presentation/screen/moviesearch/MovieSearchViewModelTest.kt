@@ -528,6 +528,24 @@ class MovieSearchViewModelTest : KoinTest {
     }
 
     @Test
+    fun shouldIgnoreRefreshWhileNewQueryIsPending() = runTest {
+        every { searchMoviesUseCase("matrix") }.returns(success(provideMovies()))
+        every { searchMoviesUseCase("matrix re") }.returns(success(provideMovies()))
+
+        val vm = viewModel
+        search(vm, "matrix")
+        type(vm, "matrix re") // now waiting for the debounce
+        vm.setEvent(MovieSearchEvent.Refresh)
+        runCurrent()
+
+        assertThat(vm.viewState.value.isRefreshing).isFalse()
+        assertThat(vm.viewState.value.isSearching).isTrue()
+
+        advanceUntilIdle()
+        verify { searchMoviesUseCase("matrix re") }.wasInvoked(exactly = once)
+    }
+
+    @Test
     fun shouldResetRefreshingWhenNewQueryInterruptsRefresh() = runTest {
         every { searchMoviesUseCase("matrix") }
             .returns(inSequence(success(provideMovies()), success(provideMovies(), delayMillis = 1_000)))

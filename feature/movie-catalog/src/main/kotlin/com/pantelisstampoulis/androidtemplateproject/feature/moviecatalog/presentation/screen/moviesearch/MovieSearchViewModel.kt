@@ -15,6 +15,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
@@ -40,7 +41,13 @@ class MovieSearchViewModel(
 
     // Declared before init: property initialisers and init blocks run in declaration order.
     private val activeQueries = MutableStateFlow(ActiveQuery(text = "", generation = 0))
-    private val reruns = MutableSharedFlow<SearchRequest>(extraBufferCapacity = 1)
+
+    // The newest request always wins, matching flatMapLatest downstream; a full buffer can
+    // never silently drop the request whose flags were just set.
+    private val reruns = MutableSharedFlow<SearchRequest>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
 
     init {
         viewModelScope.launch {
@@ -107,7 +114,8 @@ class MovieSearchViewModel(
 
     private fun refresh() {
         val state = viewState.value
-        if (!state.isActive) return
+        // A search for activeQuery is already pending or running; a refresh would only repeat it.
+        if (!state.isActive || state.isSearching) return
         if (state.results == null) {
             retry()
             return

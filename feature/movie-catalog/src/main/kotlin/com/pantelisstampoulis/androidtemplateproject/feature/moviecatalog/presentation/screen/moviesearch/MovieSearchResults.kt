@@ -1,6 +1,5 @@
 package com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviesearch
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,11 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
-import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.error.LoadError
-import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.movielist.MovieRow
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.MovieRow
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.PullToRefreshStatus
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.StatusMessage
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.iconRes
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.listMessageRes
 import com.pantelisstampoulis.androidtemplateproject.presentation.common.ui.uicomponent.PullToRefreshLazyColumn
 
 /** Search results in place of the Discover list, in whichever state the search is in. */
@@ -81,7 +80,7 @@ fun MovieSearchResults(
                     onRefresh = { onEvent(MovieSearchEvent.Refresh) },
                 ) {
                     StatusMessage(
-                        message = stringResource(id = error.searchMessageRes()),
+                        message = stringResource(id = error.listMessageRes()),
                         iconRes = error.iconRes(),
                         onRetry = { onEvent(MovieSearchEvent.Retry) },
                     )
@@ -91,10 +90,4 @@ fun MovieSearchResults(
             else -> CircularProgressIndicator()
         }
     }
-}
-
-@StringRes
-private fun LoadError.searchMessageRes(): Int = when (this) {
-    LoadError.Offline -> R.string.error_offline
-    LoadError.Generic -> R.string.movie_list_error_generic
 }

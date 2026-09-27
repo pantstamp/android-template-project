@@ -1,6 +1,7 @@
 package com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -63,4 +64,11 @@ fun StatusMessage(message: String, @DrawableRes iconRes: Int?, onRetry: (() -> U
 internal fun LoadError.iconRes(): Int = when (this) {
     LoadError.Offline -> R.drawable.ic_cloud_off
     LoadError.Generic -> R.drawable.ic_error
+}
+
+/** Message for a movie list (Discover or search results) that could not load or refresh. */
+@StringRes
+internal fun LoadError.listMessageRes(): Int = when (this) {
+    LoadError.Offline -> R.string.error_offline
+    LoadError.Generic -> R.string.movie_list_error_generic
 }

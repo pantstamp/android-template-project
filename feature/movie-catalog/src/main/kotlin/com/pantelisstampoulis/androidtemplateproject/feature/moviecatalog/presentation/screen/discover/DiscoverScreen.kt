@@ -15,6 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -33,6 +34,7 @@ import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presen
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviesearch.MovieSearchResults
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviesearch.MovieSearchSideEffect
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviesearch.MovieSearchUiState
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.listMessageRes
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import kotlinx.collections.immutable.persistentListOf
@@ -71,9 +73,10 @@ fun DiscoverScreen(
 
     // The field owns its text; the ViewModel decides what each change means. This re-sends the
     // current text after rotation (ignored as a repeat) and after process death (searches again).
+    val currentOnSearchEvent by rememberUpdatedState(onSearchEvent)
     LaunchedEffect(searchFieldState) {
         snapshotFlow { searchFieldState.text.toString() }
-            .collect { text -> onSearchEvent(MovieSearchEvent.QueryChanged(text)) }
+            .collect { text -> currentOnSearchEvent(MovieSearchEvent.QueryChanged(text)) }
     }
 
     HideKeyboardOnScroll(listState = discoverListState)
@@ -108,7 +111,7 @@ fun DiscoverScreen(
             is MovieListSideEffect.RefreshFailed ->
                 Toast.makeText(
                     context,
-                    resources.getString(sideEffect.error.refreshFailedMessageRes()),
+                    resources.getString(sideEffect.error.listMessageRes()),
                     Toast.LENGTH_SHORT,
                 )
                     .show()
@@ -122,7 +125,7 @@ fun DiscoverScreen(
             is MovieSearchSideEffect.RefreshFailed ->
                 Toast.makeText(
                     context,
-                    resources.getString(sideEffect.error.refreshFailedMessageRes()),
+                    resources.getString(sideEffect.error.listMessageRes()),
                     Toast.LENGTH_SHORT,
                 )
                     .show()
@@ -147,11 +150,6 @@ private fun HideKeyboardOnScroll(listState: LazyListState) {
             .filter { it }
             .collect { focusManager.clearFocus() }
     }
-}
-
-private fun LoadError.refreshFailedMessageRes(): Int = when (this) {
-    LoadError.Offline -> R.string.error_offline
-    LoadError.Generic -> R.string.movie_list_error_generic
 }
 
 private val previewMovies = persistentListOf(
