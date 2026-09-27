@@ -28,14 +28,28 @@ internal class MoviesRepositoryImpl(
 ) : MoviesRepository {
 
     override fun getMovie(movieId: Int): Flow<ResultState<Movie>> = flow {
-        // fetch movie from database
         val movieDbModel = databaseDataSource.getMovie(movieId)
+        if (movieDbModel != null) {
+            emit(ResultState.Success(mappers.movieDomainMapper.fromDbToDomain(movieDbModel)))
+        } else {
+            // Not in the Discover table (e.g. a search result): fetch it, but never store it.
+            emit(fetchMovieFromNetwork(movieId))
+        }
+    }
 
-        movieDbModel?.let {
-            val movie = mappers.movieDomainMapper.fromDbToDomain(movieDbModel)
-            emit(ResultState.Success(movie))
-        } ?: run {
-            emit(ResultState.Error(DomainError.NotFound()))
+    override fun searchMovies(query: String): Flow<ResultState<List<Movie>>> = flow {
+        when (val result = networkDataSource.searchMovies(query)) {
+            is NetworkResult.Success -> emit(
+                ResultState.Success(
+                    result.data
+                        .distinctBy { it.id } // TMDB can repeat a movie; list keys must be unique
+                        .map(mappers.movieSearchDomainMapper::fromApiToDomain),
+                ),
+            )
+
+            is NetworkResult.Error, is NetworkResult.Exception -> emit(
+                ResultState.Error(mappers.errorClassifier.toDomainError(result) ?: DomainError.Unknown()),
+            )
         }
     }
 
@@ -57,6 +71,16 @@ internal class MoviesRepositoryImpl(
             domainError?.let { emit(ResultState.Error(it)) }
         }
     }
+
+    private suspend fun fetchMovieFromNetwork(movieId: Int): ResultState<Movie> =
+        when (val result = networkDataSource.getMovie(movieId)) {
+            is NetworkResult.Success -> ResultState.Success(
+                mappers.movieDetailsDomainMapper.fromApiToDomain(result.data),
+            )
+
+            is NetworkResult.Error, is NetworkResult.Exception ->
+                ResultState.Error(mappers.errorClassifier.toDomainError(result) ?: DomainError.Unknown())
+        }
 
     private suspend fun FlowCollector<ResultState<List<Movie>>>.emitMoviesFromDb(movieDbModelList: List<MovieDbModel>) {
         val movieDomainList = movieDbModelList.map(mappers.movieDomainMapper::fromDbToDomain)

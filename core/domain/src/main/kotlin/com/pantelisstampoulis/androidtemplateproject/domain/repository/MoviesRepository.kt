@@ -7,7 +7,18 @@ import kotlinx.coroutines.flow.Flow
 
 interface MoviesRepository {
 
+    /**
+     * Emits the movie for [movieId]: from the database when it is there (a Discover movie),
+     * otherwise fetched from the network. A fetched movie is never written to the database,
+     * so opening it cannot add it to the Discover list.
+     */
     fun getMovie(movieId: Int): Flow<ResultState<Movie>>
+
+    /**
+     * Searches TMDB by title. Network only: results are never written to the database, so they
+     * can never appear in the Discover list. An empty result is `Success(emptyList())`.
+     */
+    fun searchMovies(query: String): Flow<ResultState<List<Movie>>>
 
     fun getMovies(ignoreCache: Boolean = false): Flow<ResultState<List<Movie>>>
 
