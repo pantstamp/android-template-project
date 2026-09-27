@@ -6,6 +6,9 @@ sealed interface MovieDetailsEvent : Event {
 
     data class Init(val movieId: Int) : MovieDetailsEvent
 
+    /** Reloads the movie after a failed load. The user's rating is not reloaded. */
+    data class Retry(val movieId: Int) : MovieDetailsEvent
+
     data class RateMovie(
         val movieId: Int,
         val rating: Float,

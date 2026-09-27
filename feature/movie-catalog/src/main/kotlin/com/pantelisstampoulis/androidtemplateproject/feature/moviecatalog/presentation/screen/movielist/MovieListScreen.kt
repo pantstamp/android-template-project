@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,14 +31,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.error.LoadError
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.StatusMessage
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.iconRes
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.common.ui.uicomponent.PullToRefreshLazyColumn
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
@@ -154,33 +152,12 @@ private fun MovieListStatus(
         // PullToRefreshBox only reacts to nested scroll, so the content must be scrollable.
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             item {
-                Column(
-                    modifier = Modifier
-                        .fillParentMaxSize()
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    if (iconRes != null) {
-                        Icon(
-                            painter = painterResource(id = iconRes),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(48.dp),
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-                    Text(
-                        text = stringResource(id = messageRes),
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Button(onClick = onRetry) {
-                        Text(text = stringResource(id = R.string.action_retry))
-                    }
-                }
+                StatusMessage(
+                    message = stringResource(id = messageRes),
+                    iconRes = iconRes,
+                    onRetry = onRetry,
+                    modifier = Modifier.fillParentMaxSize(),
+                )
             }
         }
     }
@@ -256,15 +233,9 @@ fun MovieRow(movie: MovieUiModel, onClick: () -> Unit, modifier: Modifier = Modi
 }
 
 @StringRes
-private fun MovieListError.messageRes(): Int = when (this) {
-    MovieListError.Offline -> R.string.movie_list_error_offline
-    MovieListError.Generic -> R.string.movie_list_error_generic
-}
-
-@DrawableRes
-private fun MovieListError.iconRes(): Int = when (this) {
-    MovieListError.Offline -> R.drawable.ic_cloud_off
-    MovieListError.Generic -> R.drawable.ic_error
+private fun LoadError.messageRes(): Int = when (this) {
+    LoadError.Offline -> R.string.error_offline
+    LoadError.Generic -> R.string.movie_list_error_generic
 }
 
 private val previewMovie = MovieUiModel(
@@ -288,7 +259,7 @@ private val previewMovie = MovieUiModel(
 @Composable
 fun PreviewMovieListOfflineError() {
     MovieListScreen(
-        state = MovieListUiState(error = MovieListError.Offline),
+        state = MovieListUiState(error = LoadError.Offline),
         effect = emptyFlow(),
         onEvent = {},
         onMovieClicked = {},
@@ -299,7 +270,7 @@ fun PreviewMovieListOfflineError() {
 @Composable
 fun PreviewMovieListGenericError() {
     MovieListScreen(
-        state = MovieListUiState(error = MovieListError.Generic),
+        state = MovieListUiState(error = LoadError.Generic),
         effect = emptyFlow(),
         onEvent = {},
         onMovieClicked = {},

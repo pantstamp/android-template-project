@@ -6,9 +6,10 @@
     <string name="label_you_rated_this">You rated this</string>
     <string name="snackbar_rating_saved">Rating saved</string>
     <string name="snackbar_rating_error">Something went wrong. Please try again.</string>
+    <string name="movie_details_error_generic">Couldn\'t load this movie. Please try again.</string>
 
     <!-- Movie list (Discover) screen -->
-    <string name="movie_list_error_offline">You\'re offline. Check your connection and try again.</string>
+    <string name="error_offline">You\'re offline. Check your connection and try again.</string>
     <string name="movie_list_error_generic">Couldn\'t load movies. Please try again.</string>
     <string name="movie_list_empty">No movies to show right now.</string>
     <string name="action_retry">Retry</string>
