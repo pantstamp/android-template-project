@@ -4,6 +4,7 @@ import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presen
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.mapper.WatchedMovieUiMapper
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviedetails.MovieDetailsViewModel
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.movielist.MovieListViewModel
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviesearch.MovieSearchViewModel
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.watchedmovielist.WatchedMovieListViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
@@ -32,6 +33,13 @@ val featureMovieCatalogPresentationModule: Module = module {
             rateMovieUseCase = get(),
             saveWatchedMovieUseCase = get(),
             getWatchedMovieUseCase = get(),
+            mapper = get(),
+        )
+    }
+
+    viewModel {
+        MovieSearchViewModel(
+            searchMoviesUseCase = get(),
             mapper = get(),
         )
     }

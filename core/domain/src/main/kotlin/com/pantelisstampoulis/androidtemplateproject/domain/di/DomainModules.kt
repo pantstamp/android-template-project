@@ -13,6 +13,8 @@ import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.RateM
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.RateMovieUseCaseImpl
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.SaveWatchedMovieUseCase
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.SaveWatchedMovieUseCaseImpl
+import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.SearchMoviesUseCase
+import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.SearchMoviesUseCaseImpl
 import com.pantelisstampoulis.androidtemplateproject.utils.koin.getWith
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
@@ -68,4 +70,12 @@ val domainModule: Module = module {
             logger = getWith("GetWatchedMovieUseCase"),
         )
     } bind GetWatchedMovieUseCase::class
+
+    factory {
+        SearchMoviesUseCaseImpl(
+            moviesRepository = get(),
+            coroutineContext = get(qualifier = named(CoroutinesDispatchers.IO)),
+            logger = getWith("SearchMoviesUseCase"),
+        )
+    } bind SearchMoviesUseCase::class
 }

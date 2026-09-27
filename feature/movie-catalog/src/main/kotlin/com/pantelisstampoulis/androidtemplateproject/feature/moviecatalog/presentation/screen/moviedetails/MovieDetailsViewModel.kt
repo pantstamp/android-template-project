@@ -9,11 +9,14 @@ import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.RateM
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.RateMovieUseCaseInput
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.SaveWatchedMovieInput
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.SaveWatchedMovieUseCase
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.error.LoadError
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.error.toLoadError
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.mapper.MovieUiMapper
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.MviViewModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.UiState
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class MovieDetailsViewModel(
@@ -26,33 +29,12 @@ class MovieDetailsViewModel(
     initialState = MovieDetailsUiState(),
 ) {
 
+    private var movieLoadJob: Job? = null
+
     override fun handleEvents(event: MovieDetailsEvent) {
         when (event) {
             is MovieDetailsEvent.Init -> {
-                viewModelScope.launch {
-                    getMovieUseCase(input = event.movieId).collect { resultState ->
-                        resultState
-                            .onLoading { setState { this.copy(isLoading = true) } }
-                            .onSuccess {
-                                setState {
-                                    this.copy(
-                                        isLoading = false,
-                                        errorMessage = null,
-                                        movie = it,
-                                        data = mapper.fromDomainToUi(it),
-                                    )
-                                }
-                            }
-                            .onError { error ->
-                                setState {
-                                    this.copy(
-                                        isLoading = false,
-                                        errorMessage = error.message,
-                                    )
-                                }
-                            }
-                    }
-                }
+                loadMovie(event.movieId)
                 viewModelScope.launch {
                     getWatchedMovieUseCase(input = event.movieId).collect { resultState ->
                         resultState
@@ -66,6 +48,8 @@ class MovieDetailsViewModel(
                     }
                 }
             }
+
+            is MovieDetailsEvent.Retry -> loadMovie(event.movieId)
 
             is MovieDetailsEvent.RateMovie -> {
                 setState { copy(isRatingInProgress = true) }
@@ -89,6 +73,29 @@ class MovieDetailsViewModel(
                             }
                     }
                 }
+            }
+        }
+    }
+
+    private fun loadMovie(movieId: Int) {
+        movieLoadJob?.cancel()
+        movieLoadJob = viewModelScope.launch {
+            getMovieUseCase(input = movieId).collect { resultState ->
+                resultState
+                    .onLoading { setState { copy(isLoading = true, error = null) } }
+                    .onSuccess { movie ->
+                        setState {
+                            copy(
+                                isLoading = false,
+                                error = null,
+                                movie = movie,
+                                data = mapper.fromDomainToUi(movie),
+                            )
+                        }
+                    }
+                    .onError { domainError ->
+                        setState { copy(isLoading = false, error = domainError.toLoadError()) }
+                    }
             }
         }
     }
@@ -120,7 +127,8 @@ class MovieDetailsViewModel(
 
 data class MovieDetailsUiState(
     val isLoading: Boolean = false,
-    val errorMessage: String? = null,
+    /** Set when the movie could not be loaded; the composable resolves the message. */
+    val error: LoadError? = null,
     /**
      * The domain movie, kept so that domain operations use domain data. [data] is the same
      * movie formatted for display, and its [MovieUiModel.releaseYear] is a truncated year

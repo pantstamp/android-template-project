@@ -278,4 +278,123 @@ class RetrofitNetworkDataSourceTest : KoinTest {
         val error = result as NetworkResult.Error
         assertThat(error.code).isEqualTo(401)
     }
+
+    @Test
+    fun `test searchMovies success`() = runTest {
+        // Given
+        val jsonResponse = loadFileText(this, "/json/tmdb_search_movie_success.json")
+        mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody(jsonResponse))
+
+        // When
+        val result = dataSource.searchMovies("matrix")
+
+        // Then
+        assertThat(result).isInstanceOf(NetworkResult.Success::class.java)
+        val movies = (result as NetworkResult.Success).data
+        assertThat(movies).hasSize(3)
+        assertThat(movies.first().id).isEqualTo(603)
+        assertThat(movies.single { it.id == 684428 }.posterPath).isNull()
+        assertThat(movies.single { it.id == 1291608 }.releaseDate).isEmpty()
+    }
+
+    @Test
+    fun `test searchMovies sends query, include_adult=false and page=1`() = runTest {
+        // Given
+        val jsonResponse = loadFileText(this, "/json/tmdb_search_movie_empty.json")
+        mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody(jsonResponse))
+
+        // When
+        dataSource.searchMovies("the matrix")
+
+        // Then
+        val request = mockWebServer.takeRequest()
+        val url = request.requestUrl!!
+        assertThat(url.encodedPath).isEqualTo("/search/movie")
+        assertThat(url.queryParameter("query")).isEqualTo("the matrix")
+        assertThat(url.queryParameter("include_adult")).isEqualTo("false")
+        assertThat(url.queryParameter("page")).isEqualTo("1")
+    }
+
+    @Test
+    fun `test searchMovies empty results`() = runTest {
+        // Given
+        val jsonResponse = loadFileText(this, "/json/tmdb_search_movie_empty.json")
+        mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody(jsonResponse))
+
+        // When
+        val result = dataSource.searchMovies("zzzzqqq")
+
+        // Then
+        assertThat(result).isEqualTo(NetworkResult.Success(emptyList<Any>()))
+    }
+
+    @Test
+    fun `test searchMovies http error`() = runTest {
+        // Given
+        mockWebServer.enqueue(MockResponse().setResponseCode(401))
+
+        // When
+        val result = dataSource.searchMovies("matrix")
+
+        // Then
+        assertThat(result).isInstanceOf(NetworkResult.Error::class.java)
+        assertThat((result as NetworkResult.Error).code).isEqualTo(401)
+    }
+
+    @Test
+    fun `test searchMovies no connection`() = runTest {
+        // Given
+        mockWebServer.enqueue(MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START))
+
+        // When
+        val result = dataSource.searchMovies("matrix")
+
+        // Then
+        assertThat(result).isInstanceOf(NetworkResult.Exception::class.java)
+        assertThat((result as NetworkResult.Exception).exception).isInstanceOf(IOException::class.java)
+    }
+
+    @Test
+    fun `test getMovie success`() = runTest {
+        // Given
+        val jsonResponse = loadFileText(this, "/json/tmdb_movie_details_success.json")
+        mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody(jsonResponse))
+
+        // When
+        val result = dataSource.getMovie(603)
+
+        // Then
+        assertThat(result).isInstanceOf(NetworkResult.Success::class.java)
+        val movie = (result as NetworkResult.Success).data
+        assertThat(movie.id).isEqualTo(603)
+        assertThat(movie.title).isEqualTo("The Matrix")
+        assertThat(movie.genres).hasSize(2)
+        assertThat(movie.genres.first().id).isEqualTo(28)
+    }
+
+    @Test
+    fun `test getMovie requests movie path`() = runTest {
+        // Given
+        val jsonResponse = loadFileText(this, "/json/tmdb_movie_details_success.json")
+        mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody(jsonResponse))
+
+        // When
+        dataSource.getMovie(603)
+
+        // Then
+        assertThat(mockWebServer.takeRequest().path).isEqualTo("/movie/603")
+    }
+
+    @Test
+    fun `test getMovie not found`() = runTest {
+        // Given
+        mockWebServer.enqueue(MockResponse().setResponseCode(404))
+
+        // When
+        val result = dataSource.getMovie(603)
+
+        // Then
+        assertThat(result).isInstanceOf(NetworkResult.Error::class.java)
+        assertThat((result as NetworkResult.Error).code).isEqualTo(404)
+    }
 }

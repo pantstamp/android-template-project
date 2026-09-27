@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.pantelisstampoulis.androidtemplateproject.domain.ResultState
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetMoviesUseCase
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.error.LoadError
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.mapper.MovieUiMapper
 import com.pantelisstampoulis.androidtemplateproject.model.error.DomainError
 import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
@@ -100,7 +101,7 @@ class MovieListViewModelTest : KoinTest {
         advanceUntilIdle()
 
         val state = vm.viewState.value
-        assertThat(state.error).isEqualTo(MovieListError.Offline)
+        assertThat(state.error).isEqualTo(LoadError.Offline)
         assertThat(state.isLoading).isFalse()
         assertThat(state.data).isNull()
         vm.effect.test {
@@ -116,7 +117,7 @@ class MovieListViewModelTest : KoinTest {
         val vm = viewModel
         advanceUntilIdle()
 
-        assertThat(vm.viewState.value.error).isEqualTo(MovieListError.Generic)
+        assertThat(vm.viewState.value.error).isEqualTo(LoadError.Generic)
     }
 
     @Test
@@ -169,7 +170,7 @@ class MovieListViewModelTest : KoinTest {
         vm.setEvent(MovieListEvent.Refresh)
         advanceUntilIdle()
 
-        assertThat(vm.viewState.value.error).isEqualTo(MovieListError.Offline)
+        assertThat(vm.viewState.value.error).isEqualTo(LoadError.Offline)
         assertThat(vm.viewState.value.isLoading).isFalse()
     }
 
@@ -235,7 +236,7 @@ class MovieListViewModelTest : KoinTest {
         assertThat(state.isRefreshing).isFalse()
         assertThat(state.isLoading).isFalse()
         vm.effect.test {
-            assertThat(awaitItem()).isEqualTo(MovieListSideEffect.RefreshFailed(MovieListError.Offline))
+            assertThat(awaitItem()).isEqualTo(MovieListSideEffect.RefreshFailed(LoadError.Offline))
         }
     }
 

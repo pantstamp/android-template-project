@@ -4,6 +4,8 @@ import com.pantelisstampoulis.androidtemplateproject.domain.onError
 import com.pantelisstampoulis.androidtemplateproject.domain.onLoading
 import com.pantelisstampoulis.androidtemplateproject.domain.onSuccess
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetMoviesUseCase
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.error.LoadError
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.error.toLoadError
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.mapper.MovieUiMapper
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.MviViewModel
@@ -60,7 +62,7 @@ class MovieListViewModel(
                         }
                     }
                     .onError { domainError ->
-                        val error = domainError.toMovieListError()
+                        val error = domainError.toLoadError()
                         val hadMovies = viewState.value.hasMovies
                         setState {
                             copy(
@@ -82,7 +84,7 @@ data class MovieListUiState(
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     // Set only when there are no movies to show; a failed refresh over a list is a side effect.
-    val error: MovieListError? = null,
+    val error: LoadError? = null,
     val data: ImmutableList<MovieUiModel>? = null,
 ) : UiState {
     val hasMovies: Boolean get() = !data.isNullOrEmpty()

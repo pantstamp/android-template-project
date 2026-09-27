@@ -9,14 +9,17 @@ import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetMo
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.GetWatchedMovieUseCase
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.RateMovieUseCase
 import com.pantelisstampoulis.androidtemplateproject.domain.usecase.movies.SaveWatchedMovieUseCase
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.error.LoadError
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.mapper.MovieUiMapper
 import com.pantelisstampoulis.androidtemplateproject.model.error.DomainError
+import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
 import com.pantelisstampoulis.androidtemplateproject.test.doubles.model.DomainTestDoubleFactory
 import io.mockative.Mock
 import io.mockative.any
 import io.mockative.every
 import io.mockative.matches
 import io.mockative.mock
+import io.mockative.once
 import io.mockative.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
@@ -115,7 +118,7 @@ class MovieDetailsViewModelTest : KoinTest {
         viewModel.viewState.test {
             val firstItem = awaitItem()
             assertThat(firstItem.isLoading).isFalse()
-            assertThat(firstItem.errorMessage).isNull()
+            assertThat(firstItem.error).isNull()
             assertThat(firstItem.data).isEqualTo(uiMovie)
             cancelAndIgnoreRemainingEvents()
         }
@@ -124,27 +127,93 @@ class MovieDetailsViewModelTest : KoinTest {
     }
 
     @Test
-    fun shouldEmitErrorStateWhenFetchingMovieDetailsFails() = runTest {
-        val errorMessage = "Failed to load movie details"
-        val errorState = DomainError.NotFound(errorMessage)
-
+    fun shouldShowOfflineErrorWhenMovieLoadFailsWithNoNetwork() = runTest {
         every { getMovieUseCase(any()) }
-            .returns(flowOf(ResultState.Error(errorState)))
+            .returns(flowOf(ResultState.Error(DomainError.NoNetworkConnection())))
         every { getWatchedMovieUseCase(any()) }.returns(flowOf(ResultState.Success(null)))
 
         viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
-
         advanceUntilIdle()
 
-        viewModel.viewState.test {
-            val firstItem = awaitItem()
-            assertThat(firstItem.isLoading).isFalse()
-            assertThat(firstItem.errorMessage).isEqualTo(errorMessage)
-            assertThat(firstItem.data).isNull()
-            cancelAndIgnoreRemainingEvents()
-        }
+        val state = viewModel.viewState.value
+        assertThat(state.isLoading).isFalse()
+        assertThat(state.error).isEqualTo(LoadError.Offline)
+        assertThat(state.data).isNull()
+    }
 
-        verify { getMovieUseCase(any()) }.wasInvoked()
+    @Test
+    fun shouldShowGenericErrorWhenMovieLoadFailsWithNotFound() = runTest {
+        every { getMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Error(DomainError.NotFound("Not Found"))))
+        every { getWatchedMovieUseCase(any()) }.returns(flowOf(ResultState.Success(null)))
+
+        viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
+        advanceUntilIdle()
+
+        val state = viewModel.viewState.value
+        assertThat(state.isLoading).isFalse()
+        assertThat(state.error).isEqualTo(LoadError.Generic)
+        assertThat(state.data).isNull()
+    }
+
+    @Test
+    fun shouldClearErrorAndShowMovieWhenRetrySucceeds() = runTest {
+        val domainMovie = DomainTestDoubleFactory.provideMovieModel()
+        every { getMovieUseCase(any()) }.returns(failsOnceThenSucceeds(domainMovie))
+        every { getWatchedMovieUseCase(any()) }.returns(flowOf(ResultState.Success(null)))
+
+        viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
+        advanceUntilIdle()
+        assertThat(viewModel.viewState.value.error).isEqualTo(LoadError.Offline)
+
+        viewModel.setEvent(MovieDetailsEvent.Retry(movieId = 123))
+        advanceUntilIdle()
+
+        val state = viewModel.viewState.value
+        assertThat(state.error).isNull()
+        assertThat(state.isLoading).isFalse()
+        assertThat(state.movie).isEqualTo(domainMovie)
+        assertThat(state.data).isEqualTo(uiMapper.fromDomainToUi(domainMovie))
+    }
+
+    @Test
+    fun shouldReloadOnlyTheMovieOnRetry() = runTest {
+        every { getMovieUseCase(any()) }
+            .returns(flowOf(ResultState.Error(DomainError.NoNetworkConnection())))
+        every { getWatchedMovieUseCase(any()) }.returns(flowOf(ResultState.Success(null)))
+
+        viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
+        advanceUntilIdle()
+        viewModel.setEvent(MovieDetailsEvent.Retry(movieId = 123))
+        advanceUntilIdle()
+
+        verify { getMovieUseCase(123) }.wasInvoked(exactly = 2)
+        verify { getWatchedMovieUseCase(any()) }.wasInvoked(exactly = once)
+    }
+
+    @Test
+    fun shouldShowLoadingWithoutErrorWhileRetrying() = runTest {
+        var calls = 0
+        every { getMovieUseCase(any()) }.returns(
+            flow {
+                calls++
+                if (calls == 1) {
+                    emit(ResultState.Error(DomainError.NoNetworkConnection()))
+                } else {
+                    emit(ResultState.Loading) // stays loading
+                }
+            },
+        )
+        every { getWatchedMovieUseCase(any()) }.returns(flowOf(ResultState.Success(null)))
+
+        viewModel.setEvent(MovieDetailsEvent.Init(movieId = 123))
+        advanceUntilIdle()
+        viewModel.setEvent(MovieDetailsEvent.Retry(movieId = 123))
+        advanceUntilIdle()
+
+        val state = viewModel.viewState.value
+        assertThat(state.isLoading).isTrue()
+        assertThat(state.error).isNull()
     }
 
     @Test
@@ -303,6 +372,19 @@ class MovieDetailsViewModelTest : KoinTest {
             assertThat(state.userRating).isNull()
             assertThat(state.isRatingInProgress).isFalse()
             cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /** A cold flow: the first collection fails offline, every later one succeeds. */
+    private fun failsOnceThenSucceeds(movie: Movie) = run {
+        var calls = 0
+        flow {
+            calls++
+            if (calls == 1) {
+                emit(ResultState.Error(DomainError.NoNetworkConnection()))
+            } else {
+                emit(ResultState.Success(movie))
+            }
         }
     }
 }

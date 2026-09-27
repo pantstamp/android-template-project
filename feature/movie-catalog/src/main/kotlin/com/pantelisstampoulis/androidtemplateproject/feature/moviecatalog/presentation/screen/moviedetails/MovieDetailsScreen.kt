@@ -1,5 +1,6 @@
 package com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.screen.moviedetails
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,14 +35,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import coil3.compose.AsyncImage
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.R
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.error.LoadError
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.StatusMessage
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.UserRatingBar
+import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uicomponent.iconRes
 import com.pantelisstampoulis.androidtemplateproject.feature.moviecatalog.presentation.uimodel.MovieUiModel
 import com.pantelisstampoulis.androidtemplateproject.presentation.mvi.ObserveEffects
 import com.pantelisstampoulis.androidtemplateproject.presentation.theme.StarYellow
@@ -79,11 +82,11 @@ fun MovieDetailsScreen(
                     CircularProgressIndicator()
                 }
 
-                state.errorMessage != null -> {
-                    Text(
-                        text = state.errorMessage,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 16.dp),
+                state.error != null -> {
+                    StatusMessage(
+                        message = stringResource(id = state.error.detailsMessageRes()),
+                        iconRes = state.error.iconRes(),
+                        onRetry = { onEvent(MovieDetailsEvent.Retry(movieId)) },
                     )
                 }
 
@@ -250,6 +253,12 @@ fun RateMovie(
     }
 }
 
+@StringRes
+private fun LoadError.detailsMessageRes(): Int = when (this) {
+    LoadError.Offline -> R.string.error_offline
+    LoadError.Generic -> R.string.movie_details_error_generic
+}
+
 private val previewMovie = MovieUiModel(
     id = 1,
     adult = false,
@@ -280,9 +289,20 @@ fun PreviewMovieDetailsLoading() {
 
 @Preview
 @Composable
-fun PreviewMovieDetailsError() {
+fun PreviewMovieDetailsOfflineError() {
     MovieDetailsScreen(
-        state = MovieDetailsUiState(errorMessage = "Movie not found"),
+        state = MovieDetailsUiState(error = LoadError.Offline),
+        effect = emptyFlow(),
+        onEvent = {},
+        movieId = 1,
+    )
+}
+
+@Preview
+@Composable
+fun PreviewMovieDetailsGenericError() {
+    MovieDetailsScreen(
+        state = MovieDetailsUiState(error = LoadError.Generic),
         effect = emptyFlow(),
         onEvent = {},
         movieId = 1,

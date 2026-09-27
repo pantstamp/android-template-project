@@ -9,3 +9,8 @@ plugins {
 android {
     namespace = namespaceWithProjectPackage(suffix = "feature.moviecatalog")
 }
+
+dependencies {
+    // BackHandler; also reachable through navigation-compose, but declared because it is imported.
+    implementation(libs.androidx.activity.compose)
+}

@@ -8,6 +8,7 @@ import com.pantelisstampoulis.androidtemplateproject.database.DatabaseDataSource
 import com.pantelisstampoulis.androidtemplateproject.domain.ResultState
 import com.pantelisstampoulis.androidtemplateproject.domain.repository.MoviesRepository
 import com.pantelisstampoulis.androidtemplateproject.model.error.DomainError
+import com.pantelisstampoulis.androidtemplateproject.network.IMAGE_URL
 import com.pantelisstampoulis.androidtemplateproject.network.NetworkDataSource
 import com.pantelisstampoulis.androidtemplateproject.network.NetworkResult
 import com.pantelisstampoulis.androidtemplateproject.network.request.RateMovieRequest
@@ -32,6 +33,7 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.inject
+import java.net.UnknownHostException
 
 class MoviesRepositoryImplTest : KoinTest {
 
@@ -196,17 +198,165 @@ class MoviesRepositoryImplTest : KoinTest {
     }
 
     @Test
-    fun shouldReturnErrorWhenMovieNotFoundInDatabase() = runTest {
-        val movieId = 1
+    fun shouldFetchMovieFromNetworkWhenNotInDatabase() = runTest {
+        val movieId = 603
+        val apiModel = NetworkTestDoubleFactory.provideMovieDetailsApiModel().copy(id = movieId)
         coEvery { databaseDataSource.getMovie(movieId) }.returns(null)
+        coEvery { networkDataSource.getMovie(movieId) }.returns(NetworkResult.Success(apiModel))
+
+        repository.getMovie(movieId).test {
+            assertThat(awaitItem())
+                .isEqualTo(ResultState.Success(dataMappers.movieDetailsDomainMapper.fromApiToDomain(apiModel)))
+            coVerify { databaseDataSource.getMovie(movieId) }.wasInvoked(exactly = once)
+            coVerify { networkDataSource.getMovie(movieId) }.wasInvoked(exactly = once)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun shouldNotFetchFromNetworkWhenMovieIsInDatabase() = runTest {
+        val movieId = 1
+        coEvery { databaseDataSource.getMovie(movieId) }.returns(DatabaseTestDoubleFactory.provideMovieDbModel())
+
+        repository.getMovie(movieId).test {
+            assertThat(awaitItem()).isInstanceOf(ResultState.Success::class.java)
+            coVerify { networkDataSource.getMovie(any()) }.wasNotInvoked()
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun shouldNotWriteToDatabaseWhenMovieFetchedFromNetwork() = runTest {
+        val movieId = 603
+        coEvery { databaseDataSource.getMovie(movieId) }.returns(null)
+        coEvery { networkDataSource.getMovie(movieId) }
+            .returns(NetworkResult.Success(NetworkTestDoubleFactory.provideMovieDetailsApiModel()))
+
+        repository.getMovie(movieId).test {
+            assertThat(awaitItem()).isInstanceOf(ResultState.Success::class.java)
+            awaitComplete()
+        }
+        assertNothingWritten()
+    }
+
+    @Test
+    fun shouldEmitNoNetworkErrorWhenMovieFetchFailsOffline() = runTest {
+        val movieId = 603
+        coEvery { databaseDataSource.getMovie(movieId) }.returns(null)
+        coEvery { networkDataSource.getMovie(movieId) }.returns(NetworkResult.Exception(UnknownHostException()))
 
         repository.getMovie(movieId).test {
             val result = awaitItem()
-            assertThat(result).isInstanceOf(ResultState.Error::class.java)
-            assertThat((result as ResultState.Error).error).isInstanceOf(DomainError.NotFound::class.java)
-            coVerify { databaseDataSource.getMovie(movieId) }.wasInvoked(exactly = once)
+            assertThat((result as ResultState.Error).error).isInstanceOf(DomainError.NoNetworkConnection::class.java)
             awaitComplete()
         }
+        assertNothingWritten()
+    }
+
+    @Test
+    fun shouldEmitNotFoundWhenNetworkReturns404ForMovie() = runTest {
+        val movieId = 603
+        coEvery { databaseDataSource.getMovie(movieId) }.returns(null)
+        coEvery { networkDataSource.getMovie(movieId) }.returns(NetworkResult.Error(404, "Not Found"))
+
+        repository.getMovie(movieId).test {
+            val result = awaitItem()
+            assertThat((result as ResultState.Error).error).isInstanceOf(DomainError.NotFound::class.java)
+            awaitComplete()
+        }
+        assertNothingWritten()
+    }
+
+    @Test
+    fun shouldEmitSearchResultsInNetworkOrder() = runTest {
+        val apiModels = listOf(
+            NetworkTestDoubleFactory.provideMovieApiModel().copy(id = 3, posterPath = "/c.jpg"),
+            NetworkTestDoubleFactory.provideMovieApiModel().copy(id = 1, posterPath = "/a.jpg"),
+            NetworkTestDoubleFactory.provideMovieApiModel().copy(id = 2, posterPath = "/b.jpg"),
+        )
+        coEvery { networkDataSource.searchMovies("matrix") }.returns(NetworkResult.Success(apiModels))
+
+        repository.searchMovies("matrix").test {
+            val movies = (awaitItem() as ResultState.Success).data
+            assertThat(movies.map { it.id }).containsExactly(3, 1, 2).inOrder()
+            assertThat(movies.map { it.posterPath })
+                .containsExactly("$IMAGE_URL/c.jpg", "$IMAGE_URL/a.jpg", "$IMAGE_URL/b.jpg").inOrder()
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun shouldDropDuplicateIdsFromSearchResultsKeepingFirst() = runTest {
+        val apiModels = listOf(
+            NetworkTestDoubleFactory.provideMovieApiModel().copy(id = 1, title = "first"),
+            NetworkTestDoubleFactory.provideMovieApiModel().copy(id = 2, title = "second"),
+            NetworkTestDoubleFactory.provideMovieApiModel().copy(id = 1, title = "duplicate"),
+        )
+        coEvery { networkDataSource.searchMovies("matrix") }.returns(NetworkResult.Success(apiModels))
+
+        repository.searchMovies("matrix").test {
+            val movies = (awaitItem() as ResultState.Success).data
+            assertThat(movies.map { it.id }).containsExactly(1, 2).inOrder()
+            assertThat(movies.first().title).isEqualTo("first")
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun shouldEmitEmptySuccessWhenSearchHasNoResults() = runTest {
+        coEvery { networkDataSource.searchMovies("zzzzqqq") }.returns(NetworkResult.Success(emptyList()))
+
+        repository.searchMovies("zzzzqqq").test {
+            assertThat(awaitItem()).isEqualTo(ResultState.Success(emptyList<Any>()))
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun shouldEmitNoNetworkErrorWhenSearchFailsOffline() = runTest {
+        coEvery { networkDataSource.searchMovies("matrix") }
+            .returns(NetworkResult.Exception(UnknownHostException()))
+
+        repository.searchMovies("matrix").test {
+            val result = awaitItem()
+            assertThat((result as ResultState.Error).error).isInstanceOf(DomainError.NoNetworkConnection::class.java)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun shouldEmitServerErrorWhenSearchReturns500() = runTest {
+        coEvery { networkDataSource.searchMovies("matrix") }.returns(NetworkResult.Error(500, "Internal Server Error"))
+
+        repository.searchMovies("matrix").test {
+            val result = awaitItem()
+            assertThat((result as ResultState.Error).error).isInstanceOf(DomainError.ServerError::class.java)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun shouldNeverTouchDatabaseWhenSearchSucceeds() = runTest {
+        coEvery { networkDataSource.searchMovies("matrix") }
+            .returns(NetworkResult.Success(listOf(NetworkTestDoubleFactory.provideMovieApiModel())))
+
+        repository.searchMovies("matrix").test {
+            awaitItem()
+            awaitComplete()
+        }
+        assertDatabaseUntouched()
+    }
+
+    @Test
+    fun shouldNeverTouchDatabaseWhenSearchFails() = runTest {
+        coEvery { networkDataSource.searchMovies("matrix") }
+            .returns(NetworkResult.Exception(UnknownHostException()))
+
+        repository.searchMovies("matrix").test {
+            awaitItem()
+            awaitComplete()
+        }
+        assertDatabaseUntouched()
     }
 
     @Test
@@ -327,5 +477,16 @@ class MoviesRepositoryImplTest : KoinTest {
             coVerify { databaseDataSource.insertMovies(any()) }.wasNotInvoked()
             awaitComplete()
         }
+    }
+
+    private suspend fun assertNothingWritten() {
+        coVerify { databaseDataSource.insertMovies(any()) }.wasNotInvoked()
+        coVerify { databaseDataSource.insertWatchedMovie(any()) }.wasNotInvoked()
+    }
+
+    private suspend fun assertDatabaseUntouched() {
+        coVerify { databaseDataSource.getMovies() }.wasNotInvoked()
+        coVerify { databaseDataSource.getMovie(any()) }.wasNotInvoked()
+        assertNothingWritten()
     }
 }

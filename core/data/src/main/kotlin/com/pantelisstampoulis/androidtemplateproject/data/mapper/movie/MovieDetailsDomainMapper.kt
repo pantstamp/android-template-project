@@ -1,16 +1,17 @@
 package com.pantelisstampoulis.androidtemplateproject.data.mapper.movie
 
-import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.ApiToDbMapper
-import com.pantelisstampoulis.androidtemplateproject.database.model.MovieDbModel
-import com.pantelisstampoulis.androidtemplateproject.network.model.MovieApiModel
+import com.pantelisstampoulis.androidtemplateproject.architecture.mapper.ApiToDomainMapper
+import com.pantelisstampoulis.androidtemplateproject.model.movies.Movie
+import com.pantelisstampoulis.androidtemplateproject.network.model.MovieDetailsApiModel
 
-internal class MovieDataMapper : ApiToDbMapper<MovieApiModel, MovieDbModel> {
+/** Maps a movie fetched by id, which is shown in Details but never stored. */
+internal class MovieDetailsDomainMapper : ApiToDomainMapper<MovieDetailsApiModel, Movie> {
 
-    override fun fromApiToDb(apiModel: MovieApiModel): MovieDbModel = MovieDbModel(
+    override fun fromApiToDomain(apiModel: MovieDetailsApiModel): Movie = Movie(
         id = apiModel.id,
         adult = apiModel.adult,
         backdropPath = apiModel.backdropPath,
-        genreId = apiModel.genreIds.firstOrNull(),
+        genreId = apiModel.genres.firstOrNull()?.id,
         originalLanguage = apiModel.originalLanguage,
         originalTitle = apiModel.originalTitle,
         overview = apiModel.overview,

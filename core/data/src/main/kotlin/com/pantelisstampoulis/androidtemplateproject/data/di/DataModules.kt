@@ -4,7 +4,9 @@ import com.pantelisstampoulis.androidtemplateproject.data.mapper.ErrorClassifier
 import com.pantelisstampoulis.androidtemplateproject.data.mapper.Mappers
 import com.pantelisstampoulis.androidtemplateproject.data.mapper.WatchedMovieDomainMapper
 import com.pantelisstampoulis.androidtemplateproject.data.mapper.movie.MovieDataMapper
+import com.pantelisstampoulis.androidtemplateproject.data.mapper.movie.MovieDetailsDomainMapper
 import com.pantelisstampoulis.androidtemplateproject.data.mapper.movie.MovieDomainMapper
+import com.pantelisstampoulis.androidtemplateproject.data.mapper.movie.MovieSearchDomainMapper
 import com.pantelisstampoulis.androidtemplateproject.data.repository.MoviesRepositoryImpl
 import com.pantelisstampoulis.androidtemplateproject.database.di.databaseModule
 import com.pantelisstampoulis.androidtemplateproject.domain.repository.MoviesRepository
@@ -20,6 +22,8 @@ internal val mappersModule = module {
             movieDomainMapper = MovieDomainMapper(),
             errorClassifier = ErrorClassifier(),
             watchedMovieDomainMapper = WatchedMovieDomainMapper(),
+            movieSearchDomainMapper = MovieSearchDomainMapper(),
+            movieDetailsDomainMapper = MovieDetailsDomainMapper(),
         )
     }
 }
