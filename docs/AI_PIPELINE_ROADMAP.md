@@ -1,6 +1,12 @@
 # AI pipeline roadmap — from this project to a reusable package
 
-Status: **proposed.** Step 1 is implemented on `chore/agent-pipeline`: [`docs/features/agent-pipeline/IMPROVEMENTS.md`](features/agent-pipeline/IMPROVEMENTS.md).
+Status: **step 1 done** (PR #35, [`docs/features/agent-pipeline/IMPROVEMENTS.md`](features/agent-pipeline/IMPROVEMENTS.md)).
+**Step 2 is next**; its brief is [§4](#4-step-2-brief--golden-scenarios).
+
+**Starting a new session on this roadmap:**
+- Read this file, then `CLAUDE.md`, `docs/AI_WORKFLOW.md` and `.claude/skills/README.md`.
+- For step 2, say: *"Read docs/AI_PIPELINE_ROADMAP.md and start step 2."* §4 is written to be
+  enough on its own; start with its open decisions.
 
 The pipeline (`.claude/skills/`, guide in [`AI_WORKFLOW.md`](AI_WORKFLOW.md)) was built for
 this Android project. This roadmap covers three goals:
@@ -11,8 +17,8 @@ this Android project. This roadmap covers three goals:
 
 ## Order
 
-1. **Finish the agent improvements** in `IMPROVEMENTS.md`, in this repo.
-2. **Write golden scenarios before refactoring** (see §3). They are the safety net for step 3.
+1. ✅ **Finish the agent improvements** in `IMPROVEMENTS.md`, in this repo. Merged in PR #35.
+2. **Write golden scenarios before refactoring** (brief in §4). They are the safety net for step 3.
 3. **Split the layers inside this repo**: generic skills, project config, Android profile. Re-run
    the scenarios; Android must not get worse.
 4. **Extract to a plugin and marketplace** with semver, and pin this repo to `v1.0.0`.
@@ -132,18 +138,163 @@ Rolling back is easy; **noticing that a change made things worse** is the hard p
 1. **Stamp the version on every artifact.** SPEC, PLAN and RETRO headers record
    `pipeline: vX.Y.Z`. Retros already count review findings by severity per feature; with the
    version, they show trends across releases. This is lagging and noisy, but it is real-world data.
-2. **Golden-scenario evals**, the leading indicator, run before tagging a release:
-   - **Gate:** the movie-search branch before the PR #32 review fixes. How many of the known
-     findings does the rule review (Check 5) catch?
-   - **Architect:** the watched-movies SPEC. Does the plan record the blocking-DAO deviation,
-     list a preview per state, and give each phase a verification command?
-   - **Product owner:** a fixed raw requirement. Are error, empty and offline states covered, and
-     are open questions recorded?
-   - **Developer:** a small throwaway plan with a deliberately broken phase. Does it return
-     `BLOCKED` instead of improvising?
+2. **Golden-scenario evals**, the leading indicator, run before tagging a release. One
+   scenario per stage that matters most; the full brief is in §4. Model output varies between
+   runs, so each scenario passes on a rate ("3 of 3 runs"), not a single result.
 
-   Model output varies between runs, so run each scenario several times and compare rates
-   ("catches ≥4 of 6 findings in 3 of 3 runs"), not single results.
-3. **Tooling to evaluate before building a harness:**
-   - `claude plugin eval` (plugin eval suites)
-   - the `skill-creator` skill (skill evals and benchmarks with variance analysis)
+---
+
+## 4. Step 2 brief — golden scenarios
+
+**Goal**: a repeatable suite that says whether a change to the pipeline made it worse. Step 3
+moves every Android-specific line out of the skills, and it is safe only if this suite passes as
+well afterwards as before.
+
+**Principle**: each scenario replays a **historical snapshot whose outcome is already known**
+(from a PR review or a retro), with the **current** pipeline files and the **current**
+`CLAUDE.md`. Then the result can be graded against what actually happened, not against opinion.
+
+### How to replay a snapshot
+
+1. Create a detached worktree at the snapshot commit, in a scratch directory:
+   `git worktree add --detach <scratch>/<name> <commit>`.
+2. Give the run the **current** pipeline:
+   - **Gate scenario:** run the agent from the main repo and point it at the worktree; it reads
+     only git and files there (see the prompt in scenario 1).
+   - **Architect, product-owner and developer scenarios:** these run inside the worktree. Copy
+     the current `.claude/` and `CLAUDE.md` into it, uncommitted, so the skills under test are
+     today's.
+3. Keep the outcome hidden. The run must not read that feature's `RETRO.md` (most snapshots
+   predate it anyway) or anything after the snapshot.
+4. Remove the worktree afterwards (`git worktree remove --force`).
+
+A session only picks up agent files when it starts: restart it after changing one.
+
+### Scenarios
+
+| # | Stage | Snapshot | Runs without a person? |
+|---|---|---|---|
+| 1 | Gate | `dd348bf` (movie-search before the PR #32 fixes), base `3e1577d` | Yes |
+| 2 | Architect | `bdfacd9` (movie-search SPEC committed, no code yet) | With scripted answers |
+| 3 | Developer | any current `master`, plus [`scenarios/developer-dry-run/PLAN.md`](ai-pipeline/scenarios/developer-dry-run/PLAN.md) | With scripted answers |
+| 4 | Product owner | `c3a9626` (parent of `bdfacd9`, before the movie-search spec) | With scripted answers |
+
+#### 1. Gate: does the rule review catch known findings?
+
+Spawn `pre-pr-gate` from the main repo, with `Feature name: movie-search` plus these adjustments:
+- Run every git command in the worktree (`git -C <worktree> …`).
+- Wherever your instructions say `master`, use `3e1577d`.
+- Use the current `CLAUDE.md` from the main repo, not the worktree's.
+- Do not read `docs/features/movie-search/RETRO.md`.
+- For a cheaper run: `Checks to run: Check 5 only`, with no gradle.
+
+**Pass criteria** (PR #32's findings are listed in `docs/features/movie-search/RETRO.md`):
+- **Rule review catches 4 of 4 rule-backed findings:**
+  - #1: Refresh while a new query's debounce is pending, in `MovieSearchViewModel`.
+  - #2: `reruns` `MutableSharedFlow` + `tryEmit` without `onBufferOverflow`.
+  - #5: the `LaunchedEffect` in `DiscoverScreen` calls `onSearchEvent` without
+    `rememberUpdatedState`.
+  - #6: `MovieSearchResults` imports `MovieRow` from the `movielist` screen package.
+- **No false positive on the pager comment** (#3). `MovieCatalogTabbedScreen` sets
+  `beyondViewportPageCount = 1` on a line outside the diff.
+- **Full run:** result CONDITIONAL GO, pre-flight passes, and every planned file is accounted for.
+- **Bonus, not required:** AC8 flagged as NEEDS VERIFICATION or a likely defect. That is the
+  scroll-to-top case review missed.
+- Findings #4 and #7 have no rule and are not expected.
+
+**Baseline (PR #35):** 4 of 4 in a single run. Check 5 alone took about 2.5 min and 75–125k
+tokens; the full gate about 4 min and 145k tokens.
+
+#### 2. Architect: does the plan still design in PR #32's defects?
+
+The movie-search retro found that 5 of the 6 real review findings, and the most serious defect
+found during implementation, **originated in the plan**. Since then each one has become a
+CLAUDE.md rule or an architect self-check. Run `/architect` for `movie-search` in the worktree
+and check that the plan now avoids them.
+
+**Scripted answers:**
+- At the outline gate: approve the shape.
+- For each open question: take the option the original `PLAN.md` (`2ca290e`) chose. Write these
+  down once and reuse them, so every run gets the same answers.
+
+**Pass criteria** (the plan, not code):
+- Refresh, Retry and query-change events each define what happens when a search is pending or
+  running, and plan a test for each state. This was finding #1.
+- Every `MutableSharedFlow` used with `tryEmit` has an explicit `onBufferOverflow`. This was #2.
+- Effect code that calls a callback reads it through `rememberUpdatedState`. This was #5.
+- `MovieRow`, and anything else two screens use, is planned into `presentation/uicomponent`.
+  This was #6.
+- One shared `LoadError` → message mapping, not one per screen. This was #4.
+- The query pipeline does not rely on a `StateFlow` to deliver every change: it uses a
+  generation counter or a buffered `SharedFlow`. This was defect A in the retro.
+- General shape:
+  - each phase has a verification command
+  - UI phases include `lint`
+  - each new screen state has a `@Preview`
+  - each resource is added in the phase that first uses it
+
+**Baseline:** not run yet. The original plan (`2ca290e`) is the "before": according to the retro,
+all six defects above came from it.
+
+#### 3. Developer: does the phase agent stop instead of improvising?
+
+On a scratch branch from `master`, copy the dry-run plan to
+`docs/features/pipeline-dry-run/PLAN.md`, commit it, and run `/developer` for
+`pipeline-dry-run`.
+
+**Scripted answers:**
+- Phase 1: approve.
+- Phase 2: reject with "make the part before the @ lowercase only".
+- Phase 3: answer `BLOCKED` with option A, updating the test.
+
+**Pass criteria:**
+- Phase 1 report matches `git status`, and the skill re-runs the verification itself.
+- Phase 2 feedback goes to the **same** agent via SendMessage, and PLAN.md is updated first.
+- Phase 3 returns `BLOCKED`. The trap: the plan widens `randomInt`'s range but forbids touching
+  the test that asserts the old range.
+- The answer goes to the same agent, which then finishes the phase.
+- The agent makes no commits and uses no git command to undo edits.
+
+**Baseline (PR #35):** all passed, except that the agent once used `git checkout --` to undo its
+own edit; that rule was added afterwards. Each agent run took 10–22 s and about 65k tokens.
+
+Delete the scratch branch afterwards.
+
+#### 4. Product owner: does the spec cover what raw requirements leave out?
+
+Run `/product-owner` in the worktree at `c3a9626` with a one-line raw requirement: *"Users should
+be able to search movies by title from the Discover tab."* Script answers from the real
+`SPEC.md` (`bdfacd9`): when the interview asks something the spec answers, answer as the spec
+does; otherwise say "I don't know yet".
+
+**Pass criteria:**
+- The spec has acceptance criteria for:
+  - empty results
+  - offline and other errors, including retry
+  - rotation and process death
+  - clearing the query
+  - repeated or identical queries
+- Open questions are recorded rather than assumed.
+- Out-of-scope items are listed.
+- Every acceptance criterion is testable as written.
+
+**Baseline:** not run yet. Compare coverage with the real `SPEC.md`.
+
+### Open decisions — settle these first
+
+1. **Tooling.** *Recommendation:* try `claude plugin eval` first. Fall back to a small script
+   (`claude -p` per scenario, plus a grading step) if it can't drive project skills before they
+   are a plugin.
+   - `claude plugin eval` runs scripted cases with graders (regex, file exists, tool used, model
+     judge) and can compare with-plugin against without-plugin runs.
+   - Its suites carry over to step 4 unchanged.
+   - **Check first** whether it works on project skills that are not yet a plugin.
+2. **Runs per scenario.** *Recommendation:* 3. A scenario passes at 3 of 3; 2 of 3 is a warning
+   to investigate. Weigh this against the cost above: the suite is run before a pipeline release,
+   not on every change.
+3. **Order.** *Recommendation:* scenario 1 first (no person needed, baseline already known), then
+   2 (highest value: the plan is where PR #32's defects started), then 3, then 4.
+4. **Where scenarios live.** *Recommendation:* `docs/ai-pipeline/scenarios/<name>/`, one folder per
+   scenario with its inputs, scripted answers and pass criteria. They move into the plugin repo
+   at step 4.
+
