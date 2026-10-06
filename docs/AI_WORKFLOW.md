@@ -1,7 +1,9 @@
 # Implementing a feature with the AI pipeline
 
 This project ships six Claude Code skills that cover a feature or fix from raw idea
-to post-merge retrospective. This is the guide to using them.
+to post-merge retrospective. This is the guide to using them. Two of them hand
+bounded work to an agent (`.claude/agents/`): the developer skill implements each
+phase through one, and the pre-PR gate runs as one.
 
 The skills are not a replacement for judgment. Each stage ends at a point where
 you decide whether to continue, and the guide calls out what to actually look at
@@ -162,8 +164,8 @@ those are the questions to push on.**
 - **Is each phase independently verifiable?** Each should end with a command that
   passes.
 
-The plan must be self-contained. That is what makes stage 3 resumable after a
-`/clear`.
+The plan must be self-contained. Stage 3 implements every phase in a fresh agent
+that reads only the plan, so a gap in it shows up as soon as that phase starts.
 
 ---
 
@@ -177,14 +179,29 @@ Implement the user-profiles feature.
 
 Claude checks out the branch from stage 1, then works **one phase at a time**:
 
-1. Implements exactly what the phase specifies — no extras, no "while I'm here"
-2. Runs that phase's verification from the plan
+1. Hands the phase to the **`phase-implementer` agent**, which implements exactly
+   what the phase specifies (no extras, no "while I'm here") and runs its
+   verification
+2. Checks the agent's report against `git status` and re-runs the verification
 3. Reports files changed, decisions made, and the verification result
 4. **Stops and waits for you**
 5. Commits the phase once you approve it
 
-> **Tip**: switch to Sonnet for this stage (`/model sonnet`). Execution against a
-> good plan does not need the heavier model, and you will iterate faster.
+### Why each phase runs in an agent
+
+Implementation is the bulky part of a feature: file reads, build output, fix loops,
+over several phases. The agent does it in its own context, on Sonnet, and returns a
+short report. Your conversation holds the plan, the reports and your decisions,
+so it stays focused from the first phase to the PR, with no `/compact` or `/clear`
+and no `/model` switch. Execution against a good plan does not need the heavier
+model.
+
+The agent works from PLAN.md alone. It never commits and never asks you anything.
+When the plan looks wrong it does not improvise: it stops with **`BLOCKED`** and a
+question, which Claude puts to you. Your answer, or your feedback on a finished
+phase, goes back to the same agent, which continues where it left off. If either
+changes what the phase specifies, Claude updates PLAN.md first, so the plan stays
+the agreed record.
 
 ### The checkpoint is the point
 
@@ -193,6 +210,11 @@ look at the screen. A phase that compiles and passes its tests can still be
 wrong in ways no test in the plan covers.
 
 Say "continue" when you are satisfied. Say what is wrong when you are not.
+
+**Tell Claude what you checked by hand** ("empty state looks right on the
+emulator"). It records each check in the phase commit as a `Verified-manually:`
+trailer. The stage 4 gate cannot see this conversation, and reads these trailers
+to count an acceptance criterion as covered.
 
 ### Per-phase verification is deliberately narrow
 
@@ -206,25 +228,19 @@ the failure a phase or more away from its cause. The plan makes this possible by
 adding each resource in the phase that first uses it — otherwise a half-built feature
 would fail lint on a resource that a later phase consumes.
 
-### If the context window fills up
+### Resuming in a new session
 
-Between phases:
-
-```
-/compact focus on PLAN.md progress, current phase, and list of modified files
-```
-
-Or start clean:
+Every approved phase is a commit, so the branch records the progress:
 
 ```
-/clear
-Read docs/features/user-profiles/PLAN.md and CLAUDE.md.
-We are implementing the user-profiles feature.
-Phases 1 through 2 are committed. Continue with Phase 3.
+/developer
+
+Implement the user-profiles feature.
 ```
 
-This works because the plan is self-contained. It is also why stage 2 is worth
-getting right.
+Claude reads `git log` to see which phases are done and continues with the next.
+Uncommitted changes in the working tree are a phase you never approved, and
+Claude shows them to you before going on.
 
 ---
 
@@ -248,27 +264,52 @@ CI and this gate answer different questions, and the split is the whole point:
 | Do the tests pass? | Do the acceptance criteria hold? |
 | Do the architecture rules hold? | Is there debug residue in the diff? |
 | Is it formatted, is lint clean? | Is the branch worth someone's review time? |
+| | Does the diff repeat a mistake CLAUDE.md already records? |
 
 CI checks that the code is **correct**. The gate checks that it is **the code you
 said you would write** — which needs the SPEC and PLAN as a statement of intent
 and a judgment about whether the diff honours it. No CI runner has either.
 
-So the gate leads with the four checks CI cannot do — plan coverage, acceptance
-criteria, a debug/TODO scan, git hygiene — and then runs one pre-flight command
-mirroring CI so you do not push something CI will reject:
+So the gate leads with the checks CI cannot do — plan coverage, acceptance
+criteria, a debug/TODO scan, git hygiene, and a rule review — and then runs one
+pre-flight command mirroring CI so you do not push something CI will reject:
 
 ```bash
 ./gradlew spotlessCheck :test:konsist:test test assembleDebug lint
 ```
 
 (`build.yml` is the source of truth for that list — it is quoted here and in the
-skill, so if the workflow changes, both follow.)
+gate agent, so if the workflow changes, both follow.)
+
+### It runs as an independent agent
+
+The checks run in the **`pre-pr-gate` agent**, not in your conversation. That
+conversation just built the feature, and is the one most likely to read the code
+generously. The agent is given the feature name and nothing else, judges the
+branch only from what is on disk and in git, and is read-only: it reports
+problems and cannot fix its way to GO. Fixes and re-runs happen back in your
+conversation.
+
+### The rule review
+
+Every rule in CLAUDE.md's Flow, Compose and MVI sections records a mistake that
+compiled, passed CI, and was caught only at code review. The rule review checks
+the diff against those rules, so **a known mistake does not reach review twice**.
+A finding does not need to fail today: matching the rule's pattern is enough,
+because "safe today" is how each of those mistakes got through the first time.
+
+It catches repeats, not new kinds of mistake. It can only enforce what is written
+down; finding new problems is still the review's job (stage 5), and turning them
+into rules is the retrospective's (stage 6). Run against movie-search before its
+review fixes, it caught all four of that review's findings that had a rule by
+then, and neither of the two that had none.
 
 ### Reading the result
 
 - **GO** — proceed.
-- **CONDITIONAL GO** — usually unverified acceptance criteria. These need a
-  decision from you, not a fix. Go and check them.
+- **CONDITIONAL GO** — usually unverified acceptance criteria or rule review
+  findings. These need a decision from you, not an automatic fix: Claude takes
+  them one at a time. Check the criteria; fix or dismiss each finding.
 - **NO GO** — the pre-flight failed, or the plan and the diff disagree.
 
 Two failures want a specific response rather than the fastest route to green:

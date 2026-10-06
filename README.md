@@ -115,9 +115,9 @@ The branch model, CI gates and release process are described in
 
 ## AI-assisted development
 
-The project ships five Claude Code skills covering a feature from requirements to
-post-merge retrospective: spec, plan, phased implementation, a pre-PR quality gate, and a
-retrospective that turns review findings into enforced rules.
+The project ships six Claude Code skills covering a feature from requirements to
+post-merge retrospective: spec, plan, phased implementation, a pre-PR quality gate, review triage,
+and a retrospective that turns review findings into enforced rules.
 [`docs/AI_WORKFLOW.md`](docs/AI_WORKFLOW.md) is the step-by-step guide, and
 [`docs/features/watched-movies/`](docs/features/watched-movies/) is a worked example of what
 each stage produces.
