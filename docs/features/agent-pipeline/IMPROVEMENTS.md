@@ -237,6 +237,23 @@ Steps 1 (branch), 4 (gate offer) and 5 (PR) stay in the skill unchanged.
    - one approved phase
    - one rejected phase continued via SendMessage
    - one `BLOCKED` return
+
+   **Result**: a 3-phase plan against `:utils:random`, on a deleted scratch branch.
+   - **Phase 1 (approved).** The report matched `git status`, and the verification re-run
+     passed.
+   - **Phase 2 (rejected with feedback).** The same agent resumed via SendMessage, needing 3 tool
+     calls against 8 on its first pass.
+   - **Phase 3 (trap).** The plan widened `randomInt`'s range but forbade touching the test that
+     asserts the old range. The agent returned `BLOCKED` with options; the answer resumed the
+     same agent, which finished the phase.
+   - **Cost.** Each run took 10–22 s and about 65k tokens, none of it in the main conversation.
+
+   **Two fixes came out of it:**
+   - The agent undid its own edit with `git checkout -- <file>`, which broke its own rule. It
+     reported this, but the command would also have discarded anyone else's uncommitted work in
+     that file. Now: undo by editing, never with git, and on `BLOCKED` leave changes in place.
+   - The skill updated PLAN.md before passing on a `BLOCKED` answer, but not before passing on
+     feedback that changes the phase. It now does both.
 3. **Change 5.** **Verify:** read-through; no stale references to `/model sonnet` or to the gate
    running in-context.
 
@@ -248,8 +265,8 @@ Work on a `chore/agent-pipeline` branch.
   (`disallowedTools` also exists). The gate's allowlist excludes `Edit`/`Write`; that its Bash use
   never modifies files is enforced by instruction only.
 - ~~Do subagents load CLAUDE.md?~~ **Yes**, by default (`omitClaudeMd: true` turns it off).
-- SendMessage continuing a completed subagent is documented; confirm it in practice during the
-  Change 4 verification run.
+- ~~Does SendMessage continue a completed subagent with its context?~~ **Yes**, confirmed in the
+  Change 4 dry run.
 - Custom agents in `.claude/agents/` appear to be loaded at session start (observed while
   implementing Change 1): a session that predates a new agent file could not spawn it by name.
   Restart the session after adding one.
