@@ -110,8 +110,8 @@ hand off to the **pre-pr-checklist** skill.
 
 ### 5. Create the PR
 
-- **If the gate was skipped**, run its Part 2 pre-flight command from the pre-pr-checklist
-  skill first. It mirrors CI; skipping the gate should not mean pushing a branch CI rejects.
+- **If the gate was skipped**, run its Part 2 pre-flight command (in
+  `.claude/agents/pre-pr-gate.md`) first. It mirrors CI; skipping the gate should not mean pushing a branch CI rejects.
 - **Always** run `./gradlew spotlessApply` and commit any files it reformatted.
 
 Then push and open the PR. Use the plan's phase titles as the structure of the description,

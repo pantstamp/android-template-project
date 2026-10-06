@@ -48,7 +48,7 @@ test, confirm it fails when the behaviour it guards is broken.
 
 ### 3. Verify, commit, push
 
-After the last finding, run the CI mirror from the pre-pr-checklist skill (Part 2), then:
+After the last finding, run the CI mirror (Part 2 of `.claude/agents/pre-pr-gate.md`), then:
 
 ```bash
 git add {files changed for the accepted findings}

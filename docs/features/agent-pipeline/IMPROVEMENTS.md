@@ -1,6 +1,6 @@
 # AI pipeline improvements — agents for bounded work
 
-Status: **proposed, not started.** Nothing in this document has been implemented yet.
+Status: **implemented** on `chore/agent-pipeline`. Verification results are recorded under each step in "Order and verification".
 
 ## Why
 
@@ -256,6 +256,10 @@ Steps 1 (branch), 4 (gate offer) and 5 (PR) stay in the skill unchanged.
      feedback that changes the phase. It now does both.
 3. **Change 5.** **Verify:** read-through; no stale references to `/model sonnet` or to the gate
    running in-context.
+
+   **Result**: no stale `/model sonnet`, `/compact` or `/clear` instructions remain. The search
+   also found two skills, `developer` and `review-triage`, pointing at the pre-flight command's
+   old location in the pre-pr-checklist skill; both now point at the gate agent.
 
 Work on a `chore/agent-pipeline` branch.
 

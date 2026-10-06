@@ -1,6 +1,6 @@
 # AI pipeline roadmap — from this project to a reusable package
 
-Status: **proposed.** Step 1 is in progress: [`docs/features/agent-pipeline/IMPROVEMENTS.md`](features/agent-pipeline/IMPROVEMENTS.md).
+Status: **proposed.** Step 1 is implemented on `chore/agent-pipeline`: [`docs/features/agent-pipeline/IMPROVEMENTS.md`](features/agent-pipeline/IMPROVEMENTS.md).
 
 The pipeline (`.claude/skills/`, guide in [`AI_WORKFLOW.md`](AI_WORKFLOW.md)) was built for
 this Android project. This roadmap covers three goals:
@@ -71,7 +71,7 @@ generic pipeline        → process: stages, checkpoints, gates, templates, rout
 2. **`/pipeline-init` bootstraps the config.** It reads the CI workflow, build files and
    CLAUDE.md, proposes a config, and the user approves it.
 3. **Commands come from CI where possible.** The preflight command is currently written in three
-   places (`build.yml`, `AI_WORKFLOW.md`, the gate skill). Hold it once.
+   places (`build.yml`, `AI_WORKFLOW.md`, the gate agent). Hold it once.
 4. **Profiles are allowed to be rich.** "Generic" applies to the process, not the knowledge; the
    Android profile keeps everything the skills know today.
 5. **This repo is the reference consumer.** The golden scenarios must pass at least as well after
