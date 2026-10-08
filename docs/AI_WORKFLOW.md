@@ -16,7 +16,7 @@ before you do.
 | Stage | Skill | Produces | You decide |
 |---|---|---|---|
 | 1. Spec | `/product-owner` | the branch + `SPEC.md` | Are the acceptance criteria right? |
-| 2. Plan | `/architect` | `PLAN.md` | Are the phases right? |
+| 2. Plan | `/architect` | `PLAN.md` | The design — you propose it first |
 | 3. Build | `/developer` | a commit per phase, then the PR | After **every phase** |
 | 4. Gate | `/pre-pr-checklist` | GO / NO GO | Ship it or fix it |
 | 5. Review | `@claude-review`, then `/review-triage` | PR comments → fixes | Which findings to act on |
@@ -94,29 +94,42 @@ Create an implementation plan for the user-profiles feature.
 ```
 
 Claude reads the spec, `CLAUDE.md`, the architecture docs and the parts of the
-codebase the feature touches. Then it stops.
+codebase the feature touches, and quietly writes down its own design. Then it stops —
+because **you design first**. The aim is a plan that is yours: one you could have argued
+for, and can explain to someone else, including why the alternatives lost.
+
+For a small change Claude recommends a short version of what follows, and asks.
+
+### It briefs you on what exists
+
+Facts, no recommendations: a diagram of the modules, classes and data flow the feature
+touches today; the closest existing equivalent, walked through; the rules that bind the
+feature; known weaknesses it could copy; and the design questions the spec raises —
+as open questions:
+
+> - Where do ratings live — the existing movie repository or their own?
+> - The spec doesn't say whether ratings sync or stay local.
+> - A rating needs a schema migration. That's the one irreversible step.
+
+Ask questions until you have the picture.
+
+### You propose; it reviews
+
+Sketch your design, in any form. Claude reviews it one decision at a time: a verdict
+(sound, a trade-off, or a problem, and how serious), the evidence behind it, the
+principle by name, and what best practice says versus what fits this codebase. Only then
+does it show its own design and compare. Where yours is better, it says so and uses yours.
 
 ### It agrees the shape with you before writing the detail
 
-You get a one-page outline in plain language — two or three sentences per phase,
-no file paths — and the decisions it wants from you:
+You decide each fork. Then you get the shape to approve: a target-state diagram coloured
+by phase, a state diagram per new ViewModel, two or three plain sentences per phase, and
+a decision record with the alternatives you rejected.
 
-> Three phases: schema and DAO, then the repository and use cases, then the screen —
-> each with its own tests.
->
-> Two things I need from you:
-> - The spec doesn't say whether ratings sync or stay local. Which?
-> - Phase 1 needs a schema migration. That's the one irreversible step.
-
-Answer the questions, push back on the shape, or say go ahead. **This is your
-decision point**, and it is deliberately before the detail exists: a plan for a
-feature of ordinary size runs past a thousand lines — the watched-movies spec was
-156 lines and produced a 1,313-line plan. Nobody meaningfully approves a
-thousand-line document, and changing the phasing once it is written throws away
-everything downstream.
-
-For a small feature the outline may be a few lines. That is fine — the gate is
-there to catch a wrong shape, not to add ceremony.
+**This is your decision point**, and it is deliberately before the detail exists: a plan
+for a feature of ordinary size runs past a thousand lines — the watched-movies spec was
+156 lines and produced a 1,313-line plan. Nobody meaningfully approves a thousand-line
+document, and changing the phasing once it is written throws away everything downstream.
 
 ### Then the detailed plan
 
@@ -141,6 +154,10 @@ those are the questions to push on.**
 
 > **Tip**: switch to Opus for this stage (`/model opus`). Planning is where
 > deeper reasoning pays for itself; the plan's quality bounds everything after it.
+
+Last, Claude asks you to explain the plan back in your own words, and points out what
+differs from what is written. Skip it if you like; it is the cheapest check that the plan
+is now yours.
 
 **Output**: `docs/features/{feature-name}/PLAN.md`, committed on the branch once you approve it.
 
@@ -420,7 +437,7 @@ baseline numbers a future retrospective is compared against.
 
 ```
 /product-owner   → SPEC.md      → read the acceptance criteria
-/architect       → PLAN.md      → approve the outline, then read the plan
+/architect       → PLAN.md      → design it first, then read the plan and explain it back
 /developer       → code         → review after every phase
 /pre-pr-checklist→ GO / NO GO   → act on CONDITIONAL GO
 @claude-review   → PR comments

@@ -213,9 +213,12 @@ CLAUDE.md rule or an architect self-check. Run `/architect` for `movie-search` i
 and check that the plan now avoids them.
 
 **Scripted answers:**
-- At the outline gate: approve the shape.
+- At the session-size question: the full version.
+- At the briefing: no questions.
+- At the design step: "Show me yours." This tests the plan, not the review of a user design.
 - For each open question: take the option the original `PLAN.md` (`2ca290e`) chose. Write these
   down once and reuse them, so every run gets the same answers.
+- At the shape gate: approve. At the explain-back: skip.
 
 **Pass criteria** (the plan, not code):
 - Refresh, Retry and query-change events each define what happens when a search is pending or

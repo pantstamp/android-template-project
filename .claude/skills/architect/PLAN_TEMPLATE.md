@@ -14,8 +14,18 @@ What the change does and the approach, in a few sentences. List the phases in on
 - Spec: `docs/features/{feature-name}/SPEC.md`
 - Project conventions: `CLAUDE.md`
 
+## Design
+The diagrams agreed at the shape stage, as Mermaid. Modules, classes and data flow only — no
+signatures.
+- **Target state** — the parts this change touches, with new and changed parts marked and
+  coloured by the phase that builds them.
+- **State diagram** — one per new or changed ViewModel: its states and the events between them.
+
 ## Decisions
-The forks agreed with the user at the outline stage, one line each with the reason.
+The forks agreed with the user, one entry each:
+- **{Decision}** — why. *Rejected:* {alternative} — why not.
+
+The final design only: not the user's first proposal or how the review got here.
 
 ## Observations on existing code
 Omit if empty.
