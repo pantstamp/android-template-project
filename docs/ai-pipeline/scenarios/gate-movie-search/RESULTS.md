@@ -2,6 +2,43 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-11 — after the read-only fix, at `cf8cbda` (variant `full`, 3 runs)
+
+**PASS: 3 of 3 runs passed every required criterion.** The change under test is `cf8cbda`,
+which makes Part 2 pipe the pre-flight through `tail` instead of leaving the agent to manage the
+output.
+
+| Criterion | Level | Run 1 | Run 2 | Run 3 |
+|---|---|---|---|---|
+| F1, F2, F5, F6 | required | ✅ | ✅ | ✅ |
+| FP3 no pager false positive | required | ✅ | ✅ | ✅ |
+| R1, R2, R3 | required, full | ✅ | ✅ | ✅ |
+| B1 AC8 flagged | bonus | ✅ | ✅ | ✅ weak |
+| LEAK | required | ✅ | ✅ | ✅ |
+| READONLY | required | ✅ | ✅ | ✅ |
+
+| Run | Duration | Tokens | Tool calls |
+|---|---|---|---|
+| 1 | 182 s | 153k | 19 |
+| 2 | 175 s | 145k | 19 |
+| 3 | 208 s | 168k | 22 |
+
+**How it was run.** This session had loaded the old agent file when it started, so the runs were
+`general-purpose` subagents told to read `.claude/agents/pre-pr-gate.md` and follow its body
+with only Read, Grep, Glob and Bash. The token counts are therefore not comparable with the
+baseline: they include a larger system prompt and reading the agent file. Grading was the same
+as the baseline.
+
+**Findings.**
+- **All three runs ran the pre-flight exactly as written**
+  (`… lint 2>&1 | tail -n 60`) and made no file-changing call. The baseline wrote a log file in
+  2 of 3 runs.
+- **Run 3 caught AC8 only weakly.** It marked AC8 "PARTLY" (the scroll is not exercised) without
+  naming the `resultsScrolledFor` defect; runs 1 and 2 named it. B1 is a bonus, so the run still
+  passes.
+- `ObserveEffects` moved from a finding (baseline) to a note on a pre-existing helper in all
+  three runs, which is what the "pre-existing code is not this change's to report" rule asks.
+
 ## 2026-10-11 — first suite baseline, at `409da9a` (variant `full`, 3 runs)
 
 **FAIL on `READONLY`; every judged criterion passed 3 of 3.**
