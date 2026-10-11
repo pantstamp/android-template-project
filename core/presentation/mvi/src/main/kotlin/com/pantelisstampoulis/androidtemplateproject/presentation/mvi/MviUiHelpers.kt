@@ -2,6 +2,8 @@ package com.pantelisstampoulis.androidtemplateproject.presentation.mvi
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -19,6 +21,10 @@ import kotlinx.coroutines.withContext
  * not injected: tests control it through `Dispatchers.setMain`, and a caller that had to supply it would
  * need a DI container, which a Compose preview does not have.
  *
+ * [onEffect] is read through [rememberUpdatedState], so each effect goes to the lambda from the
+ * latest composition. The collection is keyed on [effect] and the lifecycle only: keying it on
+ * [onEffect] would cancel and restart it whenever the caller passes a new lambda.
+ *
  * @param effect The [Flow] of effects to observe.
  * @param lifecycleOwner The [LifecycleOwner] whose lifecycle is used to control the observation.
  * Defaults to [LocalLifecycleOwner.current].
@@ -30,10 +36,11 @@ fun <T> ObserveEffects(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onEffect: (T) -> Unit,
 ) {
+    val currentOnEffect by rememberUpdatedState(onEffect)
     LaunchedEffect(effect, lifecycleOwner.lifecycle) {
         lifecycleOwner.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
             withContext(Dispatchers.Main.immediate) {
-                effect.collect(onEffect)
+                effect.collect { currentOnEffect(it) }
             }
         }
     }
