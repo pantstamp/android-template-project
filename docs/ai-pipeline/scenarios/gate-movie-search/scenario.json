@@ -1,0 +1,24 @@
+{
+  "description": "Gate: does the rule review catch PR #32's rule-backed findings without the pager false positive?",
+  "stage": "gate",
+  "snapshot": "dd348bf",
+  "base": "3e1577d",
+  "mode": "outside",
+  "agent": "pre-pr-gate",
+  "tools": "Read,Grep,Glob,Bash",
+  "allowed_tools": [
+    "Read", "Grep", "Glob",
+    "Bash(git:*)", "Bash(grep:*)", "Bash(cd:*)", "Bash(./gradlew:*)",
+    "Bash(ls:*)", "Bash(cat:*)", "Bash(head:*)", "Bash(tail:*)", "Bash(sed -n:*)",
+    "Bash(wc:*)", "Bash(find:*)", "Bash(sort:*)", "Bash(uniq:*)"
+  ],
+  "read_only": true,
+  "forbidden_paths": ["docs/features/movie-search/RETRO.md"],
+  "runs": 3,
+  "timeout_minutes": 20,
+  "variants": {
+    "full": "",
+    "check5": "Checks to run: Check 5 only. Do not run gradle."
+  },
+  "default_variant": "full"
+}
