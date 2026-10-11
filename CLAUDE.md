@@ -92,7 +92,13 @@ database ──┤──► data ──► domain ──► model
   pass it as `initialState = FooUiState(isLoading = true)`. A default that encodes ViewModel
   behaviour makes every other construction (`FooUiState(data = …)` in a preview or test)
   render something else.
-- `SideEffect` = one-time effects (navigation, toasts) via `Channel`
+- `SideEffect` = one-time effects (navigation, toasts) via `Channel`, collected by exactly one
+  `ObserveEffects` per ViewModel. An effect sent while the screen is stopped waits for it, but
+  is lost if the process dies first.
+- **An outcome that must survive process death, or must never repeat, is state, not a
+  `SideEffect`.** Navigation after a payment, a "saved" screen that must show once: model it as
+  a `UiState` field the UI acts on and then clears through an event. Toasts, snackbars and
+  tap-triggered navigation are fine as effects.
 - ViewModels call `setState { copy(...) }`, `setEffect { ... }`, never expose mutable state
 - UI collects `viewState` as `StateFlow`, `effect` as `Flow`
 

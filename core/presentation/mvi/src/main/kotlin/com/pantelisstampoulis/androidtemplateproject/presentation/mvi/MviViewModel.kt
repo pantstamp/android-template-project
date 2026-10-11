@@ -22,6 +22,12 @@ abstract class MviViewModel<E : Event, US : UiState, SE : SideEffect>(
     private val eventFlow: MutableSharedFlow<E> = MutableSharedFlow()
 
     private val _effect: Channel<SE> = Channel()
+
+    /**
+     * One-time effects, for exactly one collector. A [Channel] hands each effect to a single
+     * receiver, so a second collector would take half of them. An effect sent while nobody
+     * collects waits for the next collector, and is lost if the process dies first.
+     */
     val effect = _effect.receiveAsFlow()
 
     init {
