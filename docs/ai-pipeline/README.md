@@ -35,6 +35,21 @@ one scenario costs minutes and well over 100k tokens.
 - `inside` — in the worktree, with today's `.claude/skills`, `.claude/agents` and `CLAUDE.md`
   committed onto the run's branch (see below). Used by the stages that write files.
 
+Other `scenario.json` settings:
+- **`seed_files`**: files copied from the scenario folder into the run's tree before it starts, such
+  as a plan to execute. They are committed with the pipeline.
+- **`hidden_paths`**: snapshot files that describe the scenario itself (this folder, the roadmap).
+  They are deleted in that same commit. A seed or snapshot that tells the run what is being tested
+  makes the result worthless. The first developer runs quoted the trap back from the plan's
+  header.
+- **`done_when_committed`** (a file) or **`done_when_commits`** (a count): when a multi-turn
+  run has finished.
+- **`grade_file`** or **`grade_git`**: what the judge reads besides the dialogue. That is either
+  one committed file, or the run's commits, diff and status.
+- **`read_only`** and **`nested_no_git`**: the `READONLY` and `NESTEDGIT` checks. `NESTEDGIT`
+  fails a run in which an agent spawned by the session (a phase implementer) ran a git command
+  that changes history or undoes edits.
+
 `forbidden_paths` are files that would reveal the outcome (a feature's `RETRO.md`), matched by
 their full repo path; `forbidden_patterns` are other strings (a later commit, `master`). The
 run is denied reading forbidden paths, and any reading tool call that names either fails the
@@ -74,7 +89,7 @@ the commit they were taken at.
 |---|---|---|---|
 | 1 | Gate | [`gate-movie-search`](scenarios/gate-movie-search/) | runnable; baseline in `RESULTS.md` |
 | 2 | Architect | [`architect-movie-search`](scenarios/architect-movie-search/) | runnable; baseline in `RESULTS.md` |
-| 3 | Developer | [`developer-dry-run`](scenarios/developer-dry-run/) | plan only; needs scripted answers |
+| 3 | Developer | [`developer-dry-run`](scenarios/developer-dry-run/) | runnable; baseline in `RESULTS.md` |
 | 4 | Product owner | — | not started |
 
 A scenario that declares `answers` is multi-turn. `eval.py` starts a session, then loops: the

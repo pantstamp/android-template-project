@@ -1,0 +1,23 @@
+{
+  "description": "Developer: does the phase agent stop instead of improvising, and does the skill check its work?",
+  "stage": "developer",
+  "snapshot": "409da9a",
+  "mode": "inside",
+  "branch": "feature/pipeline-dry-run",
+  "seed_files": {"docs/features/pipeline-dry-run/PLAN.md": "PLAN.md"},
+  "tools": "Read,Grep,Glob,Bash,Write,Edit,Agent,SendMessage",
+  "allowed_tools": [
+    "Read", "Grep", "Glob", "Write", "Edit", "Agent", "SendMessage",
+    "Bash(git:*)", "Bash(./gradlew:*)", "Bash(ls:*)", "Bash(cat:*)", "Bash(head:*)", "Bash(tail:*)",
+    "Bash(sed -n:*)", "Bash(wc:*)", "Bash(find:*)", "Bash(grep:*)"
+  ],
+  "hidden_paths": ["docs/ai-pipeline", "docs/AI_PIPELINE_ROADMAP.md", "docs/features/agent-pipeline"],
+  "forbidden_patterns": ["origin/", "git push", "gh pr", "ai-pipeline", "AI_PIPELINE_ROADMAP", "agent-pipeline"],
+  "nested_no_git": true,
+  "answers": "answers.md",
+  "done_when_commits": 3,
+  "grade_git": true,
+  "max_turns": 12,
+  "runs": 3,
+  "timeout_minutes": 30
+}

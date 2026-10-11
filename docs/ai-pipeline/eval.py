@@ -123,6 +123,16 @@ def setup(config, run_dir, extra):
         shutil.copytree(REPO / ".claude" / "agents", worktree / ".claude" / "agents", dirs_exist_ok=True)
         shutil.copy2(REPO / "CLAUDE.md", worktree / "CLAUDE.md")
         git("add", "-f", ".claude/skills", ".claude/agents", "CLAUDE.md", cwd=worktree)
+    for target, source in config.get("seed_files", {}).items():
+        # Inputs the run starts from (a plan to execute), committed like an earlier stage would.
+        (worktree / target).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(config["folder"] / source, worktree / target)
+        git("add", "-f", target, cwd=worktree)
+    for path in config.get("hidden_paths", []):
+        # Files in the snapshot that describe the scenario itself; the run must not find them.
+        if (worktree / path).exists():
+            git("rm", "-r", "-q", path, cwd=worktree)
+    if config["mode"] == "inside" or config.get("seed_files") or config.get("hidden_paths"):
         git(*EVAL_GIT, "commit", "-q", "--allow-empty", "-m", "eval: use the current pipeline", cwd=worktree)
     start = git("rev-parse", "HEAD", cwd=worktree).strip()
     prompt = config["prompt"]
@@ -154,11 +164,16 @@ def remove(workspace):
 
 
 def committed(config, workspace):
+    """Whether the run reached its end: the graded file committed, or enough commits made."""
     path = config.get("done_when_committed")
-    if not path:
-        return False
-    log = git("log", "--format=%H", f"{workspace['start']}..HEAD", "--", path, cwd=workspace["worktree"])
-    return bool(log.strip())
+    if path:
+        log = git("log", "--format=%H", f"{workspace['start']}..HEAD", "--", path, cwd=workspace["worktree"])
+        return bool(log.strip())
+    count = config.get("done_when_commits")
+    if count:
+        log = git("log", "--format=%H", f"{workspace['start']}..HEAD", cwd=workspace["worktree"])
+        return len(log.split()) >= count
+    return False
 
 
 # ── running ───────────────────────────────────────────────────────────────────────────────
@@ -266,6 +281,15 @@ def run_dialogue(config, workspace, run_dir, user_model):
 def render_output(config, workspace, dialogue):
     """What the judge reads: the final message, or the dialogue plus the file under test."""
     path = config.get("grade_file")
+    if config.get("grade_git"):
+        # What the run left in git: its commits with messages, and the change they make.
+        tree = workspace["worktree"]
+        log = git("log", "--format=%h %s%n%b", f"{workspace['start']}..HEAD", cwd=tree)
+        diff = git("diff", workspace["start"], "HEAD", cwd=tree)
+        status = git("status", "--short", cwd=tree)
+        conversation = "\n\n".join(f"[{who}]\n{text}" for who, text in dialogue)
+        return (f"<dialogue>\n{conversation}\n</dialogue>\n\n<git-log>\n{log}</git-log>\n\n"
+                f"<git-diff>\n{diff}</git-diff>\n\n<git-status>\n{status}</git-status>\n")
     if not path:
         return dialogue[-1][1]
     try:
@@ -322,20 +346,43 @@ def writes(events):
     return found
 
 
+NESTED_GIT = re.compile(r"\bgit\b[^;&|]*\b(commit|checkout|restore|reset|stash|rebase|push|switch|clean)(?![-\w])")
+
+
+def nested_git(events):
+    """History-changing or edit-undoing git commands run by a nested agent (a phase implementer).
+    The outer session may commit; an agent it spawns may not."""
+    found = []
+    for event in events:
+        if event.get("type") != "assistant" or not event.get("parent_tool_use_id"):
+            continue
+        for block in event.get("message", {}).get("content", []):
+            if block.get("type") == "tool_use" and block.get("name") == "Bash":
+                command = block.get("input", {}).get("command", "")
+                if NESTED_GIT.search(QUOTED.sub("''", command)):
+                    found.append(command if len(command) < 160 else command[:157] + "...")
+    return found
+
+
 def checks(config, events, workspace):
     found = []
     if config.get("forbidden_paths") or config.get("forbidden_patterns"):
         touched = leaks(config, events)
         found.append({"id": "LEAK", "pass": not touched,
                       "evidence": f"reached for {', '.join(touched)}" if touched else "nothing forbidden"})
+    if config.get("nested_no_git"):
+        used = nested_git(events)
+        found.append({"id": "NESTEDGIT", "pass": not used,
+                      "evidence": "; ".join(used) if used else "no nested agent changed git state"})
     if config.get("read_only"):
         changed = writes(events)
         found.append({"id": "READONLY", "pass": not changed,
                       "evidence": "; ".join(changed) if changed else "no file-changing tool call"})
-    if config.get("done_when_committed") and workspace:
+    if (config.get("done_when_committed") or config.get("done_when_commits")) and workspace:
         done = committed(config, workspace)
+        target = config.get("done_when_committed") or f"{config['done_when_commits']} commits"
         found.append({"id": "COMMITTED", "pass": done,
-                      "evidence": f"{config['done_when_committed']} " + ("committed" if done else "not committed")})
+                      "evidence": f"{target}: " + ("reached" if done else "not reached")})
     return found
 
 
