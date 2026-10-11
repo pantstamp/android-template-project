@@ -137,12 +137,17 @@ GO**, never **NO GO** on their own: each one is the user's decision to fix or di
 ## Part 2 — CI pre-flight
 
 ```bash
-./gradlew spotlessCheck :test:konsist:test test assembleDebug lint
+./gradlew spotlessCheck :test:konsist:test test assembleDebug lint 2>&1 | tail -n 60
 ```
 
 Same tasks and order as `.github/workflows/build.yml` — **if the workflow changes, change this
 line.** Gradle keeps the requested order, so the cheap checks fail first and the run stops at
 the first failure; keep that order.
+
+The output is long, so **pipe it, never redirect it into a file** — a log file is a write, and
+the ground rules forbid it. The pipe hides Gradle's exit code: read `BUILD SUCCESSFUL` or
+`BUILD FAILED` in the tail. If the tail does not show the cause, re-run only the failing task
+piped through `grep` or `tail`, or `Read` the report file Gradle links to.
 
 On failure, report the failing task with the relevant part of its output, and what the fix
 involves:
