@@ -5,7 +5,7 @@ Each scenario replays a historical snapshot with the current pipeline files and 
 result against criteria whose outcome is already known. See docs/ai-pipeline/README.md.
 
   eval.py list
-  eval.py run <scenario> [--runs N] [--variant V] [--keep] [--judge-model M]
+  eval.py run <scenario> [--runs N] [--variant V] [--keep] [--judge-model M] [--user-model M]
   eval.py setup <scenario> <dir>         # worktree + rendered prompt, no model call
   eval.py grade <scenario> <output.md> [--variant V] [--transcript FILE]
 
@@ -21,6 +21,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import uuid
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -33,6 +34,7 @@ REPO = Path(
 )
 CRITERION = re.compile(r"^- \[([A-Z0-9]+)\] \((required|bonus)(?:, ([a-z0-9-]+))?\)")
 REQUIRED_FILES = ("scenario.json", "prompt.md", "criteria.md")
+EVAL_GIT = ["-c", "user.name=ai-pipeline-eval", "-c", "user.email=eval@localhost"]
 
 
 class ScenarioError(Exception):
@@ -53,9 +55,11 @@ def load(name):
             raise ScenarioError(f"{name}: scenario.json has no '{key}'")
     if config["mode"] not in ("outside", "inside"):
         raise ScenarioError(f"{name}: mode must be 'outside' or 'inside'")
-    if "answers" in config:
-        # Multi-turn scenarios (architect, developer, product owner) need a simulated user.
-        raise ScenarioError(f"{name}: scripted answers are not supported by this runner yet")
+    if config.get("answers"):
+        answers = folder / config["answers"]
+        if not answers.is_file():
+            raise ScenarioError(f"{name}: answers file {answers} is missing")
+        config["answers_text"] = answers.read_text()
     config["name"] = name
     config["folder"] = folder
     config["prompt"] = (folder / "prompt.md").read_text()
@@ -98,23 +102,39 @@ def git(*args, cwd=REPO):
 
 
 def setup(config, run_dir, extra):
-    """Creates the snapshot worktree and returns (worktree, cwd, prompt)."""
+    """Creates the snapshot worktree. Returns a dict with worktree, branch, cwd, scratch,
+    start (the commit the run begins from) and prompt."""
     run_dir.mkdir(parents=True, exist_ok=True)
     worktree = run_dir / "worktree"
-    git("worktree", "add", "--detach", str(worktree), config["snapshot"])
+    scratch = run_dir / "scratch"
+    scratch.mkdir(exist_ok=True)
+    branch = None
+    if config.get("branch"):
+        # Branch names are shared by every worktree of the repo, so each run gets its own.
+        tag = re.sub(r"[^A-Za-z0-9-]", "-", f"{run_dir.parent.name}-{run_dir.name}")
+        branch = f"{config['branch']}-eval-{tag}"
+        git("worktree", "add", "-b", branch, str(worktree), config["snapshot"])
+    else:
+        git("worktree", "add", "--detach", str(worktree), config["snapshot"])
     write_sdk_dir(worktree)
     if config["mode"] == "inside":
-        # The skills under test are today's: copy them in, uncommitted.
+        # The skills under test are today's. Committed, so the run starts from a clean tree.
         shutil.copytree(REPO / ".claude" / "skills", worktree / ".claude" / "skills", dirs_exist_ok=True)
         shutil.copytree(REPO / ".claude" / "agents", worktree / ".claude" / "agents", dirs_exist_ok=True)
         shutil.copy2(REPO / "CLAUDE.md", worktree / "CLAUDE.md")
-    prompt = config["prompt"].replace("{{WORKTREE}}", str(worktree))
-    prompt = prompt.replace("{{BASE}}", config.get("base", ""))
+        git("add", "-f", ".claude/skills", ".claude/agents", "CLAUDE.md", cwd=worktree)
+        git(*EVAL_GIT, "commit", "-q", "--allow-empty", "-m", "eval: use the current pipeline", cwd=worktree)
+    start = git("rev-parse", "HEAD", cwd=worktree).strip()
+    prompt = config["prompt"]
+    for key, value in {"WORKTREE": worktree, "BASE": config.get("base", ""), "BRANCH": branch or "",
+                       "SCRATCH": scratch}.items():
+        prompt = prompt.replace("{{" + key + "}}", str(value))
     if extra:
         prompt = f"{prompt.rstrip()}\n\n{extra}\n"
     (run_dir / "prompt.md").write_text(prompt)
     cwd = REPO if config["mode"] == "outside" else worktree
-    return worktree, cwd, prompt
+    return {"worktree": worktree, "branch": branch, "cwd": cwd, "scratch": scratch, "start": start,
+            "prompt": prompt}
 
 
 def write_sdk_dir(worktree):
@@ -126,51 +146,138 @@ def write_sdk_dir(worktree):
     (worktree / "local.properties").write_text("\n".join(lines) + "\n")
 
 
-def remove(worktree):
-    subprocess.run(["git", "worktree", "remove", "--force", str(worktree)], cwd=REPO, capture_output=True)
+def remove(workspace):
+    subprocess.run(["git", "worktree", "remove", "--force", str(workspace["worktree"])],
+                   cwd=REPO, capture_output=True)
+    if workspace.get("branch"):
+        subprocess.run(["git", "branch", "-D", workspace["branch"]], cwd=REPO, capture_output=True)
+
+
+def committed(config, workspace):
+    path = config.get("done_when_committed")
+    if not path:
+        return False
+    log = git("log", "--format=%H", f"{workspace['start']}..HEAD", "--", path, cwd=workspace["worktree"])
+    return bool(log.strip())
 
 
 # ── running ───────────────────────────────────────────────────────────────────────────────
 
 
-def run_claude(config, cwd, prompt, run_dir):
-    command = ["claude", "-p", prompt, "--output-format", "stream-json", "--verbose",
-               "--permission-mode", "dontAsk", "--no-session-persistence"]
+def claude_turn(config, workspace, message, transcript, session, first):
+    """One `claude -p` call. Returns (final text, events, result event)."""
+    command = ["claude", "-p", message, "--output-format", "stream-json", "--verbose",
+               "--permission-mode", "dontAsk"]
+    if session is None:
+        command.append("--no-session-persistence")
+    elif first:
+        command += ["--session-id", session]
+    else:
+        command += ["--resume", session]
     if config.get("agent"):
         command += ["--agent", config["agent"]]
     if config.get("tools"):
         command += ["--tools", config["tools"]]
     if config.get("allowed_tools"):
         command += ["--allowedTools", *config["allowed_tools"]]
+    if config["mode"] == "inside":
+        command += ["--add-dir", str(workspace["scratch"])]
     denied = [f"Read(//{REPO.as_posix().lstrip('/')}/{p})" for p in config.get("forbidden_paths", [])]
     if denied:
         command += ["--disallowedTools", *denied]
-    transcript = run_dir / "transcript.jsonl"
-    started = time.monotonic()
-    with transcript.open("w") as out:
+    with tempfile.TemporaryFile("w+") as out:
         try:
-            subprocess.run(command, cwd=cwd, stdout=out, stderr=subprocess.STDOUT,
+            subprocess.run(command, cwd=workspace["cwd"], stdout=out, stderr=subprocess.STDOUT,
                            timeout=config.get("timeout_minutes", 20) * 60)
         except subprocess.TimeoutExpired:
             pass
-    events = [json.loads(l) for l in transcript.read_text().splitlines() if l.startswith("{")]
+        out.seek(0)
+        lines = out.read().splitlines()
+    with transcript.open("a") as log:
+        log.write("\n".join(lines) + "\n")
+    events = [json.loads(l) for l in lines if l.startswith("{")]
     result = next((e for e in reversed(events) if e.get("type") == "result"), None)
     if result is None:
         raise ScenarioError(f"no result event (timed out or crashed) — see {transcript}")
     if result.get("is_error"):
         raise ScenarioError(f"run failed: {result.get('result')}")
-    output = result.get("result") or ""
+    return result.get("result") or "", events, result
+
+
+SIMULATED_USER = """You play the user in a scripted session with a coding assistant. Your
+script is below. Reply with exactly what the user would type next, following the script; when
+the script does not cover the assistant's question, use the script's fallback answer. Never
+add ideas, designs or hints of your own.
+
+<script>
+{answers}
+</script>
+
+The conversation so far, oldest first:
+
+<conversation>
+{conversation}
+</conversation>
+"""
+
+
+def simulated_reply(config, dialogue, model):
+    conversation = "\n\n".join(f"[{who}]\n{text}" for who, text in dialogue)
+    prompt = SIMULATED_USER.format(answers=config["answers_text"], conversation=conversation)
+    schema = {"type": "object", "properties": {"reply": {"type": "string"}}, "required": ["reply"]}
+    return structured(prompt, schema, model or "sonnet")["reply"]
+
+
+def run_dialogue(config, workspace, run_dir, user_model):
+    """Runs the scenario to its end. Returns (output to grade, events, metrics)."""
+    transcript = run_dir / "transcript.jsonl"
+    transcript.write_text("")
+    multi_turn = bool(config.get("answers_text"))
+    session = str(uuid.uuid4()) if multi_turn else None
+    dialogue, events, results = [], [], []
+    message = workspace["prompt"]
+    started = time.monotonic()
+    for turn in range(config.get("max_turns", 1) if multi_turn else 1):
+        text, turn_events, result = claude_turn(config, workspace, message, transcript, session, turn == 0)
+        events += turn_events
+        results.append(result)
+        dialogue += [("user", message), ("assistant", text)]
+        if not multi_turn or committed(config, workspace):
+            break
+        message = simulated_reply(config, dialogue, user_model)
+    else:
+        if multi_turn and not committed(config, workspace):
+            dialogue.append(("runner", f"stopped after {config.get('max_turns')} turns"))
+    (run_dir / "dialogue.md").write_text("\n\n".join(f"## {who}\n\n{text}" for who, text in dialogue))
+    output = render_output(config, workspace, dialogue)
     (run_dir / "output.md").write_text(output)
-    usage = result.get("usage", {})
     metrics = {
         "duration_s": round(time.monotonic() - started),
-        "cost_usd": result.get("total_cost_usd"),
-        "turns": result.get("num_turns"),
-        "tokens": sum(usage.get(k, 0) for k in ("input_tokens", "cache_creation_input_tokens",
-                                                "cache_read_input_tokens", "output_tokens")),
-        "permission_denials": len(result.get("permission_denials") or []),
+        "cost_usd": sum(r.get("total_cost_usd") or 0 for r in results),
+        "turns": len(results),
+        "tokens": sum(r.get("usage", {}).get(k, 0) for r in results
+                      for k in ("input_tokens", "cache_creation_input_tokens",
+                                "cache_read_input_tokens", "output_tokens")),
+        "permission_denials": sum(len(r.get("permission_denials") or []) for r in results),
     }
     return output, events, metrics
+
+
+def render_output(config, workspace, dialogue):
+    """What the judge reads: the final message, or the dialogue plus the file under test."""
+    path = config.get("grade_file")
+    if not path:
+        return dialogue[-1][1]
+    try:
+        content = git("show", f"HEAD:{path}", cwd=workspace["worktree"])
+    except subprocess.CalledProcessError:
+        file = workspace["worktree"] / path
+        content = file.read_text() if file.is_file() else "(the file does not exist)"
+    conversation = "\n\n".join(f"[{who}]\n{text}" for who, text in dialogue)
+    return f"<dialogue>\n{conversation}\n</dialogue>\n\n<file path=\"{path}\">\n{content}\n</file>\n"
+
+
+# ── deterministic checks ──────────────────────────────────────────────────────────────────
 
 
 def tool_uses(events):
@@ -183,14 +290,16 @@ def tool_uses(events):
 
 
 def tool_inputs(events):
-    for _, tool_input in tool_uses(events):
-        yield json.dumps(tool_input)
+    """Inputs of the tools that read; what a run writes may name anything."""
+    for name, tool_input in tool_uses(events):
+        if name not in ("Write", "Edit", "NotebookEdit"):
+            yield json.dumps(tool_input)
 
 
 def leaks(config, events):
-    """Forbidden paths the run touched, whichever tool it used."""
-    names = [Path(p).name for p in config.get("forbidden_paths", [])]
-    return sorted({n for i in tool_inputs(events) for n in names if n in i})
+    """Forbidden files or refs the run reached for, whichever tool it used."""
+    patterns = config.get("forbidden_paths", []) + config.get("forbidden_patterns", [])
+    return sorted({p for i in tool_inputs(events) for p in patterns if p in i})
 
 
 QUOTED = re.compile(r"'[^']*'|\"(?:\\.|[^\"\\])*\"")
@@ -213,6 +322,23 @@ def writes(events):
     return found
 
 
+def checks(config, events, workspace):
+    found = []
+    if config.get("forbidden_paths") or config.get("forbidden_patterns"):
+        touched = leaks(config, events)
+        found.append({"id": "LEAK", "pass": not touched,
+                      "evidence": f"reached for {', '.join(touched)}" if touched else "nothing forbidden"})
+    if config.get("read_only"):
+        changed = writes(events)
+        found.append({"id": "READONLY", "pass": not changed,
+                      "evidence": "; ".join(changed) if changed else "no file-changing tool call"})
+    if config.get("done_when_committed") and workspace:
+        done = committed(config, workspace)
+        found.append({"id": "COMMITTED", "pass": done,
+                      "evidence": f"{config['done_when_committed']} " + ("committed" if done else "not committed")})
+    return found
+
+
 # ── grading ───────────────────────────────────────────────────────────────────────────────
 
 JUDGE = """You grade one run of an automated scenario. Below are the pass criteria, then the
@@ -232,6 +358,18 @@ Grade these: {ids}
 """
 
 
+def structured(prompt, schema, model):
+    command = ["claude", "-p", prompt, "--output-format", "json", "--tools", "",
+               "--no-session-persistence", "--json-schema", json.dumps(schema)]
+    if model:
+        command += ["--model", model]
+    with tempfile.TemporaryDirectory() as empty:
+        reply = json.loads(subprocess.run(command, cwd=empty, check=True, capture_output=True, text=True).stdout)
+    if reply.get("is_error"):
+        raise ScenarioError(f"model call failed: {reply.get('result')}")
+    return reply.get("structured_output") or json.loads(reply["result"])
+
+
 def judge(config, variant, output, model):
     ids = [c["id"] for c in graded(config, variant)]
     schema = {
@@ -245,15 +383,7 @@ def judge(config, variant, output, model):
         "required": ["grades"],
     }
     prompt = JUDGE.format(ids=", ".join(ids), criteria=config["criteria_text"], output=output)
-    command = ["claude", "-p", prompt, "--output-format", "json", "--tools", "",
-               "--no-session-persistence", "--json-schema", json.dumps(schema)]
-    if model:
-        command += ["--model", model]
-    with tempfile.TemporaryDirectory() as empty:
-        reply = json.loads(subprocess.run(command, cwd=empty, check=True, capture_output=True, text=True).stdout)
-    if reply.get("is_error"):
-        raise ScenarioError(f"judge failed: {reply.get('result')}")
-    grades = (reply.get("structured_output") or json.loads(reply["result"]))["grades"]
+    grades = structured(prompt, schema, model)["grades"]
     by_id = {g["id"]: g for g in grades}
     missing = [i for i in ids if i not in by_id]
     if missing:
@@ -261,19 +391,11 @@ def judge(config, variant, output, model):
     return [by_id[i] for i in ids]
 
 
-def grade_run(config, variant, output, events, model):
-    grades = judge(config, variant, output, model)
-    if config.get("forbidden_paths"):
-        touched = leaks(config, events)
-        grades.append({"id": "LEAK", "pass": not touched,
-                       "evidence": f"touched {', '.join(touched)}" if touched else "no forbidden path touched"})
-    if config.get("read_only"):
-        changed = writes(events)
-        grades.append({"id": "READONLY", "pass": not changed,
-                       "evidence": "; ".join(changed) if changed else "no file-changing tool call"})
-    levels = {c["id"]: c["level"] for c in config["criteria"]} | {"LEAK": "required", "READONLY": "required"}
+def grade_run(config, variant, output, events, model, workspace=None):
+    grades = judge(config, variant, output, model) + checks(config, events, workspace)
+    levels = {c["id"]: c["level"] for c in config["criteria"]}
     for g in grades:
-        g["level"] = levels[g["id"]]
+        g["level"] = levels.get(g["id"], "required")
     return grades
 
 
@@ -300,13 +422,13 @@ def summarise(config, variant, runs):
             cells.append("—" if g is None else "✅" if g["pass"] else "❌")
         level = next(g["level"] for r in runs for g in r.get("grades", []) if g["id"] == cid)
         lines.append(f"| {cid} | {level} | " + " | ".join(cells) + " |")
-    lines += ["", "| Run | Duration | Tokens | Cost | Denials |", "|---|---|---|---|---|"]
+    lines += ["", "| Run | Duration | Turns | Tokens | Cost | Denials |", "|---|---|---|---|---|---|"]
     for i, r in enumerate(runs):
         m = r.get("metrics", {})
         if not m:
-            lines.append(f"| {i + 1} | — | — | — | — |")
+            lines.append(f"| {i + 1} | — | — | — | — | — |")
             continue
-        lines.append(f"| {i + 1} | {m['duration_s']} s | {m['tokens']} | "
+        lines.append(f"| {i + 1} | {m['duration_s']} s | {m['turns']} | {m['tokens']} | "
                      f"${m['cost_usd'] or 0:.2f} | {m['permission_denials']} |")
     errors = [(i + 1, r["error"]) for i, r in enumerate(runs) if r.get("error")]
     if errors:
@@ -333,9 +455,12 @@ def cmd_list(_):
 def cmd_setup(args):
     config = load(args.scenario)
     _, extra = variant_of(config, args.variant)
-    worktree, cwd, _ = setup(config, Path(args.dir).resolve(), extra)
-    print(f"worktree: {worktree}\ncwd:      {cwd}\nprompt:   {Path(args.dir).resolve() / 'prompt.md'}")
-    print(f"remove with: git worktree remove --force {worktree}")
+    workspace = setup(config, Path(args.dir).resolve(), extra)
+    for key in ("worktree", "branch", "cwd", "scratch", "start"):
+        print(f"{key + ':':10}{workspace[key]}")
+    print(f"{'prompt:':10}{Path(args.dir).resolve() / 'prompt.md'}")
+    print(f"remove with: git worktree remove --force {workspace['worktree']}"
+          + (f" && git branch -D {workspace['branch']}" if workspace["branch"] else ""))
 
 
 def cmd_grade(args):
@@ -360,16 +485,16 @@ def cmd_run(args):
         run_dir = out_dir / f"run-{i + 1}"
         print(f"[{config['name']}] run {i + 1}: {run_dir}", flush=True)
         record = {}
-        worktree = None
+        workspace = None
         try:
-            worktree, cwd, prompt = setup(config, run_dir, extra)
-            output, events, record["metrics"] = run_claude(config, cwd, prompt, run_dir)
-            record["grades"] = grade_run(config, variant, output, events, args.judge_model)
+            workspace = setup(config, run_dir, extra)
+            output, events, record["metrics"] = run_dialogue(config, workspace, run_dir, args.user_model)
+            record["grades"] = grade_run(config, variant, output, events, args.judge_model, workspace)
         except (ScenarioError, subprocess.CalledProcessError) as error:
             record["error"] = str(error)
         finally:
-            if worktree and not args.keep:
-                remove(worktree)
+            if workspace and not args.keep:
+                remove(workspace)
         (run_dir / "grade.json").write_text(json.dumps(record, indent=2))
         runs.append(record)
     verdict, summary = summarise(config, variant, runs)
@@ -389,6 +514,7 @@ def main():
     p.add_argument("--variant")
     p.add_argument("--keep", action="store_true", help="keep the worktrees")
     p.add_argument("--judge-model")
+    p.add_argument("--user-model", help="model playing the user in multi-turn scenarios (default sonnet)")
     p.set_defaults(func=cmd_run)
     p = sub.add_parser("setup")
     p.add_argument("scenario")

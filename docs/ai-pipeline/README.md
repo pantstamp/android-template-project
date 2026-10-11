@@ -24,18 +24,21 @@ one scenario costs minutes and well over 100k tokens.
 | File | Holds | Seen by the run? |
 |---|---|---|
 | `scenario.json` | snapshot and base commits, mode, agent, tools, runs, variants | — |
-| `prompt.md` | the prompt; `{{WORKTREE}}` and `{{BASE}}` are filled in | yes |
+| `prompt.md` | the prompt; `{{WORKTREE}}`, `{{BASE}}`, `{{BRANCH}}` and `{{SCRATCH}}` are filled in | yes |
 | `criteria.md` | pass criteria, one `- [ID] (required\|bonus[, variant]) …` line each | **no** |
+| `answers.md` | scripted answers for a multi-turn scenario, read by the simulated user | **no** |
 | `RESULTS.md` | recorded baselines, newest first | **no** |
 
 **Mode** says where the run starts:
 - `outside` — in this repo, pointed at the snapshot worktree by the prompt. Used by the gate,
   which only reads git and files, so the current `CLAUDE.md` and agent are the ones loaded.
 - `inside` — in the worktree, with today's `.claude/skills`, `.claude/agents` and `CLAUDE.md`
-  copied in, uncommitted. Used by the stages that write files.
+  committed onto the run's branch (see below). Used by the stages that write files.
 
-`forbidden_paths` are files that would reveal the outcome (a feature's `RETRO.md`). The run is
-denied reading them, and any tool call that names one fails the run as `LEAK`.
+`forbidden_paths` are files that would reveal the outcome (a feature's `RETRO.md`), matched by
+their full repo path; `forbidden_patterns` are other strings (a later commit, `master`). The
+run is denied reading forbidden paths, and any reading tool call that names either fails the
+run as `LEAK`.
 
 ## Running
 
@@ -70,10 +73,17 @@ the commit they were taken at.
 | # | Scenario | Folder | State |
 |---|---|---|---|
 | 1 | Gate | [`gate-movie-search`](scenarios/gate-movie-search/) | runnable; baseline in `RESULTS.md` |
-| 2 | Architect | — | next; needs a simulated user for the scripted answers |
+| 2 | Architect | [`architect-movie-search`](scenarios/architect-movie-search/) | runnable; baseline in `RESULTS.md` |
 | 3 | Developer | [`developer-dry-run`](scenarios/developer-dry-run/) | plan only; needs scripted answers |
 | 4 | Product owner | — | not started |
 
-Scenarios 2–4 need answers given mid-run. `eval.py` refuses a scenario that declares `answers`
-until it can drive one: the plan is a loop of `claude -p --resume`, with a second model playing
-the user from the scripted answers.
+A scenario that declares `answers` is multi-turn. `eval.py` starts a session, then loops: the
+skill's last message and the dialogue so far go to a second model (`--user-model`, default
+Sonnet) that replies from the scripted answers, and the reply is sent with `claude -p --resume`.
+The loop ends when `done_when_committed` shows up in a commit, or after `max_turns`. The judge
+then reads the dialogue and the committed `grade_file`.
+
+A scenario with `branch` gets its own branch at the snapshot, named
+`<branch>-eval-<run>`, because branch names are shared by every worktree of the repo. In
+`inside` mode, today's pipeline is committed onto it as `eval: use the current pipeline`, so the
+run starts from a clean tree. The branch is deleted with the worktree.

@@ -3,7 +3,8 @@
 Status: **step 1 done** (PR #35, [`docs/features/agent-pipeline/IMPROVEMENTS.md`](features/agent-pipeline/IMPROVEMENTS.md)).
 **Step 2 is in progress**; its brief is [§4](#4-step-2-brief--golden-scenarios), and the suite
 lives in [`docs/ai-pipeline/`](ai-pipeline/README.md). The open decisions are settled there;
-scenario 1 (gate) is runnable and has a baseline, and scenario 2 (architect) is next.
+scenarios 1 (gate) and 2 (architect) are runnable and have baselines, and scenario 3
+(developer) is next.
 
 **Starting a new session on this roadmap:**
 - Read this file, then `CLAUDE.md`, `docs/AI_WORKFLOW.md` and `.claude/skills/README.md`.
