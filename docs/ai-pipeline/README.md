@@ -85,12 +85,16 @@ the commit they were taken at.
 
 ## Status
 
+All four baselines so far were taken in-session (subagents, with the orchestrating session as the
+user), because `claude -p` returned 401 there. `eval.py run` itself, with its judge and simulated
+user, has not yet run end to end: do that first from a logged-in terminal.
+
 | # | Scenario | Folder | State |
 |---|---|---|---|
 | 1 | Gate | [`gate-movie-search`](scenarios/gate-movie-search/) | runnable; baseline in `RESULTS.md` |
 | 2 | Architect | [`architect-movie-search`](scenarios/architect-movie-search/) | runnable; baseline in `RESULTS.md` |
 | 3 | Developer | [`developer-dry-run`](scenarios/developer-dry-run/) | runnable; baseline in `RESULTS.md` |
-| 4 | Product owner | — | not started |
+| 4 | Product owner | [`product-owner-movie-search`](scenarios/product-owner-movie-search/) | runnable; baseline in `RESULTS.md` |
 
 A scenario that declares `answers` is multi-turn. `eval.py` starts a session, then loops: the
 skill's last message and the dialogue so far go to a second model (`--user-model`, default
