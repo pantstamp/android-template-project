@@ -54,6 +54,13 @@ If the phase adds or changes a screen — one per visual state, with the `UiStat
 - `path/to/FooTest.kt`
   - `shouldDoXWhenY` — what it asserts
 
+If the phase adds or changes a ViewModel whose events start work, include its event × state
+table; every cell where work is pending or running names its test:
+
+| Event | Idle | Pending | Running | Error | Content |
+|---|---|---|---|---|---|
+| `Refresh` | ignored — `shouldIgnoreRefreshWhenIdle` | … | … | … | … |
+
 ### Verification
 ```bash
 ./gradlew :module:testDebugUnitTest assembleDebug        # add lint if UI or res/ changed
