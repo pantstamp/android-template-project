@@ -35,6 +35,11 @@ REPO = Path(
 CRITERION = re.compile(r"^- \[([A-Z0-9]+)\] \((required|bonus)(?:, ([a-z0-9-]+))?\)")
 REQUIRED_FILES = ("scenario.json", "prompt.md", "criteria.md")
 EVAL_GIT = ["-c", "user.name=ai-pipeline-eval", "-c", "user.email=eval@localhost"]
+# Pinned so results compare across machines and CLI versions: the CLI's own default model
+# changes, and the first CLI run silently used an older one than the recorded baselines.
+DEFAULT_MODEL = "claude-opus-5-5"
+DEFAULT_USER_MODEL = "claude-sonnet-5-5"
+AUTH_FAILURE = ("Failed to authenticate", "401")
 
 
 class ScenarioError(Exception):
@@ -189,6 +194,7 @@ def claude_turn(config, workspace, message, transcript, session, first):
         command += ["--session-id", session]
     else:
         command += ["--resume", session]
+    command += ["--model", config["run_model"]]
     if config.get("agent"):
         command += ["--agent", config["agent"]]
     if config.get("tools"):
@@ -197,6 +203,9 @@ def claude_turn(config, workspace, message, transcript, session, first):
         command += ["--allowedTools", *config["allowed_tools"]]
     if config["mode"] == "inside":
         command += ["--add-dir", str(workspace["scratch"])]
+    else:
+        # The run starts in this repo but works in the worktree, which is outside it.
+        command += ["--add-dir", str(workspace["worktree"])]
     denied = [f"Read(//{REPO.as_posix().lstrip('/')}/{p})" for p in config.get("forbidden_paths", [])]
     if denied:
         command += ["--disallowedTools", *denied]
@@ -240,7 +249,7 @@ def simulated_reply(config, dialogue, model):
     conversation = "\n\n".join(f"[{who}]\n{text}" for who, text in dialogue)
     prompt = SIMULATED_USER.format(answers=config["answers_text"], conversation=conversation)
     schema = {"type": "object", "properties": {"reply": {"type": "string"}}, "required": ["reply"]}
-    return structured(prompt, schema, model or "sonnet")["reply"]
+    return structured(prompt, schema, model or DEFAULT_USER_MODEL)["reply"]
 
 
 def run_dialogue(config, workspace, run_dir, user_model):
@@ -266,14 +275,15 @@ def run_dialogue(config, workspace, run_dir, user_model):
     (run_dir / "dialogue.md").write_text("\n\n".join(f"## {who}\n\n{text}" for who, text in dialogue))
     output = render_output(config, workspace, dialogue)
     (run_dir / "output.md").write_text(output)
+    init = next((e for e in events if e.get("type") == "system" and e.get("subtype") == "init"), {})
     metrics = {
         "duration_s": round(time.monotonic() - started),
         "cost_usd": sum(r.get("total_cost_usd") or 0 for r in results),
-        "turns": len(results),
-        "tokens": sum(r.get("usage", {}).get(k, 0) for r in results
-                      for k in ("input_tokens", "cache_creation_input_tokens",
-                                "cache_read_input_tokens", "output_tokens")),
+        "exchanges": len(results),
+        "agent_turns": sum(r.get("num_turns") or 0 for r in results),
+        "output_tokens": sum(r.get("usage", {}).get("output_tokens", 0) for r in results),
         "permission_denials": sum(len(r.get("permission_denials") or []) for r in results),
+        "model": init.get("model", config["run_model"]),
     }
     return output, events, metrics
 
@@ -469,14 +479,17 @@ def summarise(config, variant, runs):
             cells.append("—" if g is None else "✅" if g["pass"] else "❌")
         level = next(g["level"] for r in runs for g in r.get("grades", []) if g["id"] == cid)
         lines.append(f"| {cid} | {level} | " + " | ".join(cells) + " |")
-    lines += ["", "| Run | Duration | Turns | Tokens | Cost | Denials |", "|---|---|---|---|---|---|"]
+    lines += ["", "Exchanges are user messages sent; agent turns are the model's own steps; denials are",
+              "tool calls the permission rules refused, which usually means `allowed_tools` is too narrow.", "",
+              "| Run | Model | Duration | Exchanges | Agent turns | Output tokens | Cost | Denials |",
+              "|---|---|---|---|---|---|---|---|"]
     for i, r in enumerate(runs):
         m = r.get("metrics", {})
         if not m:
-            lines.append(f"| {i + 1} | — | — | — | — | — |")
+            lines.append(f"| {i + 1} | — | — | — | — | — | — | — |")
             continue
-        lines.append(f"| {i + 1} | {m['duration_s']} s | {m['turns']} | {m['tokens']} | "
-                     f"${m['cost_usd'] or 0:.2f} | {m['permission_denials']} |")
+        lines.append(f"| {i + 1} | {m['model']} | {m['duration_s']} s | {m['exchanges']} | {m['agent_turns']} | "
+                     f"{m['output_tokens']} | ${m['cost_usd'] or 0:.2f} | {m['permission_denials']} |")
     errors = [(i + 1, r["error"]) for i, r in enumerate(runs) if r.get("error")]
     if errors:
         lines += ["", "Errors:"] + [f"- Run {i}: {e}" for i, e in errors]
@@ -516,7 +529,7 @@ def cmd_grade(args):
     events = []
     if args.transcript:
         events = [json.loads(l) for l in Path(args.transcript).read_text().splitlines() if l.startswith("{")]
-    grades = grade_run(config, variant, Path(args.output).read_text(), events, args.judge_model)
+    grades = grade_run(config, variant, Path(args.output).read_text(), events, args.judge_model or DEFAULT_MODEL)
     verdict, summary = summarise(config, variant, [{"grades": grades}])
     print(summary)
     return 0 if verdict == "PASS" else 1
@@ -525,6 +538,9 @@ def cmd_grade(args):
 def cmd_run(args):
     config = load(args.scenario)
     variant, extra = variant_of(config, args.variant)
+    config["run_model"] = args.model or config.get("model") or DEFAULT_MODEL
+    judge_model = args.judge_model or DEFAULT_MODEL
+    user_model = args.user_model or DEFAULT_USER_MODEL
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     out_dir = Path(tempfile.gettempdir()) / "ai-pipeline-evals" / config["name"] / f"{stamp}-{variant}"
     runs = []
@@ -535,8 +551,8 @@ def cmd_run(args):
         workspace = None
         try:
             workspace = setup(config, run_dir, extra)
-            output, events, record["metrics"] = run_dialogue(config, workspace, run_dir, args.user_model)
-            record["grades"] = grade_run(config, variant, output, events, args.judge_model, workspace)
+            output, events, record["metrics"] = run_dialogue(config, workspace, run_dir, user_model)
+            record["grades"] = grade_run(config, variant, output, events, judge_model, workspace)
         except (ScenarioError, subprocess.CalledProcessError) as error:
             record["error"] = str(error)
         finally:
@@ -544,6 +560,10 @@ def cmd_run(args):
                 remove(workspace)
         (run_dir / "grade.json").write_text(json.dumps(record, indent=2))
         runs.append(record)
+        if any(marker in record.get("error", "") for marker in AUTH_FAILURE):
+            print("Stopping: the claude CLI is not logged in. Run `claude auth login`, "
+                  "check that `claude -p \"hi\"` answers, then run again.", flush=True)
+            break
     verdict, summary = summarise(config, variant, runs)
     (out_dir / "summary.md").write_text(summary)
     print(summary)
@@ -560,8 +580,9 @@ def main():
     p.add_argument("--runs", type=int)
     p.add_argument("--variant")
     p.add_argument("--keep", action="store_true", help="keep the worktrees")
-    p.add_argument("--judge-model")
-    p.add_argument("--user-model", help="model playing the user in multi-turn scenarios (default sonnet)")
+    p.add_argument("--model", help=f"model for the stage under test (default {DEFAULT_MODEL})")
+    p.add_argument("--judge-model", help=f"model grading the output (default {DEFAULT_MODEL})")
+    p.add_argument("--user-model", help=f"model playing the user in multi-turn scenarios (default {DEFAULT_USER_MODEL})")
     p.set_defaults(func=cmd_run)
     p = sub.add_parser("setup")
     p.add_argument("scenario")

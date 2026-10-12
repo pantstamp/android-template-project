@@ -2,6 +2,37 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-12 — first `eval.py run` end to end, at `fb8e00e` (variant `full`, 1 run). Not comparable
+
+**FAIL: F1 and F5 missed; every other required criterion passed.** The run used
+`claude-opus-4-7`, the CLI's default model on that machine. Every in-session baseline above used
+Opus 5.5. So this is the first proof that the runner works end to end, not a measurement of the
+gate.
+
+| Criterion | Result |
+|---|---|
+| F2, F6, FP3 | ✅ |
+| F1 Refresh while a query is pending | ❌ not reported |
+| F5 `LaunchedEffect` without `rememberUpdatedState` | ❌ not reported |
+| R1, R2, R3, LEAK, READONLY | ✅ |
+| B1 AC8 | ✅ |
+
+489 s, 77 agent turns, 32k output tokens, $3.83, 4 permission denials.
+
+**What it showed about the runner**, fixed in the commit after `fb8e00e`:
+- **The model wasn't pinned.** `eval.py` now passes `--model` for the stage and the judge
+  (`claude-opus-5-5` by default), and records the model used in the summary.
+- **The first four Gradle attempts were denied.** The run starts in this repo, and `cd` into the
+  worktree outside it was refused under `dontAsk`. The fifth attempt (`gradlew -p <worktree>`)
+  ran, so the "BUILD SUCCESSFUL" in the report is real. `outside` mode now adds the worktree with
+  `--add-dir`.
+- **A 401 used to fail every run in turn.** The runner now stops at the first one.
+- **The summary's "Turns" and "Tokens" were misleading.** "Turns" counted messages sent (1), and
+  "Tokens" included cache reads (3.99M). They are now "Exchanges", "Agent turns" and
+  "Output tokens".
+
+Re-run with the pinned model before treating any CLI number as a baseline.
+
 ## 2026-10-11 — after the read-only fix, at `cf8cbda` (variant `full`, 3 runs)
 
 **PASS: 3 of 3 runs passed every required criterion.** The change under test is `cf8cbda`,
