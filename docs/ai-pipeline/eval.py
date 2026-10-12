@@ -109,7 +109,10 @@ def graded(config, variant):
 
 
 def git(*args, cwd=REPO):
-    return subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True, text=True).stdout
+    result = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True)
+    if result.returncode:
+        raise ScenarioError(f"git {' '.join(args[:3])} failed: {result.stderr.strip() or result.stdout.strip()}")
+    return result.stdout
 
 
 def setup(config, run_dir, extra):
@@ -122,7 +125,8 @@ def setup(config, run_dir, extra):
     branch = None
     if config.get("branch"):
         # Branch names are shared by every worktree of the repo, so each run gets its own.
-        tag = re.sub(r"[^A-Za-z0-9-]", "-", f"{run_dir.parent.name}-{run_dir.name}")
+        # Two scenarios can share a branch prefix and start in the same second.
+        tag = re.sub(r"[^A-Za-z0-9-]", "-", f"{config['name']}-{run_dir.parent.name}-{run_dir.name}")
         branch = f"{config['branch']}-eval-{tag}"
         git("worktree", "add", "-b", branch, str(worktree), config["snapshot"])
     else:
@@ -310,7 +314,7 @@ def render_output(config, workspace, dialogue):
         return dialogue[-1][1]
     try:
         content = git("show", f"HEAD:{path}", cwd=workspace["worktree"])
-    except subprocess.CalledProcessError:
+    except ScenarioError:
         file = workspace["worktree"] / path
         content = file.read_text() if file.is_file() else "(the file does not exist)"
     conversation = "\n\n".join(f"[{who}]\n{text}" for who, text in dialogue)
@@ -425,7 +429,7 @@ Grade these: {ids}
 <criteria>
 {criteria}
 </criteria>
-
+{references}
 <output>
 {output}
 </output>
@@ -444,6 +448,17 @@ def structured(prompt, schema, model):
     return reply.get("structured_output") or json.loads(reply["result"])
 
 
+def judge_references(config):
+    """Files only the judge sees, such as the real spec a coverage criterion compares against.
+    Each is `{"commit": …, "path": …, "label": …}`, read from git so it needs no copy in the folder."""
+    blocks = []
+    for ref in config.get("judge_references", []):
+        content = git("show", f"{ref['commit']}:{ref['path']}")
+        blocks.append(f'\n<reference label="{ref["label"]}" source="{ref["commit"]}:{ref["path"]}">\n'
+                      f"{content}\n</reference>\n")
+    return "".join(blocks)
+
+
 def judge(config, variant, output, model):
     ids = [c["id"] for c in graded(config, variant)]
     schema = {
@@ -456,7 +471,8 @@ def judge(config, variant, output, model):
         }}},
         "required": ["grades"],
     }
-    prompt = JUDGE.format(ids=", ".join(ids), criteria=config["criteria_text"], output=output)
+    prompt = JUDGE.format(ids=", ".join(ids), criteria=config["criteria_text"],
+                          references=judge_references(config), output=output)
     grades = structured(prompt, schema, model)["grades"]
     by_id = {g["id"]: g for g in grades}
     missing = [i for i in ids if i not in by_id]

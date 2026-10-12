@@ -46,6 +46,8 @@ Other `scenario.json` settings:
   run has finished.
 - **`grade_file`** or **`grade_git`**: what the judge reads besides the dialogue. That is either
   one committed file, or the run's commits, diff and status.
+- **`judge_references`**: files only the judge reads, as `{"commit", "path", "label"}` read from
+  git. The product owner's coverage bonus compares against the real spec this way.
 - **`read_only`** and **`nested_no_git`**: the `READONLY` and `NESTEDGIT` checks. `NESTEDGIT`
   fails a run in which an agent spawned by the session (a phase implementer) ran a git command
   that changes history or undoes edits.

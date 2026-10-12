@@ -2,6 +2,23 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-12 — first `eval.py run` end to end, at `e4e40cf` (1 run)
+
+**PASS: 1 of 1.** P1–P8, `LEAK` and `COMMITTED` passed on `claude-opus-5-5`, with all three
+bonuses. 294 s, 10 exchanges with the simulated user, 26 agent turns, $7.28 API-equivalent.
+
+- **The simulated user (`claude-sonnet-5-5`) kept to its script.** It answered what was asked,
+  rejected the proposal to cache search results in the Discover table, and said "I don't know yet"
+  six times. All six became open questions.
+- **B3 was first graded as an estimate.** The runner's judge never sees the real spec. With
+  `judge_references` added, a re-grade of the same output counted about 27 of 30. The missing
+  three were AC8 (scroll to top), AC26 (Discover's pull-to-refresh unchanged) and AC30 (an empty
+  field on a fresh launch).
+- **The run's first attempt failed in setup.** It and the architect run started in the same second
+  with the same branch prefix, so they got the same branch name. Branch names now include the
+  scenario.
+- One denial: the agent's own `$(find …)`, which it rewrote.
+
 ## 2026-10-11 — first baseline, at `a9ee13b` (3 runs)
 
 **WARN: 2 of 3 runs passed every required criterion.** Run 1 failed P6: its spec states two
