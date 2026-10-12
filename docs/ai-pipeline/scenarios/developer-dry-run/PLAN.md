@@ -1,14 +1,9 @@
 # Implementation Plan: pipeline-dry-run
 
-Golden scenario 3 (see `docs/AI_PIPELINE_ROADMAP.md` §4). It is a fixed input for checking the
-developer skill and its phase-implementer agent, not a feature: never implement it on `master`.
-Copy it to `docs/features/pipeline-dry-run/PLAN.md` on a scratch branch.
-
-Phase 3 is a deliberate trap. It contradicts itself, and the expected result is `BLOCKED`.
-Do not "fix" it.
+Small helpers for `:utils:random`, in three phases.
 
 ## References
-- Spec: none (dry run)
+- Spec: none
 
 ## Phase 1: Random URL
 

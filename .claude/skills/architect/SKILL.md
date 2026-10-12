@@ -179,6 +179,15 @@ actually touches. Every phase:
 condition treats two states the same (`null` and empty), plan a test for each. When a new path
 is reachable from more than one caller or flag value, plan a test for each entry point.
 
+**Plan a ViewModel's event tests as a matrix, not a list.** For a ViewModel whose events start
+work (load, search, retry, refresh, save), write an event × state table in its phase: one row
+per event, one column per state it can arrive in (idle, pending, running, error, content).
+Each cell says what happens — ignore, cancel and restart, or queue — and names its test. **Every
+cell where work is pending or running gets a test**, including the ones whose answer is
+"ignored": those are where a second request starts, a flag sticks, or a result lands for the
+wrong input. A list of tests by feature covers the cases someone thought of; the table shows
+the ones nobody did.
+
 ##### Before presenting it, answer these
 
 Most layering rules are Konsist-enforced and run in verification and CI — don't restate them.
@@ -197,8 +206,9 @@ Spend the effort on what the build can't check:
 - **Is every code block in the plan held to CLAUDE.md?** The developer implements plan code
   verbatim, so a rule broken in the plan ships. Check each snippet as you would a diff: flows,
   effects, buffers, flags.
-- **For each event a new ViewModel handles, what happens in every state it can arrive in**
-  (idle, pending, running, error, content)? Is there a test per state that matters?
+- **Does every new or changed ViewModel whose events start work have its event × state table**,
+  with a test named in every cell where work is pending or running? Count the cells against
+  the tests; "the states that matter" is how the missing ones get skipped.
 - **Does anything two screens use stay in one screen's package?** It belongs in a shared
   package.
 - **Does the detail still match the agreed diagrams and decisions?** If writing it changed the

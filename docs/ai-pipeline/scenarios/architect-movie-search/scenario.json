@@ -1,0 +1,21 @@
+{
+  "description": "Architect: does the plan still design in PR #32's defects?",
+  "stage": "architect",
+  "snapshot": "bdfacd9",
+  "mode": "inside",
+  "branch": "feature/movie-search",
+  "tools": "Read,Grep,Glob,Bash,Write,Edit",
+  "allowed_tools": [
+    "Read", "Grep", "Glob", "Write", "Edit",
+    "Bash(git:*)", "Bash(grep:*)", "Bash(ls:*)", "Bash(cat:*)", "Bash(head:*)", "Bash(tail:*)",
+    "Bash(sed -n:*)", "Bash(wc:*)", "Bash(find:*)", "Bash(sort:*)", "Bash(mkdir:*)"
+  ],
+  "forbidden_paths": ["docs/features/movie-search/RETRO.md"],
+  "forbidden_patterns": ["2ca290e", "master", "origin/", "--all"],
+  "answers": "answers.md",
+  "done_when_committed": "docs/features/movie-search/PLAN.md",
+  "grade_file": "docs/features/movie-search/PLAN.md",
+  "max_turns": 20,
+  "runs": 3,
+  "timeout_minutes": 30
+}

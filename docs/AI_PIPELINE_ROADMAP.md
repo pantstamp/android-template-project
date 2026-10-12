@@ -1,7 +1,13 @@
 # AI pipeline roadmap — from this project to a reusable package
 
 Status: **step 1 done** (PR #35, [`docs/features/agent-pipeline/IMPROVEMENTS.md`](features/agent-pipeline/IMPROVEMENTS.md)).
-**Step 2 is next**; its brief is [§4](#4-step-2-brief--golden-scenarios).
+**Step 2 is in progress**; its brief is [§4](#4-step-2-brief--golden-scenarios), and the suite
+lives in [`docs/ai-pipeline/`](ai-pipeline/README.md). The open decisions are settled there;
+all four scenarios are runnable and have baselines. Before step 3, run `eval.py` end to end
+from a logged-in terminal once; the baselines were taken in-session.
+
+**Continuing step 2:** read [`docs/ai-pipeline/HANDOFF.md`](ai-pipeline/HANDOFF.md) first. It
+lists what is left and how to resume.
 
 **Starting a new session on this roadmap:**
 - Read this file, then `CLAUDE.md`, `docs/AI_WORKFLOW.md` and `.claude/skills/README.md`.
