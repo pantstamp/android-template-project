@@ -39,7 +39,13 @@ EVAL_GIT = ["-c", "user.name=ai-pipeline-eval", "-c", "user.email=eval@localhost
 # changes, and the first CLI run silently used an older one than the recorded baselines.
 DEFAULT_MODEL = "claude-opus-5-5"
 DEFAULT_USER_MODEL = "claude-sonnet-5-5"
-AUTH_FAILURE = ("Failed to authenticate", "401")
+# Errors no retry will fix: stop the whole invocation at the first one.
+FATAL_ERRORS = {
+    "Failed to authenticate": "the claude CLI is not logged in. Run `claude auth login`, "
+                              "check that `claude -p \"hi\"` answers",
+    "does not support this model": "the claude CLI is too old for the pinned model. Run "
+                                   "`claude update` (or pass an older --model)",
+}
 
 
 class ScenarioError(Exception):
@@ -560,9 +566,9 @@ def cmd_run(args):
                 remove(workspace)
         (run_dir / "grade.json").write_text(json.dumps(record, indent=2))
         runs.append(record)
-        if any(marker in record.get("error", "") for marker in AUTH_FAILURE):
-            print("Stopping: the claude CLI is not logged in. Run `claude auth login`, "
-                  "check that `claude -p \"hi\"` answers, then run again.", flush=True)
+        fatal = next((hint for marker, hint in FATAL_ERRORS.items() if marker in record.get("error", "")), None)
+        if fatal:
+            print(f"Stopping: {fatal}, then run again.", flush=True)
             break
     verdict, summary = summarise(config, variant, runs)
     (out_dir / "summary.md").write_text(summary)

@@ -77,8 +77,10 @@ python3 docs/ai-pipeline/eval.py setup gate-movie-search <dir>     # worktree + 
 python3 docs/ai-pipeline/eval.py grade gate-movie-search <output.md>
 ```
 
-`claude -p` must be logged in: if `claude -p "hi"` answers with a 401, run `claude auth login`
-first.
+`claude -p` must be logged in and recent enough for the pinned model. If `claude -p "hi"` answers
+with a 401, run `claude auth login`. If a run fails with "does not support this model", run
+`claude update`. The pinned `claude-opus-5-5` needs Claude Code 2.1.280 or newer. The runner
+stops at the first of either error instead of failing every run.
 
 After a pipeline change, record the new numbers at the top of the scenario's `RESULTS.md`, with
 the commit they were taken at.
