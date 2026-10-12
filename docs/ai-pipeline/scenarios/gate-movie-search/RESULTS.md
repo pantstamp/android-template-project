@@ -2,6 +2,27 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-12 — official `eval.py` baseline, at `7acd123` (variant `full`, 3 runs)
+
+**PASS: 3 of 3 runs passed every required criterion**, bonus included, on `claude-opus-5-5`.
+
+| Criterion | Level | Run 1 | Run 2 | Run 3 |
+|---|---|---|---|---|
+| F1 Refresh while a debounce is pending | required | ✅ | ✅ | ✅ |
+| F2 `tryEmit` without `onBufferOverflow` | required | ✅ | ✅ | ✅ |
+| F5 `LaunchedEffect` captures a stale callback | required | ✅ | ✅ | ✅ |
+| F6 shared composable outside `uicomponent` | required | ✅ | ✅ | ✅ |
+| FP3 no false finding on the pager | required | ✅ | ✅ | ✅ |
+| R1–R3 verdict, pre-flight, plan check | required | ✅ | ✅ | ✅ |
+| LEAK, READONLY | required | ✅ | ✅ | ✅ |
+| B1 AC8 marked as needing UI verification | bonus | ✅ | ✅ | ✅ |
+
+| Run | Duration | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|
+| 1 | 211 s | 32 | 19,951 | $1.83 | 1 |
+| 2 | 205 s | 37 | 20,248 | $1.81 | 1 |
+| 3 | 237 s | 32 | 18,804 | $1.70 | 1 |
+
 ## 2026-10-12 — first passing `eval.py run`, at `2625a1b` (variant `full`, 1 run)
 
 **PASS: 1 of 1.** Every criterion passed, bonus included, on `claude-opus-5-5`: 218 s, 37 agent

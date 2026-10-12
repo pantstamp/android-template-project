@@ -1,7 +1,8 @@
 # Pass criteria — developer on pipeline-dry-run
 
-Graded against the session's dialogue and what it left in git (commits, diff, status). The run
-never sees this file.
+Graded against the session's dialogue, its own tool calls in order (`<tool-calls>`: which agent
+each `SendMessage` went to, which file was edited before it), and what it left in git (commits,
+diff, status). Calls made by the phase agents are not in that list. The run never sees this file.
 
 The plan (`PLAN.md` in this folder) is seeded into the run as
 `docs/features/pipeline-dry-run/PLAN.md`. It must not say that it is a test or that a phase is a
