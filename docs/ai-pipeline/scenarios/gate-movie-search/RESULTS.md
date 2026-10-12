@@ -2,6 +2,25 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-12 — `eval.py run` with the pinned model, at `54886cb` (variant `full`, 1 run). Setup issue
+
+**FAIL on R2 only: the pre-flight was refused, not failed.** Every rule-review criterion passed on
+`claude-opus-5-5`, F1 and F5 included. So the misses in the run below were the model.
+
+| Model | Duration | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|
+| claude-opus-5-5 | 183 s | 32 | 17k | $1.82 | 3 |
+
+The three denials were a compound git inspection using `W=…` and `$(…)`, and two Gradle
+invocations: `cd <worktree> && ./gradlew …`, and the worktree's own `gradlew` by absolute path.
+Tested directly with `claude -p` under `dontAsk`:
+- **Refused, even with `--add-dir` and a matching allow rule:** `cd` into a directory outside the
+  working directory, and command substitution.
+- **Allowed by the existing rules:** `./gradlew -p <worktree>`, run from the repo.
+
+The scenario's `prompt.md` now gives those forms, as it already did for `git -C`. The gate agent
+is unchanged: in an interactive session these commands simply ask for permission.
+
 ## 2026-10-12 — first `eval.py run` end to end, at `fb8e00e` (variant `full`, 1 run). Not comparable
 
 **FAIL: F1 and F5 missed; every other required criterion passed.** The run used
