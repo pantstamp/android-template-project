@@ -336,10 +336,21 @@ def tool_inputs(events):
             yield json.dumps(tool_input)
 
 
+EVAL_ROOT = Path(tempfile.gettempdir()) / "ai-pipeline-evals"
+
+
 def leaks(config, events):
-    """Forbidden files or refs the run reached for, whichever tool it used."""
+    """Forbidden files or refs the run reached for, whichever tool it used. The runner's own
+    output directory is removed first: every worktree path contains it, and a pattern such as
+    `ai-pipeline` would otherwise match every command the run makes."""
     patterns = config.get("forbidden_paths", []) + config.get("forbidden_patterns", [])
-    return sorted({p for i in tool_inputs(events) for p in patterns if p in i})
+    own = sorted({str(EVAL_ROOT), str(EVAL_ROOT.resolve())}, key=len, reverse=True)
+    found = set()
+    for tool_input in tool_inputs(events):
+        for root in own:
+            tool_input = tool_input.replace(root, "")
+        found.update(p for p in patterns if p in tool_input)
+    return sorted(found)
 
 
 QUOTED = re.compile(r"'[^']*'|\"(?:\\.|[^\"\\])*\"")

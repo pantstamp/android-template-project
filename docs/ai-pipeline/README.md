@@ -88,9 +88,10 @@ the commit they were taken at.
 ## Status
 
 All four baselines so far were taken in-session (subagents, with the orchestrating session as the
-user), because `claude -p` returned 401 there. `eval.py run` has since run end to end once, for
-the gate, from a terminal. That run used the CLI's default model, so its numbers don't compare;
-see the gate's `RESULTS.md`. The multi-turn path (simulated user, `--resume`) has not run yet.
+user), because `claude -p` returned 401 there. `eval.py run` has since passed end to end for
+the gate (single-turn) and the developer (multi-turn, with nested phase agents). Both agree with
+the in-session baselines; see each `RESULTS.md`. The architect and product-owner scenarios have
+not yet run through `eval.py`.
 
 Models are pinned: `--model` and `--judge-model` default to `claude-opus-5-5`, and `--user-model`
 to `claude-sonnet-5-5`. Every summary records the model that actually ran. Results taken with a

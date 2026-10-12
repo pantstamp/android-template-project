@@ -2,6 +2,24 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-12 — first `eval.py run` end to end, at `4615975` (1 run)
+
+**PASS: 1 of 1** once the leak check was fixed. D1–D6, `NESTEDGIT` and `COMMITTED` all passed on
+`claude-opus-5-5`; B1 (a phase agent proves a test can fail) did not, as in the baseline.
+253 s, 6 exchanges with the simulated user, 23 agent turns in the session, $5.44, 0 denials.
+
+This was the first run of the runner's multi-turn path:
+- the simulated user replied from `answers.md` through `claude -p --resume`;
+- the developer spawned real phase agents;
+- `NESTEDGIT` checked their 66 nested events.
+
+It agrees with the in-session baseline.
+
+**The runner reported a false `LEAK`.** All 12 hits were the run's own directory,
+`…/ai-pipeline-evals/…`, which contains the forbidden pattern `ai-pipeline`. The leak check now
+removes the runner's output directory from tool inputs before matching. A real read of
+`docs/ai-pipeline/` is still caught.
+
 ## 2026-10-11 — first suite baseline, at `1858825` (3 runs)
 
 **PASS: 3 of 3 runs passed every required criterion.**
