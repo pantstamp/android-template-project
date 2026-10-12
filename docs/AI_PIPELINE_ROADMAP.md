@@ -6,6 +6,9 @@ lives in [`docs/ai-pipeline/`](ai-pipeline/README.md). The open decisions are se
 all four scenarios are runnable and have baselines. Before step 3, run `eval.py` end to end
 from a logged-in terminal once; the baselines were taken in-session.
 
+**Continuing step 2:** read [`docs/ai-pipeline/HANDOFF.md`](ai-pipeline/HANDOFF.md) first. It
+lists what is left and how to resume.
+
 **Starting a new session on this roadmap:**
 - Read this file, then `CLAUDE.md`, `docs/AI_WORKFLOW.md` and `.claude/skills/README.md`.
 - For step 2, say: *"Read docs/AI_PIPELINE_ROADMAP.md and start step 2."* §4 is written to be
