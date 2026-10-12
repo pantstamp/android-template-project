@@ -2,6 +2,15 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-12 — first passing `eval.py run`, at `2625a1b` (variant `full`, 1 run)
+
+**PASS: 1 of 1.** Every criterion passed, bonus included, on `claude-opus-5-5`: 218 s, 37 agent
+turns, 21k output tokens, $1.64. This is the first result taken by the runner rather than
+in-session, and it agrees with the in-session baseline.
+
+One denial remains, and the agent caused it: it used a shell variable despite the prompt, was
+refused, and rewrote the command. It is not a setup problem.
+
 ## 2026-10-12 — `eval.py run` with the pinned model, at `54886cb` (variant `full`, 1 run). Setup issue
 
 **FAIL on R2 only: the pre-flight was refused, not failed.** Every rule-review criterion passed on
