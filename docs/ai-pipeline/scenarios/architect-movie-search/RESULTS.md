@@ -2,6 +2,32 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-12 — first `eval.py run` end to end, at `e4e40cf` (1 run)
+
+**FAIL on E6; every other required criterion passed**, E1 and E3 included. Run on
+`claude-opus-5-5`: 907 s, 5 exchanges with the simulated user, 81 agent turns, 90k output
+tokens, $14.20 API-equivalent.
+
+**The E6 failure is real, and checked against the plan.** The query pipeline is
+`MutableStateFlow` → `debounce` → `distinctUntilChanged` → `flatMapLatest` (the plan's lines
+582–599). Clearing the query resets the state at once, in the event handler. So:
+1. Results for "matrix" are on screen.
+2. The user clears the field, then types "matrix" again before the collector resumes.
+3. The `StateFlow` conflates and delivers only "matrix", which `distinctUntilChanged` drops as a
+   repeat.
+4. The screen is left pending with no search running.
+
+That is the retro's defect A, and the CLAUDE.md `StateFlow` rule. The plan reasoned about a nearby
+case (a flag that sticks when the debounced value is filtered as a duplicate), but not this one.
+None of the six in-session runs made this mistake, so the code-block self-check holds most of the
+time but not always.
+
+B1 failed as well: the clear-and-retype scroll case is handled, but never flagged.
+
+**Next:** the official 3-run baseline through `eval.py`. If E6 fails again, a dedicated architect
+self-check line for "a `StateFlow` feeding work through `distinctUntilChanged`" is the candidate
+fix. One run is not enough to change the skill.
+
 ## 2026-10-11 — after the event × state change, at `59be352` (3 runs)
 
 **WARN: 2 of 3 runs passed every required criterion.** E1 went from 0 of 3 to 3 of 3. Run 2
