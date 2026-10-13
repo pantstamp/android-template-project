@@ -89,11 +89,11 @@ the commit they were taken at.
 
 ## Status
 
-All four baselines so far were taken in-session (subagents, with the orchestrating session as the
-user), because `claude -p` returned 401 there. `eval.py run` has since passed end to end for
-all four scenarios, one run each: the gate, the developer and the product owner passed, and the
-architect failed E6 (a real `StateFlow` conflation defect in its plan). See each `RESULTS.md`.
-The official baseline still needs 3 runs per scenario through `eval.py`.
+The official baseline was taken on 2026-10-12 through `eval.py`, 3 runs per scenario, and all
+four scenarios pass 3 of 3. Getting there took two harness fixes, which a developer re-run then
+confirmed, and one skill change, which a product owner re-run then confirmed. Each `RESULTS.md`
+has the details, newest first. Earlier entries there were taken in-session (subagents, with the
+orchestrating session as the user). Prefer the `eval.py` numbers.
 
 Models are pinned: `--model` and `--judge-model` default to `claude-opus-5-5`, and `--user-model`
 to `claude-sonnet-5-5`. Every summary records the model that actually ran. Results taken with a
@@ -101,10 +101,10 @@ different model are not comparable.
 
 | # | Scenario | Folder | State |
 |---|---|---|---|
-| 1 | Gate | [`gate-movie-search`](scenarios/gate-movie-search/) | runnable; baseline in `RESULTS.md` |
-| 2 | Architect | [`architect-movie-search`](scenarios/architect-movie-search/) | runnable; baseline in `RESULTS.md` |
-| 3 | Developer | [`developer-dry-run`](scenarios/developer-dry-run/) | runnable; baseline in `RESULTS.md` |
-| 4 | Product owner | [`product-owner-movie-search`](scenarios/product-owner-movie-search/) | runnable; baseline in `RESULTS.md` |
+| 1 | Gate | [`gate-movie-search`](scenarios/gate-movie-search/) | PASS, 3 of 3 (`eval.py`, 2026-10-12) |
+| 2 | Architect | [`architect-movie-search`](scenarios/architect-movie-search/) | PASS, 3 of 3 (`eval.py`, 2026-10-12) |
+| 3 | Developer | [`developer-dry-run`](scenarios/developer-dry-run/) | PASS, 3 of 3 (`eval.py`, 2026-10-12) |
+| 4 | Product owner | [`product-owner-movie-search`](scenarios/product-owner-movie-search/) | PASS, 3 of 3 (`eval.py`, 2026-10-12) |
 
 A scenario that declares `answers` is multi-turn. `eval.py` starts a session, then loops: the
 skill's last message and the dialogue so far go to a second model (`--user-model`, default

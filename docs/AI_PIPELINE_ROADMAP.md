@@ -24,7 +24,8 @@ this Android project. This roadmap covers three goals:
 ## Order
 
 1. ✅ **Finish the agent improvements** in `IMPROVEMENTS.md`, in this repo. Merged in PR #35.
-2. **Write golden scenarios before refactoring** (brief in §4). They are the safety net for step 3.
+2. ✅ **Write golden scenarios before refactoring** (brief in §4). They are the safety net for step 3.
+   All four pass 3 of 3 through `eval.py`; see `docs/ai-pipeline/`.
 3. **Split the layers inside this repo**: generic skills, project config, Android profile. Re-run
    the scenarios; Android must not get worse.
 4. **Extract to a plugin and marketplace** with semver, and pin this repo to `v1.0.0`.
