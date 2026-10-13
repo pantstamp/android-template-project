@@ -6,7 +6,12 @@ in `docs/ai-pipeline/` first. How to version and release: [`skills/README.md`](s
 
 Entries are grouped by stage and say what changed and why.
 
-## Unreleased (1.1.0)
+## Unreleased
+
+## 1.1.0 — 2026-10-13
+
+Product owner and architect pass 3 of 3 through `eval.py` on `claude-opus-5-5`; the gate and
+developer did not change. Tagged on `07ceff3`.
 
 ### All stages
 - **Artifacts record the pipeline version.** SPEC.md and PLAN.md headers carry

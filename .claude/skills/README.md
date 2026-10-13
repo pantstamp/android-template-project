@@ -53,8 +53,9 @@ it as `pipeline: vX.Y.Z`.
 
 - **Every change to the pipeline adds a line to the `Unreleased` section of
   [`../CHANGELOG.md`](../CHANGELOG.md)**, under its stage, saying what changed and why.
-- **A release** runs the golden scenarios ([`docs/ai-pipeline/`](../../docs/ai-pipeline/README.md)),
-  then renames `Unreleased` to the version, sets `PIPELINE_VERSION`, and tags the merge commit
+- **A release** runs the golden scenarios ([`docs/ai-pipeline/`](../../docs/ai-pipeline/README.md)).
+  Then, in the release PR itself, it renames `Unreleased` to the version and date and sets
+  `PIPELINE_VERSION`, so the tagged commit carries both. After merge, tag the merge commit
   `pipeline-vX.Y.Z`. Use semver: major for a change to a contract between stages (the PLAN
   format the gate reads), minor for new behaviour, patch for a wording fix.
 - **Roll back** with `git checkout pipeline-vX.Y.Z -- .claude/`.
