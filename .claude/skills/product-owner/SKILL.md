@@ -84,6 +84,8 @@ Save to `docs/features/{feature-name}/SPEC.md`:
 ```markdown
 # Feature: {Feature Name}
 
+pipeline: v{X.Y.Z}
+
 ## Overview
 One paragraph: what this does and why. For a fix, include the verified root cause.
 
@@ -105,6 +107,9 @@ What this does NOT include.
 ## Open Questions (if any)
 Undecided points, with the options discussed.
 ```
+
+`pipeline:` is the version in `.claude/PIPELINE_VERSION`, so a later retro can tell which
+pipeline produced it.
 
 Ask the user to review it. Apply requested changes. Once they approve, commit it:
 

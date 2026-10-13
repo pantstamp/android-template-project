@@ -41,7 +41,8 @@ git checkout -b docs/{feature-name}-retro
   commits
 - Timeline: comment times against the last commit and the merge — any comment newer than the
   last commit was merged unaddressed
-- SPEC.md and PLAN.md
+- SPEC.md and PLAN.md, and the `pipeline:` version in PLAN.md's header: the release that
+  built the feature. A plan written before versioning has none; write `unstamped`
 - Earlier `docs/features/*/RETRO.md` — for the comparison and for repeats
 - **Ask the user** what they found outside review (manual testing, Android Studio, lint or CI
   failures during implementation)
@@ -83,14 +84,15 @@ Save to `docs/features/{feature-name}/RETRO.md`:
 ```markdown
 # Retrospective: {Feature Name}
 
-PR: #{n} · Merged: {date}
+PR: #{n} · Merged: {date} · pipeline: v{X.Y.Z from PLAN.md, or unstamped}
 
 ## Summary
 What was built; findings by severity; how many fixed; how many merged unaddressed.
 
 ## Compared with earlier retros
 The same metrics side by side (findings by severity, fixed before merge, merged unaddressed,
-review waves). Say which *kind* of finding changed, not just the count.
+review waves), with each feature's pipeline version. Say which *kind* of finding changed, not
+just the count, and whether it changed with a pipeline release.
 
 ## What went well
 Correct patterns and decisions, with evidence from the diff.

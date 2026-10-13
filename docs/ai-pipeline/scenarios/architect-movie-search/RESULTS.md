@@ -2,6 +2,21 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-13 — pipeline 1.1.0 (version stamps), at `4cf30f2` (3 runs)
+
+**PASS: 3 of 3 runs passed every required criterion**, on `claude-opus-5-5`. No change from the
+`7acd123` baseline. Each committed PLAN.md has `pipeline: v1.1.0` on the line under its title.
+No criterion checks the stamp, so it was read from the outputs.
+
+B1 (flag the AC8 clear-and-retype scroll case) passed in runs 1 and 3, after failing all three
+baseline runs. The skill did not change in that area, so this is variance in the bonus.
+
+| Run | Duration | Exchanges | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|---|
+| 1 | 923 s | 5 | 71 | 93,148 | $13.99 | 1 |
+| 2 | 1045 s | 8 | 87 | 101,999 | $22.64 | 2 |
+| 3 | 945 s | 5 | 84 | 92,995 | $14.83 | 1 |
+
 ## 2026-10-12 — official `eval.py` baseline, at `7acd123` (3 runs)
 
 **PASS: 3 of 3 runs passed every required criterion**, on `claude-opus-5-5`. Both open questions

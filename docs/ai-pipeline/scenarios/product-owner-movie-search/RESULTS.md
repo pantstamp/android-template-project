@@ -2,6 +2,19 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-13 — pipeline 1.1.0 (version stamps), at `4cf30f2` (3 runs)
+
+**PASS: 3 of 3 runs passed every required criterion**, all bonuses included, on
+`claude-opus-5-5`. No change from the previous result, at `f22f175`. Each committed SPEC.md has
+`pipeline: v1.1.0` on the line under its title. No criterion checks the stamp, so it was read
+from the outputs.
+
+| Run | Duration | Exchanges | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|---|
+| 1 | 286 s | 12 | 20 | 14,049 | $8.04 | 0 |
+| 2 | 290 s | 12 | 26 | 16,682 | $8.25 | 1 |
+| 3 | 286 s | 12 | 20 | 15,789 | $8.67 | 0 |
+
 ## 2026-10-12 — after the repeated-input change, at `f22f175` (3 runs)
 
 **PASS: 3 of 3 runs passed every required criterion**, all bonuses included, on

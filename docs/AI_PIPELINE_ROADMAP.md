@@ -138,7 +138,9 @@ Rolling back is easy; **noticing that a change made things worse** is the hard p
 - **Each project pins a version** through its marketplace entry's git ref. Rollback is moving the
   pin back.
 - **Until extraction:** commits that touch the pipeline use the `chore(pipeline): …` prefix, and
-  releases are tagged `pipeline-vX.Y.Z`. Roll back with `git checkout pipeline-vX.Y.Z -- .claude/`.
+  releases are tagged `pipeline-vX.Y.Z`. The version is in `.claude/PIPELINE_VERSION`, the
+  CHANGELOG is `.claude/CHANGELOG.md`, and both move into the plugin at step 4. Roll back with
+  `git checkout pipeline-vX.Y.Z -- .claude/`; the version file goes back with it.
 
 ### Detecting regressions
 

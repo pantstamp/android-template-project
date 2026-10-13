@@ -137,7 +137,9 @@ def setup(config, run_dir, extra):
         shutil.copytree(REPO / ".claude" / "skills", worktree / ".claude" / "skills", dirs_exist_ok=True)
         shutil.copytree(REPO / ".claude" / "agents", worktree / ".claude" / "agents", dirs_exist_ok=True)
         shutil.copy2(REPO / "CLAUDE.md", worktree / "CLAUDE.md")
-        git("add", "-f", ".claude/skills", ".claude/agents", "CLAUDE.md", cwd=worktree)
+        shutil.copy2(REPO / ".claude" / "PIPELINE_VERSION", worktree / ".claude" / "PIPELINE_VERSION")
+        git("add", "-f", ".claude/skills", ".claude/agents", ".claude/PIPELINE_VERSION", "CLAUDE.md",
+            cwd=worktree)
     for target, source in config.get("seed_files", {}).items():
         # Inputs the run starts from (a plan to execute), committed like an earlier stage would.
         (worktree / target).parent.mkdir(parents=True, exist_ok=True)
