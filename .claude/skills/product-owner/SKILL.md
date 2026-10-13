@@ -63,10 +63,13 @@ For each topic:
 - State what is unclear or what you are assuming
 - Propose a default with its reason ("I'd suggest X because Y — does that work?")
 - Wait for the answer before the next topic
+- Ask about every gap you notice. Record it as an open question only when the user doesn't know
 
 Cover what applies:
 - **Core behaviour** — triggers and outcomes
-- **Edge cases** — empty states, boundary values, concurrent operations
+- **Edge cases** — empty states, boundary values, concurrent operations, repeated or
+  equivalent input (the same value again, a change of only spaces or case), and a response that
+  arrives after the input changed
 - **Error handling** — network failures, database errors, invalid input
 - **Lifecycle** — rotation, process death, back navigation
 - **Offline** — what works offline, what is cached, sync strategy
@@ -87,7 +90,8 @@ One paragraph: what this does and why. For a fix, include the verified root caus
 ## User Stories
 - **As a** [user type], **I want** [action], **so that** [benefit]
 - **Acceptance Criteria:**
-  - [ ] Criterion (observable and checkable — not "loads quickly")
+  - [ ] Criterion (observable and checkable — not "loads quickly"). An undecided point goes
+    under Open Questions, never into a criterion.
 
 ## Edge Cases
 Each edge case and how it is handled.

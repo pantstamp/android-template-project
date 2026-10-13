@@ -283,7 +283,7 @@ def run_dialogue(config, workspace, run_dir, user_model):
         if multi_turn and not committed(config, workspace):
             dialogue.append(("runner", f"stopped after {config.get('max_turns')} turns"))
     (run_dir / "dialogue.md").write_text("\n\n".join(f"## {who}\n\n{text}" for who, text in dialogue))
-    output = render_output(config, workspace, dialogue)
+    output = render_output(config, workspace, dialogue, events)
     (run_dir / "output.md").write_text(output)
     init = next((e for e in events if e.get("type") == "system" and e.get("subtype") == "init"), {})
     metrics = {
@@ -298,8 +298,38 @@ def run_dialogue(config, workspace, run_dir, user_model):
     return output, events, metrics
 
 
-def render_output(config, workspace, dialogue):
-    """What the judge reads: the final message, or the dialogue plus the file under test."""
+def timeline(events):
+    """The session's own tool calls, in order, without those of the agents it spawned. The
+    dialogue alone cannot show which agent a message went to, or that a file changed first."""
+    agent_ids = {e["parent_tool_use_id"]: e["agent_id"] for e in events
+                 if e.get("parent_tool_use_id") and e.get("agent_id")}
+    lines = []
+    for event in events:
+        if event.get("type") != "assistant" or event.get("parent_tool_use_id"):
+            continue
+        for block in event.get("message", {}).get("content", []):
+            if block.get("type") != "tool_use":
+                continue
+            name, tool_input = block.get("name", ""), block.get("input", {})
+            if name == "Agent":
+                detail = (f"spawn {tool_input.get('subagent_type', '')} as agent "
+                          f"{agent_ids.get(block.get('id'), '?')}: {tool_input.get('description', '')}")
+            elif name == "SendMessage":
+                detail = f"to {tool_input.get('to', '')}: {str(tool_input.get('message', ''))[:120]}"
+            elif name in ("Edit", "Write", "Read"):
+                detail = tool_input.get("file_path", "")
+                for root in (str(EVAL_ROOT.resolve()), str(EVAL_ROOT)):
+                    detail = detail.replace(root, "…")
+            else:
+                detail = tool_input.get("command") or tool_input.get("pattern") or ""
+            detail = " ".join(str(detail).split())
+            lines.append(f"{len(lines) + 1}. {name} {detail[:160]}")
+    return "\n".join(lines) + "\n"
+
+
+def render_output(config, workspace, dialogue, events):
+    """What the judge reads: the final message, or the dialogue plus the file under test. A
+    git-graded run also shows the session's tool calls, so the judge can check the order."""
     path = config.get("grade_file")
     if config.get("grade_git"):
         # What the run left in git: its commits with messages, and the change they make.
@@ -308,8 +338,9 @@ def render_output(config, workspace, dialogue):
         diff = git("diff", workspace["start"], "HEAD", cwd=tree)
         status = git("status", "--short", cwd=tree)
         conversation = "\n\n".join(f"[{who}]\n{text}" for who, text in dialogue)
-        return (f"<dialogue>\n{conversation}\n</dialogue>\n\n<git-log>\n{log}</git-log>\n\n"
-                f"<git-diff>\n{diff}</git-diff>\n\n<git-status>\n{status}</git-status>\n")
+        return (f"<dialogue>\n{conversation}\n</dialogue>\n\n<tool-calls>\n{timeline(events)}</tool-calls>\n\n"
+                f"<git-log>\n{log}</git-log>\n\n<git-diff>\n{diff}</git-diff>\n\n"
+                f"<git-status>\n{status}</git-status>\n")
     if not path:
         return dialogue[-1][1]
     try:

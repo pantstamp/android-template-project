@@ -2,6 +2,80 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-12 — after the repeated-input change, at `f22f175` (3 runs)
+
+**PASS: 3 of 3 runs passed every required criterion**, all bonuses included, on
+`claude-opus-5-5`. P5 went from 1 of 3 to 3 of 3, and P8 from 2 of 3 to 3 of 3.
+
+`f22f175` changed three lines of the skill. The edge cases the interview covers now include
+repeated or equivalent input and late responses. Every gap the product owner notices must be
+asked about, and becomes an open question only when the user doesn't know. An undecided point
+goes under Open Questions, never into an acceptance criterion.
+
+Every run now states that a change of only surrounding spaces starts no new search, and that a
+late response for an older query is never shown. The interviews got a little longer, 12–13
+exchanges against 10, and recorded more open questions (10, 15 and 18) because the product owner
+asked more. P6 still passed in all three runs: every one of those questions was an "I don't know
+yet". AC11 (a cached result loads with no network call) is still missing from all three.
+
+| Criterion | Level | Run 1 | Run 2 | Run 3 |
+|---|---|---|---|---|
+| P1–P4 | required | ✅ | ✅ | ✅ |
+| P5 repeated or identical queries | required | ✅ | ✅ | ✅ |
+| P6 open questions recorded, no unapproved decision | required | ✅ | ✅ | ✅ |
+| P7 out of scope listed | required | ✅ | ✅ | ✅ |
+| P8 every criterion testable | required | ✅ | ✅ | ✅ |
+| COMMITTED, LEAK | required | ✅ | ✅ | ✅ |
+| B1, B2 | bonus | ✅ | ✅ | ✅ |
+| B3 ≥ 20 of the real spec's 30 ACs | bonus | ✅ 26 | ✅ 27 | ✅ 27 |
+
+| Run | Duration | Exchanges | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|---|
+| 1 | 299 s | 12 | 24 | 15,977 | $7.45 | 1 |
+| 2 | 323 s | 13 | 21 | 16,532 | $8.87 | 0 |
+| 3 | 344 s | 12 | 28 | 17,773 | $8.51 | 1 |
+
+## 2026-10-12 — official `eval.py` baseline, at `7acd123` (3 runs)
+
+**FAIL: 0 of 3 runs passed every required criterion**, on `claude-opus-5-5`. P6, the failure
+these runs were meant to re-check, passed all three. The failures are two others, and both are
+real.
+
+- **P5 failed in runs 1 and 3. The interview never asked whether an unchanged query searches
+  again.** The scripted user had the answer ready: changing only surrounding spaces starts no new
+  search. Run 3 never raised the case. Run 1 noticed it but filed it as Open Question 6 without
+  asking. Run 2 proposed it, and the user confirmed it. P5 had passed all 4 earlier runs, so this
+  is variance in what the interview covers, not a new defect. The skill's edge-case prompt
+  ("empty states, boundary values, concurrent operations") does not mention repeated or
+  equivalent input.
+- **P8 failed in run 2.** AC-5.5 reads "What a refresh that returns no results shows is an open
+  question (OQ-2)." An undecided point was written as a checkbox criterion that cannot be
+  tested.
+
+B3 dropped AC5 (spaces only) in runs 1 and 3, the same gap as P5. AC11 (a cached result loads with
+no network call) was missing in all three runs.
+
+| Criterion | Level | Run 1 | Run 2 | Run 3 |
+|---|---|---|---|---|
+| P1 empty results | required | ✅ | ✅ | ✅ |
+| P2 offline and other errors, with retry | required | ✅ | ✅ | ✅ |
+| P3 rotation and process death | required | ✅ | ✅ | ✅ |
+| P4 clearing the query | required | ✅ | ✅ | ✅ |
+| P5 repeated or identical queries | required | ❌ | ✅ | ❌ |
+| P6 open questions recorded, no unapproved decision | required | ✅ | ✅ | ✅ |
+| P7 out of scope listed | required | ✅ | ✅ | ✅ |
+| P8 every criterion testable | required | ✅ | ❌ | ✅ |
+| COMMITTED, LEAK | required | ✅ | ✅ | ✅ |
+| B1 Details opens a movie never in Discover | bonus | ✅ | ✅ | ✅ |
+| B2 search never adds to Discover | bonus | ✅ | ✅ | ✅ |
+| B3 ≥ 20 of the real spec's 30 ACs | bonus | ✅ 27 | ✅ 26 | ✅ 25 |
+
+| Run | Duration | Exchanges | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|---|
+| 1 | 257 s | 10 | 19 | 14,671 | $5.96 | 0 |
+| 2 | 272 s | 10 | 21 | 14,890 | $6.46 | 1 |
+| 3 | 295 s | 10 | 28 | 16,625 | $8.32 | 1 |
+
 ## 2026-10-12 — first `eval.py run` end to end, at `e4e40cf` (1 run)
 
 **PASS: 1 of 1.** P1–P8, `LEAK` and `COMMITTED` passed on `claude-opus-5-5`, with all three

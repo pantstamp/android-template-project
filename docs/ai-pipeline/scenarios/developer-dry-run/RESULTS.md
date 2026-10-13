@@ -2,6 +2,41 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-12 — official `eval.py` baseline, at `7acd123` plus the harness fixes on `chore/golden-baseline` (3 runs)
+
+**PASS: 3 of 3 runs passed every required criterion**, on `claude-opus-5-5`, with no denials.
+B1 (a phase agent proves a test can fail) failed in every run, as it always has.
+
+| Criterion | Level | Run 1 | Run 2 | Run 3 |
+|---|---|---|---|---|
+| D1 git status checked and verification re-run after the agent | required | ✅ | ✅ | ✅ |
+| D2 Phase 2 feedback: PLAN.md first, then the same agent | required | ✅ | ✅ | ✅ |
+| D3 Phase 3 stopped as BLOCKED on the test conflict | required | ✅ | ✅ | ✅ |
+| D4 answer: PLAN.md first, then the same agent, phase finished | required | ✅ | ✅ | ✅ |
+| D5 three phase commits, each after approval, nothing pushed | required | ✅ | ✅ | ✅ |
+| D6 final code matches the updated plan, nothing else touched | required | ✅ | ✅ | ✅ |
+| NESTEDGIT, COMMITTED, LEAK | required | ✅ | ✅ | ✅ |
+| B1 a phase agent proved a test can fail | bonus | ❌ | ❌ | ❌ |
+
+| Run | Duration | Exchanges | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|---|
+| 1 | 307 s | 7 | 40 | 8,925 | $6.69 | 0 |
+| 2 | 256 s | 6 | 36 | 8,066 | $5.58 | 0 |
+| 3 | 217 s | 5 | 32 | 7,124 | $3.85 | 0 |
+
+**The first attempt at `7acd123` failed 0 of 3, both times because of the harness:**
+- **Run 1 stalled at Phase 1.** Its verification command ended in `echo "EXIT: ${PIPESTATUS[0]}"`,
+  which `dontAsk` refuses. The developer read the refusal as "Gradle is blocked", retried the
+  same command five times, and the simulated user's "go with your recommendation" could not
+  unblock it. The prompt now lists the refused forms (`cd`, `$(…)`, shell variables), as the
+  gate's prompt does. The retry loop is worth remembering: the skill did not try a simpler form
+  of a refused command.
+- **Runs 2 and 3 failed D2 although they did it right.** Both edited PLAN.md, then sent the
+  feedback to the existing phase agent with `SendMessage`. The judge saw only the dialogue and
+  git, so it could not tell which agent got the message. `eval.py` now gives git-graded runs a
+  `<tool-calls>` timeline of the session's own calls, with each spawned agent's ID. Re-graded with
+  it, both runs passed every required criterion.
+
 ## 2026-10-12 — first `eval.py run` end to end, at `4615975` (1 run)
 
 **PASS: 1 of 1** once the leak check was fixed. D1–D6, `NESTEDGIT` and `COMMITTED` all passed on

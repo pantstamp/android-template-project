@@ -2,6 +2,45 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-12 — official `eval.py` baseline, at `7acd123` (3 runs)
+
+**PASS: 3 of 3 runs passed every required criterion**, on `claude-opus-5-5`. Both open questions
+from the earlier runs are answered:
+
+- **E6 held in all three runs, so the architect skill stays as it is.** Runs 1 and 3 dropped the
+  `StateFlow` query pipeline: each `QueryChanged` event cancels and restarts a tracked `Job`.
+  Run 1 tests that "matrix" → "matrixx" → "matrix" sends a new request. Run 3 rejected a
+  `StateFlow` because it "needs a generation counter". Run 2 kept a `StateFlow` and argued that
+  conflating A → B → A is harmless there, because clearing is applied only by the collector. The
+  judge passed that and called it borderline. A run that repeats run 2's design with the clear
+  done in the event handler would be the first run's defect again. Watch for it.
+- **E3 held in all three runs**, now that #37 makes `ObserveEffects` read its callback through
+  `rememberUpdatedState`. Every long-running effect read its callback through
+  `rememberUpdatedState` as well.
+
+B1 (flag the AC8 clear-and-retype scroll case) failed in all three runs, as in 3 of the 4 runs
+before. Every plan handles the case, but none flags it as a decision.
+
+| Criterion | Level | Run 1 | Run 2 | Run 3 |
+|---|---|---|---|---|
+| E1 events defined and tested in every busy state | required | ✅ | ✅ | ✅ |
+| E2 `tryEmit` without `onBufferOverflow` | required | ✅ | ✅ | ✅ |
+| E3 `rememberUpdatedState` in long-running effects | required | ✅ | ✅ | ✅ |
+| E4 shared composables in `uicomponent` | required | ✅ | ✅ | ✅ |
+| E5 one shared `LoadError` mapping | required | ✅ | ✅ | ✅ |
+| E6 no `StateFlow` conflation of A → B → A | required | ✅ | ✅ | ✅ |
+| G1–G5 shape | required | ✅ | ✅ | ✅ |
+| S1 briefing first, user's design asked for first | required | ✅ | ✅ | ✅ |
+| S2 scripted decisions honoured | required | ✅ | ✅ | ✅ |
+| COMMITTED, LEAK | required | ✅ | ✅ | ✅ |
+| B1 AC8 clear-and-retype edge case | bonus | ❌ | ❌ | ❌ |
+
+| Run | Duration | Exchanges | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|---|
+| 1 | 945 s | 5 | 75 | 85,866 | $13.62 | 4 |
+| 2 | 971 s | 6 | 88 | 94,782 | $17.01 | 1 |
+| 3 | 839 s | 5 | 79 | 80,779 | $13.14 | 1 |
+
 ## 2026-10-12 — first `eval.py run` end to end, at `e4e40cf` (1 run)
 
 **FAIL on E6; every other required criterion passed**, E1 and E3 included. Run on
