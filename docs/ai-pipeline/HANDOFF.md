@@ -8,7 +8,7 @@ this folder.
 
 ## Before you start
 
-- [ ] The baseline PR (`chore/golden-baseline`) is merged.
+- [ ] The version-stamp PR (`chore/pipeline-version-stamps`) is merged.
 - [ ] `master` is checked out and pulled, and nothing is left over from earlier runs:
   `git worktree list` shows only the main checkout, and `git branch | grep -- -eval-` is empty.
 - [ ] `claude --version` is **2.1.280 or newer**, and
@@ -39,15 +39,11 @@ The official baseline is taken: all four scenarios pass **3 of 3** through `eval
 
 ## What is left, in order
 
-1. **Tag the release:** `git tag pipeline-v1.0.0 <merge commit>` on `master`, then push the tag.
-   The baseline was taken on the branch's commits, and the merge commit has the same
-   pipeline files.
-2. **Finish the versioning plan** (roadmap §3):
-   - stamp `pipeline: vX.Y.Z` on the SPEC, PLAN and RETRO headers (the product owner, architect
-     and retrospective skills write them);
-   - start a pipeline CHANGELOG, with `v1.0.0` as its first entry.
-   Those are pipeline changes, so they go in `pipeline-v1.1.0` or later, not into the `v1.0.0`
-   tag.
+1. ✅ **Tagged `pipeline-v1.0.0`** on `34baf3f`.
+2. **Release `pipeline-v1.1.0`:** version stamps on SPEC, PLAN and RETRO headers, and
+   `.claude/CHANGELOG.md`. Run the suite (at least the product owner and architect, whose
+   templates changed), then follow the release steps in
+   [`.claude/skills/README.md`](../../.claude/skills/README.md#versions).
 3. **Roadmap step 3:** split the generic skills, the project config and the Android profile
    (roadmap §1). Re-run the full suite afterwards. It must stay at 3 of 3 everywhere; record each
    result at the top of the scenario's `RESULTS.md`.

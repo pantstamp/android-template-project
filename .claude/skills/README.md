@@ -44,3 +44,17 @@ Skills hold **process**. Lessons from a retrospective go where they belong — p
 *how a stage works* goes into a skill or agent, written as a general step with no feature names,
 phase numbers or counts. The test: would the sentence still be true and useful if that feature
 had never existed?
+
+## Versions
+
+The pipeline (`.claude/skills/`, `.claude/agents/` and the pipeline sections of `CLAUDE.md`) has
+one version, in [`../PIPELINE_VERSION`](../PIPELINE_VERSION). SPEC, PLAN and RETRO headers record
+it as `pipeline: vX.Y.Z`.
+
+- **Every change to the pipeline adds a line to the `Unreleased` section of
+  [`../CHANGELOG.md`](../CHANGELOG.md)**, under its stage, saying what changed and why.
+- **A release** runs the golden scenarios ([`docs/ai-pipeline/`](../../docs/ai-pipeline/README.md)),
+  then renames `Unreleased` to the version, sets `PIPELINE_VERSION`, and tags the merge commit
+  `pipeline-vX.Y.Z`. Use semver: major for a change to a contract between stages (the PLAN
+  format the gate reads), minor for new behaviour, patch for a wording fix.
+- **Roll back** with `git checkout pipeline-vX.Y.Z -- .claude/`.
