@@ -8,15 +8,20 @@ needs a section missing here stops and says so.
 
 ## Interview concerns
 
-The product owner covers each one that applies to the feature, and asks rather than assumes.
+The product owner uses both lists. Keep them short: every topic added here lengthens every
+interview, and the golden scenario got worse when they grew.
 
-- **Lifecycle** — rotation and other configuration changes, process death (what is restored,
-  what is lost), back navigation.
-- **Offline** — what works without a network, what is cached and for how long, how it syncs.
-- **Permissions** — runtime permission prompts, denial and "don't ask again".
-- **Deep links** — whether the screen can be opened directly, and with what state.
-- **Accessibility** — content descriptions, touch targets of at least 48dp, TalkBack order and
-  announcements.
+### Gaps to look for
+
+Before the interview: offline, lifecycle (rotation, process death), permissions, deep links,
+back navigation, accessibility.
+
+### Topics to cover
+
+Where they apply:
+- **Lifecycle** — rotation, process death, back navigation
+- **Offline** — what works offline, what is cached, sync strategy
+- **Accessibility** — content descriptions, touch targets, screen reader behaviour
 
 ## Plan checklist
 

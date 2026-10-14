@@ -17,16 +17,12 @@ Entries are grouped by stage and say what changed and why.
   instead of guessing. This is roadmap step 3: the process can now be reused on another platform
   or project by writing a profile and a config, not by editing skills. Breaking: a project
   without `.claude/pipeline.md` cannot run any stage.
+- **The Android profile moves the skills' knowledge, without adding to it.** A first profile
+  that turned each platform concern into its own interview topic, with more detail, made the
+  product owner's interviews about a third longer, and it fell from 3 of 3 to 6 of 9 runs; the
+  pre-split skill, re-run the same day, still passed 3 of 3.
 - **The pre-flight command is held once**, in the config. The gate agent and `AI_WORKFLOW.md`
   each had their own copy of `build.yml`'s task list.
-
-### Product owner
-- Every edge case and platform concern the user decided or approved also gets an acceptance
-  criterion. After the split, one of three specs recorded the agreed rotation and process-death
-  behaviour only under Edge Cases, where the architect and the gate never look.
-- When an answer accepts only part of a proposal, the rest is not approved: the interview asks
-  about it or records it as an open question. One run turned the unmentioned half of two
-  proposals into acceptance criteria.
 
 ### Architect
 - A plan that argues a CLAUDE.md rule does not apply must walk the rule's own failure sequence

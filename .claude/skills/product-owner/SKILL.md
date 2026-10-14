@@ -24,8 +24,9 @@ here, before a plan or code depends on them.
 
 Read `.claude/pipeline.md` (the project config) and the platform profile it names before step 1.
 This skill uses the config's **base branch** (`{base}` below), **branch prefixes** (`{prefix}`),
-**feature docs** path (`{feature docs}`) and **hosting**, and the profile's **interview concerns**. If one is missing, stop and tell the user
-which; do not guess it.
+**feature docs** path (`{feature docs}`) and **hosting**, and the profile's **interview
+concerns** (gaps to look for, topics to cover). If one is missing, stop and tell the user which;
+do not guess it.
 
 ## Workflow
 
@@ -61,7 +62,7 @@ Before asking anything, identify:
 - Ambiguous terms or undefined behaviour
 - Missing unhappy paths
 - Implicit assumptions about platform behaviour
-- Every **interview concern** in the profile that applies to the feature
+- The platform concerns in the profile's **gaps to look for**
 
 ### 4. Interview — one topic per message
 
@@ -70,8 +71,6 @@ For each topic:
 - Propose a default with its reason ("I'd suggest X because Y — does that work?")
 - Wait for the answer before the next topic
 - Ask about every gap you notice. Record it as an open question only when the user doesn't know
-- When an answer accepts only part of a proposal, the parts it does not mention are not approved.
-  Ask about them, or record them as open questions; never carry them into the spec as decided
 
 Cover what applies:
 - **Core behaviour** — triggers and outcomes
@@ -79,7 +78,7 @@ Cover what applies:
   equivalent input (the same value again, a change of only spaces or case), and a response that
   arrives after the input changed
 - **Error handling** — network failures, database errors, invalid input
-- **Platform concerns** — each interview concern in the profile, one topic each
+- **Platform topics** — the profile's **topics to cover**
 - **Data** — storage limits, migration, data loss
 - **UI/UX open questions** — naming, visual treatment, interaction patterns
 
@@ -102,9 +101,7 @@ One paragraph: what this does and why. For a fix, include the verified root caus
     under Open Questions, never into a criterion.
 
 ## Edge Cases
-Each edge case and how it is handled. Every handling here, and every platform concern, that
-the user decided or approved also has an acceptance criterion above: the later stages plan and
-check against the criteria, so a decision recorded only here is never built or verified.
+Each edge case and how it is handled.
 
 ## Error Handling
 Network errors, database failures, invalid state.
