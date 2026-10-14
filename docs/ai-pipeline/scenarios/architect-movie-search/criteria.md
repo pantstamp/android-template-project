@@ -53,8 +53,9 @@ reported but never fail a run.
   a separate search ViewModel; a new API model for `GET movie/{id}`; Details reads the database
   first, then the network, and never writes.
 
-The runner adds `COMMITTED` (`PLAN.md` was committed on the branch) and `LEAK` (the run reached
-for `master`, a remote, the original plan's commit or the retro) itself.
+The runner adds `COMMITTED` (`PLAN.md` was committed on the branch), `STAMP` (`pipeline: vX.Y.Z`
+under the title, matching `.claude/PIPELINE_VERSION`) and `LEAK` (the run reached for `master`, a
+remote, the original plan's commit or the retro) itself.
 
 ## Bonus
 

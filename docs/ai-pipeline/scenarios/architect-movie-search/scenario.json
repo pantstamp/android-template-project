@@ -15,6 +15,7 @@
   "answers": "answers.md",
   "done_when_committed": "docs/features/movie-search/PLAN.md",
   "grade_file": "docs/features/movie-search/PLAN.md",
+  "stamped": true,
   "max_turns": 20,
   "runs": 3,
   "timeout_minutes": 30

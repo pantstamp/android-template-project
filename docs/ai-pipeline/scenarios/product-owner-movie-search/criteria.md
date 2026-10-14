@@ -35,8 +35,9 @@ of behaviour (given / when / then, or equivalent), not a goal.
 - [P8] (required) Every acceptance criterion is testable as written: observable, with no
   "quickly", "smoothly" or "user-friendly" without a measure.
 
-The runner adds `COMMITTED` (`SPEC.md` committed on the branch) and `LEAK` (no `master`,
-remote, issue or later commit reached for) itself.
+The runner adds `COMMITTED` (`SPEC.md` committed on the branch), `STAMP` (`pipeline: vX.Y.Z`
+under the title, matching `.claude/PIPELINE_VERSION`) and `LEAK` (no `master`, remote, issue or
+later commit reached for) itself.
 
 ## Bonus
 
