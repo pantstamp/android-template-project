@@ -8,7 +8,7 @@ this folder.
 
 ## Before you start
 
-- [ ] The version-stamp PR (`chore/pipeline-version-stamps`) is merged.
+- [ ] The CHANGELOG PR (`chore/changelog-1.1.0`) is merged.
 - [ ] `master` is checked out and pulled, and nothing is left over from earlier runs:
   `git worktree list` shows only the main checkout, and `git branch | grep -- -eval-` is empty.
 - [ ] `claude --version` is **2.1.280 or newer**, and
@@ -40,9 +40,8 @@ The official baseline is taken: all four scenarios pass **3 of 3** through `eval
 ## What is left, in order
 
 1. ✅ **Tagged `pipeline-v1.0.0`** on `34baf3f`.
-2. **Release `pipeline-v1.1.0`:** version stamps on SPEC, PLAN and RETRO headers, and
-   `.claude/CHANGELOG.md`. Run the suite (at least the product owner and architect, whose
-   templates changed), then follow the release steps in
+2. ✅ **Tagged `pipeline-v1.1.0`** on `07ceff3`: version stamps on SPEC, PLAN and RETRO headers,
+   and `.claude/CHANGELOG.md`. The release steps are in
    [`.claude/skills/README.md`](../../.claude/skills/README.md#versions).
 3. **Roadmap step 3:** split the generic skills, the project config and the Android profile
    (roadmap §1). Re-run the full suite afterwards. It must stay at 3 of 3 everywhere; record each
