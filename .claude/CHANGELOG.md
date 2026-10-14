@@ -20,15 +20,11 @@ Entries are grouped by stage and say what changed and why.
 - **The Android profile moves the skills' knowledge, without adding to it.** A first profile
   that turned each platform concern into its own interview topic, with more detail, made the
   product owner's interviews about a third longer, and it fell from 3 of 3 to 6 of 9 runs; the
-  pre-split skill, re-run the same day, still passed 3 of 3.
+  pre-split skill, re-run the same day, still passed 3 of 3. The architect fell to 3 of 6 when
+  its generic sentences were reworded along with the move, so a sentence with nothing
+  platform-specific in it keeps its 1.1.0 wording.
 - **The pre-flight command is held once**, in the config. The gate agent and `AI_WORKFLOW.md`
   each had their own copy of `build.yml`'s task list.
-
-### Architect
-- A plan that argues a CLAUDE.md rule does not apply must walk the rule's own failure sequence
-  through the plan's code, including state the event handler changes first. One of three plans
-  after the split kept a `StateFlow` query pipeline on a steady-state argument while its handler
-  cleared results synchronously; the baseline had passed the same argument as borderline.
 
 ### Retrospective
 - Lessons can be routed to the platform profile, and a skill sentence that names a platform's

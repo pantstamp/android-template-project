@@ -35,10 +35,9 @@ skipped — create it from an up-to-date base branch with the prefix matching th
 ## Pipeline context
 
 Read `.claude/pipeline.md` (the project config) and the platform profile it names before
-step 1. This skill uses the config's **base branch**, **branch prefixes**, **feature docs**
-path (`{feature docs}` below), **commands** (phase verification and UI check), **enforcement** tools and **rule review**
-sections, and the profile's **plan checklist**. If one is missing, stop and tell the user which;
-do not guess it.
+step 1. This skill uses the config's **base branch**, **branch prefixes**, **feature docs** path
+(`{feature docs}` below), **commands** and **enforcement** tools, and the profile's **plan
+checklist**. If one is missing, stop and tell the user which; do not guess it.
 
 ## Diagrams
 
@@ -55,7 +54,7 @@ stale while the detail changes.
 
 #### 1. Read the context — and judge it
 
-Read in order: `CLAUDE.md`, the pipeline config and profile, the SPEC.md, the architecture docs in `docs/`, then the code the
+Read in order: `CLAUDE.md`, the SPEC.md, the architecture docs in `docs/`, then the code the
 feature touches (module structure, navigation, database, DI, and the closest existing
 equivalent of what you are building).
 
@@ -90,8 +89,7 @@ complete enough to design from and free of hints about the answer:
   they are today. Mark the parts with known weaknesses.
 - **The closest existing equivalent**, walked through step by step: how it loads, caches,
   maps and displays its data.
-- **The rules that bind this feature** — the `CLAUDE.md` rules, and the rules of the config's
-  enforcement tools, that it will run into,
+- **The rules that bind this feature** — the enforcement-tool and `CLAUDE.md` rules it will run into,
   so the user designs inside them rather than discovering them in review.
 - **Known weaknesses** this feature could copy, stated as facts with their consequence ("this
   collects a Room flow on every resume, which leaks a collector per resume"), without saying
@@ -167,7 +165,7 @@ Use the structure in [PLAN_TEMPLATE.md](PLAN_TEMPLATE.md). The diagrams and deci
 from step 5 go into it as agreed — the final design only, not how it was reached.
 
 **Phases are dependency-ordered slices, not fixed layers.** Order them so each builds on the
-previous one (typically from the data layer up to the UI), and use only the layers the change
+previous one (typically data → domain → presentation), and use only the layers the change
 actually touches. Every phase:
 
 - lists files to modify and create, with exact paths, class names, signatures and key logic
@@ -203,21 +201,16 @@ Spend the effort on what the build can't check:
 - **Does an interface grow past what its callers need?**
 - **Is there an abstraction with exactly one implementor that will never have another?**
   Prefer the concrete class until the second one exists.
-- **Would a change of library reach into a module that shouldn't care?** The profile's plan
-  checklist names the library types to look for; `CLAUDE.md` names the modules that must not see
-  them.
+- **Would a change of library reach into a module that shouldn't care?** A library type the
+  profile's plan checklist names, in a module that holds domain models or stable contracts, is
+  the signal.
 - **Does a default or constant encode behaviour that belongs elsewhere?** e.g. a `UiState`
   default describing what the ViewModel does on start.
 - **Does every phase compile on its own, include its tests, include the UI check where the
   profile's condition holds, and meet each item of the profile's plan checklist?**
 - **Is every code block in the plan held to CLAUDE.md?** The developer implements plan code
-  verbatim, so a rule broken in the plan ships. Check each snippet as you would a diff, against
-  every bullet of the CLAUDE.md sections the config lists under rule review: flows, effects,
-  buffers, flags.
-- **Where the plan argues that a rule does not apply, is the argument traced through the plan's
-  own code?** Walk the exact sequence the rule describes, step by step, including state the
-  event handler changes before the asynchronous work sees it. An exception argued from the
-  steady state is how the rule's failure gets in; if the walk is not airtight, follow the rule.
+  verbatim, so a rule broken in the plan ships. Check each snippet as you would a diff: flows,
+  effects, buffers, flags.
 - **Does every new or changed ViewModel whose events start work have its event × state table**,
   with a test named in every cell where work is pending or running? Count the cells against
   the tests; "the states that matter" is how the missing ones get skipped.
