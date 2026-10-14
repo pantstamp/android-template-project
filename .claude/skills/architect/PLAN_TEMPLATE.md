@@ -14,7 +14,7 @@ pipeline: v{X.Y.Z}
 What the change does and the approach, in a few sentences. List the phases in one line each.
 
 ## References
-- Spec: `docs/features/{feature-name}/SPEC.md`
+- Spec: `{feature docs}/SPEC.md`
 - Project conventions: `CLAUDE.md`
 
 ## Design
@@ -51,7 +51,8 @@ Omit if empty.
 If applicable — SQL, version bump, exported schema.
 
 ### Previews to add
-If the phase adds or changes a screen — one per visual state, with the `UiState` it renders.
+If the phase adds or changes a screen — one per visual state, with the UI state it renders, as
+the profile's plan checklist asks.
 
 ### Tests
 - `path/to/FooTest.kt`
@@ -66,7 +67,7 @@ table; every cell where work is pending or running names its test:
 
 ### Verification
 ```bash
-./gradlew :module:testDebugUnitTest assembleDebug        # add lint if UI or res/ changed
+{the config's phase verification for the modules touched}   # plus the UI check when the profile's condition holds
 ```
 
 ## Phase 2: {what this phase delivers}

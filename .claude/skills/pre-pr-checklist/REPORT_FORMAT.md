@@ -4,7 +4,7 @@ Part 1 leads, because that is what the gate is for. Follow the report box with a
 section per check that has something to say (a table of criteria for Check 2 works well).
 On a partial re-run, mark the checks that were not run as `⏭️ skipped`.
 
-For Check 5, give each finding its own entry:
+For Check 5, give each finding its own entry, naming the CLAUDE.md section and quoting the rule:
 
 ```
 FooViewModel.kt:57 — Flow and coroutines: "A state flag set before `launch` must be reset on
@@ -26,7 +26,7 @@ every exit path"
   ⚠️  Rule review     1 finding (Flow and coroutines)
 
   CI pre-flight
-  ✅ spotless · konsist · test · assemble · lint   PASS
+  ✅ {each pre-flight task, in order}   PASS
 
 ──────────────────────────────────────────
   RESULT: CONDITIONAL GO

@@ -17,6 +17,12 @@ skill makes each decision informed and makes sure none is missed.
 
 - **PR number** — if not given, use the PR for the current branch (`gh pr view --json number`).
 
+## Pipeline context
+
+Read `.claude/pipeline.md` (the project config) first. This skill uses its **hosting** (the
+commands below are for GitHub through `gh`; for any other host, stop and say so) and its
+**pre-flight** command. If one is missing, stop and tell the user which; do not guess it.
+
 ## Workflow
 
 ### 1. Fetch
@@ -48,7 +54,8 @@ test, confirm it fails when the behaviour it guards is broken.
 
 ### 3. Verify, commit, push
 
-After the last finding, run the CI mirror (Part 2 of `.claude/agents/pre-pr-gate.md`), then:
+After the last finding, run the config's **pre-flight** command, read as the config says,
+then:
 
 ```bash
 git add {files changed for the accepted findings}

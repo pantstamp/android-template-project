@@ -1,7 +1,7 @@
 # Golden scenarios
 
-A suite that says whether a change to the pipeline (`.claude/skills/`, `.claude/agents/`, the
-pipeline sections of `CLAUDE.md`) made it worse. It is step 2 of
+A suite that says whether a change to the pipeline (`.claude/skills/`, `.claude/agents/`, `.claude/profiles/`,
+`.claude/pipeline.md`, the pipeline sections of `CLAUDE.md`) made it worse. It is step 2 of
 [`AI_PIPELINE_ROADMAP.md`](../AI_PIPELINE_ROADMAP.md); §4 there is the brief.
 
 Each scenario replays a **historical snapshot whose outcome is already known**, with the

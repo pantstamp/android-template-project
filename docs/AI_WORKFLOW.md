@@ -295,8 +295,9 @@ pre-flight command mirroring CI so you do not push something CI will reject:
 ./gradlew spotlessCheck :test:konsist:test test assembleDebug lint
 ```
 
-(`build.yml` is the source of truth for that list — it is quoted here and in the
-gate agent, so if the workflow changes, both follow.)
+(`build.yml` is the source of truth for that list. The pipeline reads it from
+[`.claude/pipeline.md`](../.claude/pipeline.md), the one copy to change when the
+workflow does.)
 
 ### It runs as an independent agent
 

@@ -1,12 +1,28 @@
 # Pipeline CHANGELOG
 
-One version for the whole pipeline: `.claude/skills/`, `.claude/agents/` and the pipeline
-sections of `CLAUDE.md`. Each release is tagged `pipeline-vX.Y.Z` and passes the golden scenarios
+One version for the whole pipeline: `.claude/skills/`, `.claude/agents/`, `.claude/profiles/`,
+`.claude/pipeline.md` and the pipeline sections of `CLAUDE.md`. Each release is tagged `pipeline-vX.Y.Z` and passes the golden scenarios
 in `docs/ai-pipeline/` first. How to version and release: [`skills/README.md`](skills/README.md#versions).
 
 Entries are grouped by stage and say what changed and why.
 
 ## Unreleased
+
+### All stages
+- **The skills and agents are generic; platform and project context moved out.** Commands,
+  branches, the docs path, hosting, enforcement tools, the review mechanism and the rule-review
+  sections are in the project config, `.claude/pipeline.md`. Interview concerns, the plan
+  checklist, residue patterns and framework mistake areas are in the platform profile,
+  `.claude/profiles/android.md`. Each stage reads both first, and stops on a missing entry
+  instead of guessing. This is roadmap step 3: the process can now be reused on another platform
+  or project by writing a profile and a config, not by editing skills. Breaking: a project
+  without `.claude/pipeline.md` cannot run any stage.
+- **The pre-flight command is held once**, in the config. The gate agent and `AI_WORKFLOW.md`
+  each had their own copy of `build.yml`'s task list.
+
+### Retrospective
+- Lessons can be routed to the platform profile, and a skill sentence that names a platform's
+  tools fails the routing test: it belongs in the profile or `CLAUDE.md`.
 
 ## 1.1.0 — 2026-10-13
 

@@ -26,12 +26,19 @@ design honestly, and turn the agreed design into a plan.
 
 ## Inputs
 
-- **Feature name** — locates `docs/features/{feature-name}/SPEC.md`. If not given, use the
-  most recent SPEC.md and confirm.
+- **Feature name** — locates `{feature docs}/SPEC.md`. If not given, use the most recent
+  SPEC.md and confirm.
 
-Work on the branch the product-owner stage created (`feature/{name}` or `fix/{name}`). If it
-does not exist — the spec stage was skipped — create it from an up-to-date `master` with the
-prefix matching the change type.
+Work on the branch the product-owner stage created. If it does not exist — the spec stage was
+skipped — create it from an up-to-date base branch with the prefix matching the change type.
+
+## Pipeline context
+
+Read `.claude/pipeline.md` (the project config) and the platform profile it names before
+step 1. This skill uses the config's **base branch**, **branch prefixes**, **feature docs**
+path (`{feature docs}` below), **commands** (phase verification and UI check), **enforcement** tools and **rule review**
+sections, and the profile's **plan checklist**. If one is missing, stop and tell the user which;
+do not guess it.
 
 ## Diagrams
 
@@ -48,7 +55,7 @@ stale while the detail changes.
 
 #### 1. Read the context — and judge it
 
-Read in order: `CLAUDE.md`, the SPEC.md, the architecture docs in `docs/`, then the code the
+Read in order: `CLAUDE.md`, the pipeline config and profile, the SPEC.md, the architecture docs in `docs/`, then the code the
 feature touches (module structure, navigation, database, DI, and the closest existing
 equivalent of what you are building).
 
@@ -83,7 +90,8 @@ complete enough to design from and free of hints about the answer:
   they are today. Mark the parts with known weaknesses.
 - **The closest existing equivalent**, walked through step by step: how it loads, caches,
   maps and displays its data.
-- **The rules that bind this feature** — the Konsist and `CLAUDE.md` rules it will run into,
+- **The rules that bind this feature** — the `CLAUDE.md` rules, and the rules of the config's
+  enforcement tools, that it will run into,
   so the user designs inside them rather than discovering them in review.
 - **Known weaknesses** this feature could copy, stated as facts with their consequence ("this
   collects a Room flow on every resume, which leaks a collector per resume"), without saying
@@ -159,21 +167,18 @@ Use the structure in [PLAN_TEMPLATE.md](PLAN_TEMPLATE.md). The diagrams and deci
 from step 5 go into it as agreed — the final design only, not how it was reached.
 
 **Phases are dependency-ordered slices, not fixed layers.** Order them so each builds on the
-previous one (typically data → domain → presentation), and use only the layers the change
+previous one (typically from the data layer up to the UI), and use only the layers the change
 actually touches. Every phase:
 
 - lists files to modify and create, with exact paths, class names, signatures and key logic
 - **includes its own tests** — no code phase ships untested waiting for a later "testing"
   phase
 - **leaves the project compiling and its tests passing**
-- ends with a **verification command**. If the phase touches a composable or anything under
-  `res/`, the command includes `lint`: lint is the only check that sees Compose and resource
-  misuse, and it runs with `warningsAsErrors`. To make that possible, **add each resource in
-  the phase that first uses it** — an unused resource is itself a lint error.
-- for a phase that adds or changes a screen, lists the **`@Preview`s to add, one per visual
-  state** (loading, each error variant, empty, content). CI compiles previews but never
-  renders them, so a preview is often the only way to see a state that is hard to reach on a
-  device.
+- ends with a **verification command**, built from the config's phase verification. When the
+  profile's UI-check condition holds for the phase, the command includes the config's UI check.
+- meets **every item of the profile's plan checklist** — previews per visual state, where
+  resources are added, and the rest. Apply each item to each phase; they record what the build
+  cannot see.
 
 **Choose test cases from the code's branches, not only from the spec's list.** When a
 condition treats two states the same (`null` and empty), plan a test for each. When a new path
@@ -190,22 +195,25 @@ the ones nobody did.
 
 ##### Before presenting it, answer these
 
-Most layering rules are Konsist-enforced and run in verification and CI — don't restate them.
+Most layering rules are enforced by the config's enforcement tools and run in verification and
+CI — don't restate them.
 Spend the effort on what the build can't check:
 
 - **Is each new use case doing one thing?** One that fetches and also saves is two.
 - **Does an interface grow past what its callers need?**
 - **Is there an abstraction with exactly one implementor that will never have another?**
   Prefer the concrete class until the second one exists.
-- **Would a change of library reach into a module that shouldn't care?** A Room, Retrofit or
-  Compose type named in `:architecture:mapper` or `:core:model` is the signal.
+- **Would a change of library reach into a module that shouldn't care?** The profile's plan
+  checklist names the library types to look for; `CLAUDE.md` names the modules that must not see
+  them.
 - **Does a default or constant encode behaviour that belongs elsewhere?** e.g. a `UiState`
   default describing what the ViewModel does on start.
-- **Does every phase compile on its own, include its tests, run `lint` if it touches UI or
-  resources, and list a preview per new screen state?**
+- **Does every phase compile on its own, include its tests, include the UI check where the
+  profile's condition holds, and meet each item of the profile's plan checklist?**
 - **Is every code block in the plan held to CLAUDE.md?** The developer implements plan code
-  verbatim, so a rule broken in the plan ships. Check each snippet as you would a diff: flows,
-  effects, buffers, flags.
+  verbatim, so a rule broken in the plan ships. Check each snippet as you would a diff, against
+  every bullet of the CLAUDE.md sections the config lists under rule review: flows, effects,
+  buffers, flags.
 - **Does every new or changed ViewModel whose events start work have its event × state table**,
   with a test named in every cell where work is pending or running? Count the cells against
   the tests; "the states that matter" is how the missing ones get skipped.
@@ -229,10 +237,10 @@ is the default; the user may skip it.
 
 #### 8. Save and commit PLAN.md
 
-Save to `docs/features/{feature-name}/PLAN.md`, then commit it on the feature branch:
+Save to `{feature docs}/PLAN.md`, then commit it on the feature branch:
 
 ```bash
-git add docs/features/{feature-name}/PLAN.md
+git add {feature docs}/PLAN.md
 git commit -m "docs({feature-name}): add implementation plan"
 ```
 

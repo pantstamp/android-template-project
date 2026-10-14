@@ -20,6 +20,22 @@ The review itself is not a skill: it runs in GitHub Actions
 Everything for one change lives in `docs/features/{feature-name}/` (`SPEC.md`, `PLAN.md`,
 `RETRO.md`), on the change's own branch (`feature/…` or `fix/…`).
 
+## Three layers
+
+The skills and agents hold only the process. What they need to know about the platform and the
+project comes from two files, read at the start of every stage:
+
+| Layer | Where | Holds |
+|---|---|---|
+| Generic pipeline | `.claude/skills/`, `.claude/agents/` | stages, checkpoints, gates, templates, routing |
+| Platform profile | [`../profiles/android.md`](../profiles/android.md) | interview concerns, plan checklist, residue patterns, framework mistake areas |
+| Project config | [`../pipeline.md`](../pipeline.md) | base branch and prefixes, docs path, hosting, commands, enforcement tools, review mechanism, the CLAUDE.md sections the rule review reads |
+
+`CLAUDE.md` stays the project's coding rules. **Every entry in the config and profile is
+required**: a stage that needs one that is missing stops and says so instead of guessing. Change a
+command or a branch in the config, never in a skill; if a skill sentence names Gradle, Android or
+this repo, it belongs in one of the two files.
+
 ## Agents
 
 Two skills hand bounded work to an agent in `../agents/`:
@@ -40,15 +56,16 @@ A new or changed agent file is picked up when a session starts, so restart after
 ## Maintaining these skills
 
 Skills hold **process**. Lessons from a retrospective go where they belong — project rules in
-`CLAUDE.md`, mechanical checks in Konsist or lint, history in `RETRO.md` — and only a change to
+`CLAUDE.md`, mechanical checks where the config says new rules go, platform knowledge in the
+profile, history in `RETRO.md` — and only a change to
 *how a stage works* goes into a skill or agent, written as a general step with no feature names,
 phase numbers or counts. The test: would the sentence still be true and useful if that feature
 had never existed?
 
 ## Versions
 
-The pipeline (`.claude/skills/`, `.claude/agents/` and the pipeline sections of `CLAUDE.md`) has
-one version, in [`../PIPELINE_VERSION`](../PIPELINE_VERSION). SPEC, PLAN and RETRO headers record
+The pipeline (`.claude/skills/`, `.claude/agents/`, `.claude/profiles/`, `.claude/pipeline.md`
+and the pipeline sections of `CLAUDE.md`) has one version, in [`../PIPELINE_VERSION`](../PIPELINE_VERSION). SPEC, PLAN and RETRO headers record
 it as `pipeline: vX.Y.Z`.
 
 - **Every change to the pipeline adds a line to the `Unreleased` section of
