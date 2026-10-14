@@ -8,7 +8,7 @@ this folder.
 
 ## Before you start
 
-- [ ] The CHANGELOG PR (`chore/changelog-1.1.0`) is merged.
+- [ ] The step-3 preparation PR (`chore/eval-before-step-3`) is merged.
 - [ ] `master` is checked out and pulled, and nothing is left over from earlier runs:
   `git worktree list` shows only the main checkout, and `git branch | grep -- -eval-` is empty.
 - [ ] `claude --version` is **2.1.280 or newer**, and
@@ -43,9 +43,21 @@ The official baseline is taken: all four scenarios pass **3 of 3** through `eval
 2. ✅ **Tagged `pipeline-v1.1.0`** on `07ceff3`: version stamps on SPEC, PLAN and RETRO headers,
    and `.claude/CHANGELOG.md`. The release steps are in
    [`.claude/skills/README.md`](../../.claude/skills/README.md#versions).
-3. **Roadmap step 3:** split the generic skills, the project config and the Android profile
+3. ✅ **Prepared the suite for step 3:**
+   - `eval.py` copies all of `.claude/` that git tracks or would track, and clears the snapshot's
+     own copy first. New files from the split (`.claude/pipeline.md`, profiles) reach the runs
+     with no runner change, and a file the split deletes cannot linger.
+   - The runner's `STAMP` check fails a product owner or architect run whose committed file lacks
+     `pipeline: vX.Y.Z` under its title.
+4. **Roadmap step 3:** split the generic skills, the project config and the Android profile
    (roadmap §1). Re-run the full suite afterwards. It must stay at 3 of 3 everywhere; record each
-   result at the top of the scenario's `RESULTS.md`.
+   result at the top of the scenario's `RESULTS.md`. Then release it following
+   [`.claude/skills/README.md`](../../.claude/skills/README.md#versions).
+
+**Decided, so not to be raised again before step 3 is done:**
+- **No retrospective scenario until the roadmap is complete.** A retro broken by steps 3 or 4
+  will not show in the suite. It will show on the first real retro after the split; fix it then.
+- **`review-triage` gets no check.** It is simple, and the split changes little in it.
 
 ## Things that bit us, and how they are handled now
 
@@ -69,3 +81,9 @@ subscription this comes from the plan's allowance.
 - **Judge consistency is unmeasured.** Each criterion is graded once per run. Grading a few
   outputs twice would show how much grades vary.
 - **Three runs show a rate, not a guarantee.** P5 passed 4 earlier runs before failing 2 of 3.
+- **Two of the six skills have no scenario:** `retrospective` (deferred, see above) and
+  `review-triage` (not needed).
+- **Not blockers, and already accepted by the baseline:** the architect's and developer's B1 bonuses
+  never pass reliably, and the product owner never covers AC11. The architect's run 2 at
+  `7acd123` passed E6 as borderline; watch for a `StateFlow` query pipeline that clears in the
+  event handler.

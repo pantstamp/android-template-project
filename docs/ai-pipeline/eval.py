@@ -133,13 +133,18 @@ def setup(config, run_dir, extra):
         git("worktree", "add", "--detach", str(worktree), config["snapshot"])
     write_sdk_dir(worktree)
     if config["mode"] == "inside":
-        # The skills under test are today's. Committed, so the run starts from a clean tree.
-        shutil.copytree(REPO / ".claude" / "skills", worktree / ".claude" / "skills", dirs_exist_ok=True)
-        shutil.copytree(REPO / ".claude" / "agents", worktree / ".claude" / "agents", dirs_exist_ok=True)
+        # The pipeline under test is today's: all of `.claude/` that git tracks or would track,
+        # whatever files it is split into. The snapshot's own copy goes first, so a file the
+        # pipeline has since removed cannot linger. Committed, so the run starts from a clean tree.
+        shutil.rmtree(worktree / ".claude", ignore_errors=True)
+        pipeline = git("ls-files", "--cached", "--others", "--exclude-standard", ".claude").split("\n")
+        for path in filter(None, pipeline):
+            if not (REPO / path).is_file():
+                continue  # tracked but deleted, and not yet committed
+            (worktree / path).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(REPO / path, worktree / path)
         shutil.copy2(REPO / "CLAUDE.md", worktree / "CLAUDE.md")
-        shutil.copy2(REPO / ".claude" / "PIPELINE_VERSION", worktree / ".claude" / "PIPELINE_VERSION")
-        git("add", "-f", ".claude/skills", ".claude/agents", ".claude/PIPELINE_VERSION", "CLAUDE.md",
-            cwd=worktree)
+        git("add", "-A", "-f", ".claude", "CLAUDE.md", cwd=worktree)
     for target, source in config.get("seed_files", {}).items():
         # Inputs the run starts from (a plan to execute), committed like an earlier stage would.
         (worktree / target).parent.mkdir(parents=True, exist_ok=True)
@@ -428,6 +433,21 @@ def nested_git(events):
     return found
 
 
+def stamp(config, workspace):
+    """Whether the committed grade_file records the pipeline version under its title, as the
+    SPEC and PLAN templates ask. The version is the one the run was given."""
+    version = (REPO / ".claude" / "PIPELINE_VERSION").read_text().strip()
+    expected = f"pipeline: v{version}"
+    try:
+        content = git("show", f"HEAD:{config['grade_file']}", cwd=workspace["worktree"])
+    except ScenarioError:
+        return {"id": "STAMP", "pass": False, "evidence": f"{config['grade_file']} is not committed"}
+    head = [line.strip() for line in content.splitlines() if line.strip()][:3]
+    ok = bool(head) and head[0].startswith("# ") and expected in head[1:]
+    return {"id": "STAMP", "pass": ok,
+            "evidence": f"`{expected}` under the title" if ok else f"expected `{expected}`; starts {head}"}
+
+
 def checks(config, events, workspace):
     found = []
     if config.get("forbidden_paths") or config.get("forbidden_patterns"):
@@ -442,6 +462,8 @@ def checks(config, events, workspace):
         changed = writes(events)
         found.append({"id": "READONLY", "pass": not changed,
                       "evidence": "; ".join(changed) if changed else "no file-changing tool call"})
+    if config.get("stamped") and workspace:
+        found.append(stamp(config, workspace))
     if (config.get("done_when_committed") or config.get("done_when_commits")) and workspace:
         done = committed(config, workspace)
         target = config.get("done_when_committed") or f"{config['done_when_commits']} commits"
