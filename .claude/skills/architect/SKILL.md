@@ -214,6 +214,10 @@ Spend the effort on what the build can't check:
   verbatim, so a rule broken in the plan ships. Check each snippet as you would a diff, against
   every bullet of the CLAUDE.md sections the config lists under rule review: flows, effects,
   buffers, flags.
+- **Where the plan argues that a rule does not apply, is the argument traced through the plan's
+  own code?** Walk the exact sequence the rule describes, step by step, including state the
+  event handler changes before the asynchronous work sees it. An exception argued from the
+  steady state is how the rule's failure gets in; if the walk is not airtight, follow the rule.
 - **Does every new or changed ViewModel whose events start work have its event × state table**,
   with a test named in every cell where work is pending or running? Count the cells against
   the tests; "the states that matter" is how the missing ones get skipped.

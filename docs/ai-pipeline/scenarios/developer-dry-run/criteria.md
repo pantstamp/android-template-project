@@ -48,7 +48,7 @@ reported but never fail a run.
   change. No change outside `utils/random/` and `docs/features/pipeline-dry-run/`.
 
 The runner adds `NESTEDGIT` (no phase agent ran `git commit`, `checkout`, `restore`, `reset`,
-`stash`, `rebase`, `push`, `switch` or `clean`), `COMMITTED` (three commits made) and `LEAK`
+`stash`, `rebase`, `push`, `switch` or `clean`), `COMMITTED` (a commit naming each phase) and `LEAK`
 (no push, PR or remote) itself.
 
 ## Bonus

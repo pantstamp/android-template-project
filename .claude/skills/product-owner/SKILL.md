@@ -70,6 +70,8 @@ For each topic:
 - Propose a default with its reason ("I'd suggest X because Y — does that work?")
 - Wait for the answer before the next topic
 - Ask about every gap you notice. Record it as an open question only when the user doesn't know
+- When an answer accepts only part of a proposal, the parts it does not mention are not approved.
+  Ask about them, or record them as open questions; never carry them into the spec as decided
 
 Cover what applies:
 - **Core behaviour** — triggers and outcomes
@@ -100,7 +102,9 @@ One paragraph: what this does and why. For a fix, include the verified root caus
     under Open Questions, never into a criterion.
 
 ## Edge Cases
-Each edge case and how it is handled.
+Each edge case and how it is handled. Every handling here, and every platform concern, that
+the user decided or approved also has an acceptance criterion above: the later stages plan and
+check against the criteria, so a decision recorded only here is never built or verified.
 
 ## Error Handling
 Network errors, database failures, invalid state.

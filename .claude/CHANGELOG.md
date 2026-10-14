@@ -20,6 +20,20 @@ Entries are grouped by stage and say what changed and why.
 - **The pre-flight command is held once**, in the config. The gate agent and `AI_WORKFLOW.md`
   each had their own copy of `build.yml`'s task list.
 
+### Product owner
+- Every edge case and platform concern the user decided or approved also gets an acceptance
+  criterion. After the split, one of three specs recorded the agreed rotation and process-death
+  behaviour only under Edge Cases, where the architect and the gate never look.
+- When an answer accepts only part of a proposal, the rest is not approved: the interview asks
+  about it or records it as an open question. One run turned the unmentioned half of two
+  proposals into acceptance criteria.
+
+### Architect
+- A plan that argues a CLAUDE.md rule does not apply must walk the rule's own failure sequence
+  through the plan's code, including state the event handler changes first. One of three plans
+  after the split kept a `StateFlow` query pipeline on a steady-state argument while its handler
+  cleared results synchronously; the baseline had passed the same argument as borderline.
+
 ### Retrospective
 - Lessons can be routed to the platform profile, and a skill sentence that names a platform's
   tools fails the routing test: it belongs in the profile or `CLAUDE.md`.

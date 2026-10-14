@@ -186,15 +186,17 @@ def remove(workspace):
 
 
 def committed(config, workspace):
-    """Whether the run reached its end: the graded file committed, or enough commits made."""
+    """Whether the run reached its end: the graded file committed, or a commit for each expected
+    subject. Subjects, not a count: a run may also commit a plan change on its own, and counting
+    that as a phase ended runs before their last phase was approved."""
     path = config.get("done_when_committed")
     if path:
         log = git("log", "--format=%H", f"{workspace['start']}..HEAD", "--", path, cwd=workspace["worktree"])
         return bool(log.strip())
-    count = config.get("done_when_commits")
-    if count:
-        log = git("log", "--format=%H", f"{workspace['start']}..HEAD", cwd=workspace["worktree"])
-        return len(log.split()) >= count
+    subjects = config.get("done_when_subjects")
+    if subjects:
+        log = git("log", "--format=%s", f"{workspace['start']}..HEAD", cwd=workspace["worktree"])
+        return all(subject in log for subject in subjects)
     return False
 
 
@@ -464,9 +466,9 @@ def checks(config, events, workspace):
                       "evidence": "; ".join(changed) if changed else "no file-changing tool call"})
     if config.get("stamped") and workspace:
         found.append(stamp(config, workspace))
-    if (config.get("done_when_committed") or config.get("done_when_commits")) and workspace:
+    if (config.get("done_when_committed") or config.get("done_when_subjects")) and workspace:
         done = committed(config, workspace)
-        target = config.get("done_when_committed") or f"{config['done_when_commits']} commits"
+        target = config.get("done_when_committed") or "a commit for each of " + ", ".join(config["done_when_subjects"])
         found.append({"id": "COMMITTED", "pass": done,
                       "evidence": f"{target}: " + ("reached" if done else "not reached")})
     return found

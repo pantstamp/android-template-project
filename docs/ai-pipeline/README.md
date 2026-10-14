@@ -42,7 +42,8 @@ Other `scenario.json` settings:
   They are deleted in that same commit. A seed or snapshot that tells the run what is being tested
   makes the result worthless. The first developer runs quoted the trap back from the plan's
   header.
-- **`done_when_committed`** (a file) or **`done_when_commits`** (a count): when a multi-turn
+- **`done_when_committed`** (a file) or **`done_when_subjects`** (a commit subject containing
+  each of these strings, such as the phase titles): when a multi-turn
   run has finished.
 - **`grade_file`** or **`grade_git`**: what the judge reads besides the dialogue. That is either
   one committed file, or the run's commits, diff and status.

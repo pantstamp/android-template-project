@@ -15,7 +15,7 @@
   "forbidden_patterns": ["origin/", "git push", "gh pr", "ai-pipeline", "AI_PIPELINE_ROADMAP", "agent-pipeline"],
   "nested_no_git": true,
   "answers": "answers.md",
-  "done_when_commits": 3,
+  "done_when_subjects": ["Random URL", "Random email", "Wider default range for randomInt"],
   "grade_git": true,
   "max_turns": 12,
   "runs": 3,
