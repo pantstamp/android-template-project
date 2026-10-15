@@ -2,6 +2,33 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-15 — step 3, project facts in `.claude/pipeline.md`, at `32f5662` (3 runs)
+
+**PASS: 3 of 3 runs passed every required criterion**, on `claude-opus-5-5`. The skill is
+`pipeline-v1.1.0`'s text with only project facts replaced by named values (`{{base}}`,
+`{{feature-docs}}`, `{{architecture-rules}}`, `{{verification}}`). B1 passed in run 1.
+
+| Run | Duration | Exchanges | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|---|
+| 1 | 923 s | 5 | 76 | 91,693 | $13.71 | 1 |
+| 2 | 977 s | 6 | 91 | 95,726 | $18.05 | 1 |
+| 3 | 946 s | 5 | 92 | 92,768 | $15.08 | 1 |
+
+**The first attempt at step 3 regressed this scenario, and showed why.** It moved the Android
+plan checklist (lint, previews, resources) into a platform profile and pointed the skill at it.
+
+| Variant, 2026-10-14 | Result | Failing |
+|---|---|---|
+| Profile, skill reworded (`1d62a57`) | WARN, 2 of 3 | E6 |
+| Plus a self-check for argued rule exceptions (`8d558c6`) | FAIL, 1 of 3 | E6, S2 |
+| Generic wording restored, checklist still in the profile (`84b5cab`) | FAIL, 1 of 3 | E6 ×2 |
+| `pipeline-v1.1.0`, same day | PASS, 3 of 3 | — |
+
+E6 is the `StateFlow` query pipeline: the failing plans kept it on the argument that "a query edited
+back needs no new search", while their event handler cleared results synchronously. The skill text
+names the `StateFlow` rule nowhere; it changed only in moving the checklist out. Concrete text in
+the skill is followed more reliably than a pointer to another file. See the roadmap's §5.
+
 ## 2026-10-13 — pipeline 1.1.0 (version stamps), at `4cf30f2` (3 runs)
 
 **PASS: 3 of 3 runs passed every required criterion**, on `claude-opus-5-5`. No change from the

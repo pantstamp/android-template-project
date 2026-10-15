@@ -1,7 +1,7 @@
 # AI pipeline roadmap — from this project to a reusable package
 
-Status: steps 1 and 2 done. **Step 3 (project config) is in progress** on `chore/pipeline-split`;
-the next session's brief is [`docs/ai-pipeline/HANDOFF.md`](ai-pipeline/HANDOFF.md). Re-planned on
+Status: steps 1–3 done; step 3 is `pipeline-v2.0.0`. **Next: step 4**, the dry run on the
+production project; the next session's brief is [`docs/ai-pipeline/HANDOFF.md`](ai-pipeline/HANDOFF.md). Re-planned on
 2026-10-15 after a first attempt at a platform split regressed two stages (see §5).
 
 **Starting a new session on this roadmap:** read this file, then `CLAUDE.md`,
@@ -23,7 +23,7 @@ released versions.
 1. ✅ **Finish the agent improvements** in `IMPROVEMENTS.md`. Merged in PR #35.
 2. ✅ **Golden scenarios** (§4, suite in [`docs/ai-pipeline/`](ai-pipeline/README.md)). The
    safety net for every step below. All four pass 3 of 3 on `pipeline-v1.1.0`.
-3. **Project config** (§1): move the facts that differ between Android projects into
+3. ✅ **Project config** (§1): move the facts that differ between Android projects into
    `.claude/pipeline.md`. The Android knowledge stays in the skills, word for word. Release as
    `pipeline-v2.0.0`.
 4. **Dry run on the production project** (§1): write its `pipeline.md`, run the gate on an existing

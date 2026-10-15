@@ -1,89 +1,77 @@
-# Handoff — after the golden-scenario baseline (roadmap steps 2 → 3)
+# Handoff — after step 3 (project config), before step 4 (dry run on production)
 
-Written 2026-10-13, for a new session started after the baseline PR is merged.
-
-**Start the session with:** *"Read docs/ai-pipeline/HANDOFF.md and continue."* Then read
-[`AI_PIPELINE_ROADMAP.md`](../AI_PIPELINE_ROADMAP.md) §1 and §3, and [`README.md`](README.md) in
-this folder.
+Written 2026-10-15. **Start the next session with:** *"Read docs/ai-pipeline/HANDOFF.md and
+continue."* Then read [`AI_PIPELINE_ROADMAP.md`](../AI_PIPELINE_ROADMAP.md) §1, §2 and §5.
 
 ## Before you start
 
-- [ ] The step-3 preparation PR (`chore/eval-before-step-3`) is merged.
-- [ ] `master` is checked out and pulled, and nothing is left over from earlier runs:
-  `git worktree list` shows only the main checkout, and `git branch | grep -- -eval-` is empty.
-- [ ] `claude --version` is **2.1.280 or newer**, and
-  `claude -p "reply with ok" --model claude-opus-5-5` answers.
+- [ ] The step-3 PR (`chore/pipeline-split`) is merged, and `master` is tagged `pipeline-v2.0.0`
+  on the merge commit.
+- [ ] `git worktree list` shows only the main checkout, and `git branch | grep -- -eval-` is empty.
+- [ ] `claude --version` is 2.1.280 or newer, and `claude -p "reply with ok" --model claude-opus-5-5`
+  answers.
+- [ ] The production Android project is cloned locally, and you know its base branch and CI.
 
 ## Where things stand
 
-The official baseline is taken: all four scenarios pass **3 of 3** through `eval.py`, on
-`claude-opus-5-5`. Each scenario's `RESULTS.md` has the numbers, newest first.
+**The goal changed on 2026-10-15:** first a second, production Android project, then Flutter. The
+roadmap is re-planned around it.
 
-| Scenario | Result | Bonus that never passes |
-|---|---|---|
-| `gate-movie-search` | 3 of 3 | — |
-| `architect-movie-search` | 3 of 3 | B1, flagging the AC8 clear-and-retype scroll case |
-| `developer-dry-run` | 3 of 3 | B1, a phase agent proving a test can fail |
-| `product-owner-movie-search` | 3 of 3 | — (AC11, a cached result with no network call, is never covered) |
+**Step 3 is done as `pipeline-v2.0.0`.** The skills and agents are `pipeline-v1.1.0`'s text with
+only project facts replaced by named values, such as `{{base}}`, `{{pre-flight}}` and
+`{{architecture-rules}}`. Their values are in [`.claude/pipeline.md`](../../.claude/pipeline.md).
+All four scenarios pass 3 of 3 (gate and product owner on a re-run).
 
-**What the baseline changed:**
-- **Product owner skill:** the interview now covers repeated or equivalent input and late
-  responses, asks about every gap it notices, and keeps undecided points out of the
-  acceptance criteria. Before the change, 0 of 3; after it, 3 of 3.
-- **Harness:** the developer scenario's prompt lists the command forms headless mode refuses.
-  Git-graded runs also give the judge a `<tool-calls>` timeline of the session's own calls, with
-  each spawned agent's ID.
-- **Architect:** no change. E6 and E3 held in all three runs. Run 2 argued that a `StateFlow`
-  query pipeline was safe because clearing happens in the collector. The judge passed it as
-  borderline; watch for it.
+**A first attempt at step 3 was dropped.** It moved the Android knowledge into a platform profile,
+and the product owner and architect regressed while 1.1.0, re-run the same day, did not. The roadmap's
+§5 and each `RESULTS.md` have the numbers. The lesson: facts can move to a config; knowledge and
+wording stay in the skill.
 
 ## What is left, in order
 
-1. ✅ **Tagged `pipeline-v1.0.0`** on `34baf3f`.
-2. ✅ **Tagged `pipeline-v1.1.0`** on `07ceff3`: version stamps on SPEC, PLAN and RETRO headers,
-   and `.claude/CHANGELOG.md`. The release steps are in
-   [`.claude/skills/README.md`](../../.claude/skills/README.md#versions).
-3. ✅ **Prepared the suite for step 3:**
-   - `eval.py` copies all of `.claude/` that git tracks or would track, and clears the snapshot's
-     own copy first. New files from the split (`.claude/pipeline.md`, profiles) reach the runs
-     with no runner change, and a file the split deletes cannot linger.
-   - The runner's `STAMP` check fails a product owner or architect run whose committed file lacks
-     `pipeline: vX.Y.Z` under its title.
-4. **Roadmap step 3:** split the generic skills, the project config and the Android profile
-   (roadmap §1). Re-run the full suite afterwards. It must stay at 3 of 3 everywhere; record each
-   result at the top of the scenario's `RESULTS.md`. Then release it following
-   [`.claude/skills/README.md`](../../.claude/skills/README.md#versions).
+1. **Step 4 — dry run on the production project** (roadmap §1):
+   - Write its `.claude/pipeline.md` from its CI workflow, build files and `CLAUDE.md`. Every name
+     in this repo's table needs a value.
+   - Copy `.claude/skills/` and `.claude/agents/` onto a scratch branch there. Run
+     `/pre-pr-checklist` on an existing feature branch, and `/architect` on a small real change if
+     there is one.
+   - List every place a skill still assumes this template. Likely candidates:
+     - Konsist (does production have an architecture-rule tool at all?)
+     - the CLAUDE.md section names `{{rule-review}}` points to
+     - `warningsAsErrors`
+     - the `@claude-review` workflow
+   - Fix each one here as a `2.0.x` patch: a new name in the table if it is a fact, a skill change
+     if it is process. Run the affected scenarios.
+2. **Step 5 — package as a plugin** (roadmap §2). Verify first:
+   - the `subagent_type` string for a plugin agent (`ai-pipeline:pre-pr-gate`?)
+   - that a pinned tag is not refetched by auto-update
+3. **Step 6 — install on production**, pinned to the tag, and take one real feature through the
+   whole pipeline, ending with a retro.
 
-**Decided, so not to be raised again before step 3 is done:**
-- **No retrospective scenario until the roadmap is complete.** A retro broken by steps 3 or 4
-  will not show in the suite. It will show on the first real retro after the split; fix it then.
-- **`review-triage` gets no check.** It is simple, and the split changes little in it.
+**Decided, so not to be raised again:**
+- No platform profile until a real Flutter project adopts the pipeline (roadmap §5).
+- No retrospective scenario until the roadmap is complete. `review-triage` gets no scenario.
 
 ## Things that bit us, and how they are handled now
 
 | Problem | Where it is handled |
 |---|---|
-| `claude -p` 401 | `claude auth login`. The runner stops at the first one. |
-| "does not support this model" | `claude update`. The runner stops at the first one. |
-| The CLI's default model differs between machines | Models are pinned; each summary records the model that actually ran. |
-| Under `dontAsk`, `cd`, `$(…)` and shell variables are refused | The gate and developer prompts say so. A run that retries a refused command unchanged stalls; watch the Denials column. |
-| The judge cannot see which agent a message went to | Git-graded runs include a `<tool-calls>` timeline. |
-| A seeded plan or snapshot that describes the test | `hidden_paths` and a neutral seed. |
-| False `LEAK` from the runner's own `…/ai-pipeline-evals/…` path | The leak check strips the output directory. |
-| Branch collisions between parallel runs | Branch names include the scenario. |
+| `claude -p` 401, or "does not support this model" | `claude auth login` / `claude update`. The runner stops at the first one. |
+| Under `dontAsk`, `cd`, `$(…)` and shell variables are refused | The gate and developer prompts say so. The gate still loses 1–3 calls a run to `W=…; git -C $W`; harmless. |
+| A developer run that commits a plan change on its own ended early | `done_when_subjects`: a run ends when a commit names each phase. |
+| One failing run in three on P6 or F5 | Compare with the previous release the same day before touching a skill (suite README, Status). |
+| A same-day comparison checkout has no `local.properties` | Copy only its `sdk.dir` line; the root file holds the API key. |
 
-**Costs:** a full suite run (3 runs of each scenario) is about $85–90 at API prices: the architect
-about $45, the product owner and developer about $20 each, the gate about $5. On a Claude
-subscription this comes from the plan's allowance.
+**Costs:** a full suite run is about $90 at API prices (architect about $45–50, product owner
+about $27, developer about $16, gate about $5). Step 3 cost about $500 in runs, most of it on the
+dropped first attempt.
 
 ## Known limits of the suite
 
-- **Judge consistency is unmeasured.** Each criterion is graded once per run. Grading a few
-  outputs twice would show how much grades vary.
-- **Three runs show a rate, not a guarantee.** P5 passed 4 earlier runs before failing 2 of 3.
-- **Two of the six skills have no scenario:** `retrospective` (deferred, see above) and
-  `review-triage` (not needed).
-- **Not blockers, and already accepted by the baseline:** the architect's and developer's B1 bonuses
-  never pass reliably, and the product owner never covers AC11. The architect's run 2 at
-  `7acd123` passed E6 as borderline; watch for a `StateFlow` query pipeline that clears in the
-  event handler.
+- **Three runs show a rate, not a guarantee.** P6 and F5 each fail about one run in ten or more;
+  a single miss is not a regression until a same-day comparison says so.
+- **Judge consistency is unmeasured.**
+- **The suite only tests this template project.** Production quality shows on the first real
+  feature there.
+- **Not blockers:** the architect's and developer's B1 bonuses rarely pass, and the product owner
+  never covers AC11.

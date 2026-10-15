@@ -92,11 +92,10 @@ the commit they were taken at.
 
 ## Status
 
-The official baseline was taken on 2026-10-12 through `eval.py`, 3 runs per scenario, and all
-four scenarios pass 3 of 3. Getting there took two harness fixes, which a developer re-run then
-confirmed, and one skill change, which a product owner re-run then confirmed. Each `RESULTS.md`
-has the details, newest first. Earlier entries there were taken in-session (subagents, with the
-orchestrating session as the user). Prefer the `eval.py` numbers.
+`pipeline-v2.0.0` (roadmap step 3, project facts in `.claude/pipeline.md`) passes 3 of 3 in all
+four scenarios, taken on 2026-10-15 at `32f5662`. Each `RESULTS.md` has the details, newest first,
+including the first attempt at step 3 that regressed two scenarios. Prefer the `eval.py` numbers
+over the in-session entries further down.
 
 Models are pinned: `--model` and `--judge-model` default to `claude-opus-5-5`, and `--user-model`
 to `claude-sonnet-5-5`. Every summary records the model that actually ran. Results taken with a
@@ -104,10 +103,21 @@ different model are not comparable.
 
 | # | Scenario | Folder | State |
 |---|---|---|---|
-| 1 | Gate | [`gate-movie-search`](scenarios/gate-movie-search/) | PASS, 3 of 3 (`eval.py`, 2026-10-12) |
-| 2 | Architect | [`architect-movie-search`](scenarios/architect-movie-search/) | PASS, 3 of 3 (`eval.py`, 2026-10-12) |
-| 3 | Developer | [`developer-dry-run`](scenarios/developer-dry-run/) | PASS, 3 of 3 (`eval.py`, 2026-10-12) |
-| 4 | Product owner | [`product-owner-movie-search`](scenarios/product-owner-movie-search/) | PASS, 3 of 3 (`eval.py`, 2026-10-12) |
+| 1 | Gate | [`gate-movie-search`](scenarios/gate-movie-search/) | PASS, 3 of 3 on a re-run (`2.0.0`, 2026-10-15) |
+| 2 | Architect | [`architect-movie-search`](scenarios/architect-movie-search/) | PASS, 3 of 3 (`2.0.0`, 2026-10-15) |
+| 3 | Developer | [`developer-dry-run`](scenarios/developer-dry-run/) | PASS, 3 of 3 (`2.0.0`, 2026-10-15) |
+| 4 | Product owner | [`product-owner-movie-search`](scenarios/product-owner-movie-search/) | PASS, 3 of 3 on a re-run (`2.0.0`, 2026-10-15) |
+
+**When a scenario drops below 3 of 3, compare with the previous release the same day** before
+changing a skill. Model behaviour drifts, and one failing run in three is common for P6 and F5:
+
+```bash
+git worktree add --detach <scratch>/prev pipeline-vX.Y.Z
+grep '^sdk.dir' local.properties > <scratch>/prev/local.properties   # Gradle needs the SDK path
+python3 <scratch>/prev/docs/ai-pipeline/eval.py run <scenario>
+```
+
+The comparison then runs with that release's skills and harness. Remove the worktree afterwards.
 
 A scenario that declares `answers` is multi-turn. `eval.py` starts a session, then loops: the
 skill's last message and the dialogue so far go to a second model (`--user-model`, default

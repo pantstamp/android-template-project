@@ -2,6 +2,31 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-15 — step 3, project facts in `.claude/pipeline.md`, at `32f5662` (variant `full`, 3 + 3 runs)
+
+**PASS on the re-run: 3 of 3 runs passed every required criterion**, bonus included, on
+`claude-opus-5-5`. The first batch was **WARN, 2 of 3**: run 2 reported no finding for F5 (the
+`LaunchedEffect` that captures `onSearchEvent`); every other criterion passed in all three runs.
+`pipeline-v1.1.0`, run the same day for comparison, caught F5 in 3 of 3. F5 has now been missed in
+1 of 15 runs across all batches, so the miss is read as variance, not as the change.
+
+The prompt changed with the config: the agent uses its working directory for `CLAUDE.md` and
+`.claude/pipeline.md`, and replaces `{{base}}` (and the config's `master`) with the fixed base.
+
+| Run | Duration | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|
+| 1 | 218 s | 26 | 21,770 | $1.78 | 1 |
+| 2 | 219 s | 35 | 21,500 | $1.73 | 1 |
+| 3 | 197 s | 28 | 17,512 | $1.21 | 1 |
+
+**Earlier on 2026-10-14, the first attempt at step 3** (a platform profile, `1d62a57`) passed
+3 of 3. The gate was the one stage that attempt did not regress; the attempt was replaced, see
+the roadmap's §5.
+
+**The same-day `v1.1.0` comparison failed R1 and R2 for a setup reason:** its checkout had no
+`local.properties`, so Gradle stopped at "SDK location not found". Copy the `sdk.dir` line into a
+comparison checkout before running it.
+
 ## 2026-10-12 — official `eval.py` baseline, at `7acd123` (variant `full`, 3 runs)
 
 **PASS: 3 of 3 runs passed every required criterion**, bonus included, on `claude-opus-5-5`.

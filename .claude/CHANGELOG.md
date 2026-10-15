@@ -8,6 +8,12 @@ Entries are grouped by stage and say what changed and why.
 
 ## Unreleased
 
+## 2.0.0 — 2026-10-15
+
+All four golden scenarios pass 3 of 3 through `eval.py` on `claude-opus-5-5`, at `32f5662`. The
+gate and product owner each needed a re-run after one failing run on a criterion with a history
+of occasional misses (F5, P6); `pipeline-v1.1.0` was compared the same day.
+
 ### All stages
 - **Project facts moved into `.claude/pipeline.md`.** The base branch and branch prefixes, the
   feature docs path, hosting, the pre-flight, format-fix and verification commands, the

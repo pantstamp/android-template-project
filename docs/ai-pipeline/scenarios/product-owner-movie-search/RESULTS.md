@@ -2,6 +2,29 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-15 — step 3, project facts in `.claude/pipeline.md`, at `32f5662` (3 + 3 runs)
+
+**PASS on the re-run: 3 of 3 runs passed every required criterion**, bonuses included, on
+`claude-opus-5-5`. The first batch was **WARN, 2 of 3**: run 2 failed P6, carrying the
+unconfirmed half of a proposal (previous results hidden once the field is cleared) into a user
+story, against its own open question. The skill is `pipeline-v1.1.0`'s text with only branches
+and paths replaced by named values, and its interviews were as long as 1.1.0's (11–15
+exchanges). P6 failed the same way in the first baseline (2026-10-11), so this is read as the
+known intermittent weakness, not the change.
+
+| Run | Duration | Exchanges | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|---|
+| 1 | 313 s | 15 | 30 | 16,971 | $11.57 | 1 |
+| 2 | 313 s | 14 | 22 | 15,593 | $9.79 | 0 |
+| 3 | 255 s | 11 | 24 | 14,599 | $6.91 | 1 |
+
+**The first attempt at step 3 regressed this scenario** (2026-10-14). Its Android profile made
+each platform concern its own interview topic, with more detail than the skill had. Interviews
+grew from about 9 topics to about 12, and three batches passed 2 of 3 each, failing P3 once and
+P6 twice, each time differently. `pipeline-v1.1.0`, run the same day, passed 3 of 3. Moving the
+skill's two lists into the profile verbatim restored 3 of 3; the attempt was then replaced by
+this one. See the roadmap's §5.
+
 ## 2026-10-13 — pipeline 1.1.0 (version stamps), at `4cf30f2` (3 runs)
 
 **PASS: 3 of 3 runs passed every required criterion**, all bonuses included, on
