@@ -18,18 +18,16 @@ it generously; the agent starts with no account of what was built and only reads
 is read-only, so it reports problems and cannot fix its way to GO. This skill runs it, shows
 the result, and handles everything that needs the user.
 
-## Inputs
-
-- **Feature name** — locates the feature's folder in the config's feature docs path. If not
-  given, infer it from the branch name (the branch prefix dropped: `feature/user-profiles` →
-  `user-profiles`) and confirm.
-
 ## Pipeline context
 
-Read `.claude/pipeline.md` (the project config) before step 1; the agent reads it too. This skill
-uses its **feature docs** path, **branch prefixes**, **format fix** command and **enforcement**
-table, and the profile's **manual checks**. If one is missing, stop and tell the user which; do
-not guess it.
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
+stands for that name's value in its table. If a value this skill uses is missing there, stop and tell the user which; do not
+guess it.
+
+## Inputs
+
+- **Feature name** — locates `{{feature-docs}}/`. If not given, infer it from the
+  branch name (`{{feat-prefix}}user-profiles` → `user-profiles`) and confirm.
 
 ## Workflow
 
@@ -52,13 +50,13 @@ item, say so separately and say why.
   finding, and ask whether to fix, verify manually, or dismiss. Then fix what was agreed.
 - **NO GO** → show the errors and offer fixes within the limits below.
 
-Limits on fixes: each pre-flight failure gets the response the config's **enforcement** table
-gives for its tool, and nothing faster. In general:
-- **Formatting** — run the config's format fix. The only failure that needs no judgment call.
-- **A rule check** (architecture, lint) — fix the code to match the rule. Changing a rule, or
-  adding a baseline or suppression, is a conversation with the user, not a silent edit.
+Limits on fixes:
+- **{{formatter}}** — run `{{format-fix}}`. The only failure that needs no judgment call.
+- **{{architecture-rules}}** — fix the code to match the rule. Changing a rule is a conversation with the user,
+  not a silent edit.
+- **Lint** (`warningsAsErrors`) — fix the cause. No baseline or suppression without asking.
 
-When the user reports a manual check (one of the profile's manual checks), record it in the next
+When the user reports a manual check (on a device, emulator or preview), record it in the next
 commit as a `Verified-manually:` trailer, as the developer skill does. The gate reads those
 from git.
 

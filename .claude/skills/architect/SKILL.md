@@ -24,20 +24,20 @@ SPEC.md. The skill has three goals, in this order:
 So the user proposes before you do. Your job is to give them the full picture, review their
 design honestly, and turn the agreed design into a plan.
 
-## Inputs
-
-- **Feature name** — locates `{feature docs}/SPEC.md`. If not given, use the most recent
-  SPEC.md and confirm.
-
-Work on the branch the product-owner stage created. If it does not exist — the spec stage was
-skipped — create it from an up-to-date base branch with the prefix matching the change type.
-
 ## Pipeline context
 
-Read `.claude/pipeline.md` (the project config) and the platform profile it names before
-step 1. This skill uses the config's **base branch**, **branch prefixes**, **feature docs** path
-(`{feature docs}` below), **commands** and **enforcement** tools, and the profile's **plan
-checklist**. If one is missing, stop and tell the user which; do not guess it.
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
+stands for that name's value in its table. If a value this skill uses is missing there, stop and tell the user which; do not
+guess it.
+
+## Inputs
+
+- **Feature name** — locates `{{feature-docs}}/SPEC.md`. If not given, use the
+  most recent SPEC.md and confirm.
+
+Work on the branch the product-owner stage created (`{{feat-prefix}}{name}` or `{{fix-prefix}}{name}`). If it
+does not exist — the spec stage was skipped — create it from an up-to-date `{{base}}` with the
+prefix matching the change type.
 
 ## Diagrams
 
@@ -89,7 +89,7 @@ complete enough to design from and free of hints about the answer:
   they are today. Mark the parts with known weaknesses.
 - **The closest existing equivalent**, walked through step by step: how it loads, caches,
   maps and displays its data.
-- **The rules that bind this feature** — the enforcement-tool and `CLAUDE.md` rules it will run into,
+- **The rules that bind this feature** — the {{architecture-rules}} and `CLAUDE.md` rules it will run into,
   so the user designs inside them rather than discovering them in review.
 - **Known weaknesses** this feature could copy, stated as facts with their consequence ("this
   collects a Room flow on every resume, which leaks a collector per resume"), without saying
@@ -172,11 +172,14 @@ actually touches. Every phase:
 - **includes its own tests** — no code phase ships untested waiting for a later "testing"
   phase
 - **leaves the project compiling and its tests passing**
-- ends with a **verification command**, built from the config's phase verification. When the
-  profile's UI-check condition holds for the phase, the command includes the config's UI check.
-- meets **every item of the profile's plan checklist** — previews per visual state, where
-  resources are added, and the rest. Apply each item to each phase; they record what the build
-  cannot see.
+- ends with a **verification command**. If the phase touches a composable or anything under
+  `res/`, the command includes `lint`: lint is the only check that sees Compose and resource
+  misuse, and it runs with `warningsAsErrors`. To make that possible, **add each resource in
+  the phase that first uses it** — an unused resource is itself a lint error.
+- for a phase that adds or changes a screen, lists the **`@Preview`s to add, one per visual
+  state** (loading, each error variant, empty, content). CI compiles previews but never
+  renders them, so a preview is often the only way to see a state that is hard to reach on a
+  device.
 
 **Choose test cases from the code's branches, not only from the spec's list.** When a
 condition treats two states the same (`null` and empty), plan a test for each. When a new path
@@ -193,21 +196,19 @@ the ones nobody did.
 
 ##### Before presenting it, answer these
 
-Most layering rules are enforced by the config's enforcement tools and run in verification and
-CI — don't restate them.
+Most layering rules are enforced by {{architecture-rules}} and run in verification and CI — don't restate them.
 Spend the effort on what the build can't check:
 
 - **Is each new use case doing one thing?** One that fetches and also saves is two.
 - **Does an interface grow past what its callers need?**
 - **Is there an abstraction with exactly one implementor that will never have another?**
   Prefer the concrete class until the second one exists.
-- **Would a change of library reach into a module that shouldn't care?** A library type the
-  profile's plan checklist names, in a module that holds domain models or stable contracts, is
-  the signal.
+- **Would a change of library reach into a module that shouldn't care?** A Room, Retrofit or
+  Compose type named in `:architecture:mapper` or `:core:model` is the signal.
 - **Does a default or constant encode behaviour that belongs elsewhere?** e.g. a `UiState`
   default describing what the ViewModel does on start.
-- **Does every phase compile on its own, include its tests, include the UI check where the
-  profile's condition holds, and meet each item of the profile's plan checklist?**
+- **Does every phase compile on its own, include its tests, run `lint` if it touches UI or
+  resources, and list a preview per new screen state?**
 - **Is every code block in the plan held to CLAUDE.md?** The developer implements plan code
   verbatim, so a rule broken in the plan ships. Check each snippet as you would a diff: flows,
   effects, buffers, flags.
@@ -234,10 +235,10 @@ is the default; the user may skip it.
 
 #### 8. Save and commit PLAN.md
 
-Save to `{feature docs}/PLAN.md`, then commit it on the feature branch:
+Save to `{{feature-docs}}/PLAN.md`, then commit it on the feature branch:
 
 ```bash
-git add {feature docs}/PLAN.md
+git add {{feature-docs}}/PLAN.md
 git commit -m "docs({feature-name}): add implementation plan"
 ```
 

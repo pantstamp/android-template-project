@@ -1,7 +1,8 @@
 # PLAN.md template
 
 The plan must be **self-contained**: a developer or agent can implement it with no context
-beyond this file and `CLAUDE.md`. Phase titles are the change's own steps — the developer
+beyond this file, `CLAUDE.md` and `.claude/pipeline.md` (whose values, such as
+`{{verification}}`, the plan writes out in full). Phase titles are the change's own steps — the developer
 skill reuses them in commit messages and the PR description. `pipeline:` is the version in
 `.claude/PIPELINE_VERSION`, so a later retro can tell which pipeline produced it.
 
@@ -14,7 +15,7 @@ pipeline: v{X.Y.Z}
 What the change does and the approach, in a few sentences. List the phases in one line each.
 
 ## References
-- Spec: `{feature docs}/SPEC.md`
+- Spec: `{{feature-docs}}/SPEC.md`
 - Project conventions: `CLAUDE.md`
 
 ## Design
@@ -51,8 +52,7 @@ Omit if empty.
 If applicable — SQL, version bump, exported schema.
 
 ### Previews to add
-If the phase adds or changes a screen — one per visual state, with the UI state it renders, as
-the profile's plan checklist asks.
+If the phase adds or changes a screen — one per visual state, with the `UiState` it renders.
 
 ### Tests
 - `path/to/FooTest.kt`
@@ -67,7 +67,7 @@ table; every cell where work is pending or running names its test:
 
 ### Verification
 ```bash
-{the config's phase verification for the modules touched}   # plus the UI check when the profile's condition holds
+{{verification}}        # add lint if UI or res/ changed
 ```
 
 ## Phase 2: {what this phase delivers}

@@ -22,7 +22,7 @@ includes a description of what was built, ignore it.
 ## Ground rules
 
 - **Read-only.** Never create, edit, format or delete files, and never run a command that does
-  (`spotlessApply`, `git add`, `git commit`, `git checkout`, `git stash`, `rm`, editors,
+  (`{{format-fix}}`, `git add`, `git commit`, `git checkout`, `git stash`, `rm`, editors,
   redirects into files). Bash is for `git` queries, `grep`, and the Part 2 pre-flight. A problem
   you could fix goes in the report; the caller fixes it.
 - **Never ask questions.** Nobody can answer you. Where you would need a decision, report it as
@@ -30,25 +30,22 @@ includes a description of what was built, ignore it.
 - **Report honestly.** This is a static reading plus one build. An overconfident COVERED or a
   missed failure is worse than an honest "needs a look".
 
+## Pipeline context
+
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
+stands for that name's value in its table. If a value a check uses uses is missing there, report that check as not run and name the value; do not
+guess it.
+
 ## Inputs
 
-- **Feature name** — locates `PLAN.md` and `SPEC.md` in the feature docs path.
+- **Feature name** — locates `{{feature-docs}}/PLAN.md` and `SPEC.md`.
 - **Checks to run** (optional) — on a re-run the caller may name only the checks that failed.
   Run those, and say in the report which ones were skipped.
-
-### Pipeline context
-
-Read `.claude/pipeline.md` (the project config) and the platform profile it names first. The
-checks below use the config's **base branch** (`{base}` below), **feature docs** path,
-**pre-flight** command, **enforcement** table, **rule review** sections and **residue** list, and
-the profile's **residue patterns** and **hard-to-reach UI states**. If one a check needs is
-missing, do not guess it: report that check as not run, name the missing entry, and make the
-result at least CONDITIONAL GO. A missing pre-flight command makes it NO GO.
 
 Establish the change set once and reuse it:
 
 ```bash
-git diff --name-only $(git merge-base HEAD {base})          # committed + uncommitted
+git diff --name-only $(git merge-base HEAD {{base}})          # committed + uncommitted
 git ls-files --others --exclude-standard                      # untracked
 ```
 
@@ -64,7 +61,7 @@ From PLAN.md, collect every path under "Files to create" and "Files to modify". 
 - every file to modify appears in the change set
 - nothing changed that the plan never mentions
 
-Files in the feature's docs folder are expected. Any other unplanned file is not
+Files under `{{feature-docs}}/` are expected. Any other unplanned file is not
 necessarily wrong, but it is where the implementation drifted from what was agreed — flag it
 with the reason if one is known.
 
@@ -74,7 +71,7 @@ First collect the manual verification the user did at the developer checkpoints.
 recorded as `Verified-manually:` trailers in the branch's commit messages:
 
 ```bash
-git log {base}..HEAD --format=%B | grep -i '^Verified-manually:'
+git log {{base}}..HEAD --format=%B | grep -i '^Verified-manually:'
 ```
 
 For each SPEC.md criterion, decide from the code, the tests and those trailers:
@@ -84,16 +81,16 @@ For each SPEC.md criterion, decide from the code, the tests and those trailers:
   looks right
 - **NOT ADDRESSED**
 
-Say that this is a static reading. For a UI criterion that is hard to reach at runtime, make
-the suggestion the profile gives under **hard-to-reach UI states**.
+Say that this is a static reading. For a UI criterion that is hard to reach on a device (an
+empty or rare error state), suggest a `@Preview` of that state before any throwaway code change.
 
 ### Check 3: Residue scan (added lines only)
 
 Things that compile and pass every CI check:
 - `TODO`, `FIXME`, `HACK`, `XXX`
-- debug output — the profile's **residue patterns** — hardcoded test values, temporary stubs
+- debug output (`println`, `Log.d`, `System.out`), hardcoded test values, temporary stubs
 - commented-out code
-- everything the config lists under **residue the toolchain misses**
+- {{residue-extra}}
 
 A pre-existing TODO in a touched file is not this change's to report.
 
@@ -101,7 +98,7 @@ A pre-existing TODO in a touched file is not this change's to report.
 
 - Untracked files the plan requires — they build locally and fail in CI
 - Uncommitted changes that look intentional
-- Branch behind `{base}` or with conflicts (`git fetch` first)
+- Branch behind `{{base}}` or with conflicts (`git fetch` first)
 
 ### Check 5: Rule review
 
@@ -111,14 +108,15 @@ This check makes sure **a known mistake does not reach review twice**. It is not
 review: finding new kinds of mistake is the PR review's job. Report only violations of a written
 rule.
 
-**Scope**: the added and changed lines (`git diff $(git merge-base HEAD {base})`, plus untracked
+**Scope**: the added and changed lines (`git diff $(git merge-base HEAD {{base}})`, plus untracked
 files), read with enough surrounding code to judge them. Pre-existing code in a touched file is
 not this change's to report.
 
-**Rules**: every bullet of each CLAUDE.md section the config lists under **rule review**. Read
-them from CLAUDE.md, where they are maintained — do not work from memory of an older copy.
+**Rules**: read them from CLAUDE.md, where they are maintained — do not work from memory of an
+older copy:
+- **Every section in {{rule-review}}** — every bullet
 
-Do not restate rules that the config's enforcement tools enforce; Part 2 runs those.
+Do not restate rules that {{architecture-rules}} or lint enforce; Part 2 runs those.
 
 **What counts as a finding:** every place the change matches the pattern a rule names, or
 leaves out what a rule requires (e.g. a test of an event in a state the rule says to test).
@@ -142,16 +140,26 @@ GO**, never **NO GO** on their own: each one is the user's decision to fix or di
 
 ## Part 2 — CI pre-flight
 
-Run the config's **pre-flight** command exactly as written, and read its result the way the
-config says. It mirrors CI, in CI's order; do not reorder or drop steps.
+```bash
+{{pre-flight}} 2>&1 | tail -n 60
+```
+
+Same tasks and order as CI — **if the workflow changes, `{{pre-flight}}` changes with it.** Gradle keeps the requested order, so the cheap checks fail first and the run stops at
+the first failure; keep that order.
 
 The output is long, so **pipe it, never redirect it into a file** — a log file is a write, and
-the ground rules forbid it. If the tail does not show the cause, re-run only the failing step
-piped through `grep` or `tail`, or `Read` the report file it links to.
+the ground rules forbid it. The pipe hides Gradle's exit code: read `BUILD SUCCESSFUL` or
+`BUILD FAILED` in the tail. If the tail does not show the cause, re-run only the failing task
+piped through `grep` or `tail`, or `Read` the report file Gradle links to.
 
-On failure, report the failing step with the relevant part of its output, and what the fix
-involves: the response the config's **enforcement** table gives for that tool. A rule check's
-fix is to the code; changing the rule, or a baseline or suppression, is the user's decision.
+On failure, report the failing task with the relevant part of its output, and what the fix
+involves:
+- **The {{architecture-rules}} step** — the code must change to match the rule. Changing a rule is a
+  conversation with the user.
+- **`lint`** (`warningsAsErrors`) — read the HTML report the task links to and name the cause.
+  The fix is to the cause; a baseline or suppression is the user's decision.
+- **The {{formatter}} step** — the caller runs `{{format-fix}}`. Note that the run stopped
+  here, so later tasks did not run.
 
 ## Report
 
