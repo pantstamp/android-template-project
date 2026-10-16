@@ -4,8 +4,12 @@ Your checklist for roadmap step 4. Claude's own brief is [`HANDOFF.md`](HANDOFF.
 what **you** do, and what to check at each point.
 
 **What this phase is for:** find every place the pipeline still assumes this template project,
-before it is packaged as a plugin. Nothing is committed in the production project. It ends with a
-small patch release (`pipeline-v2.0.x`) here.
+before it is packaged as a plugin. It ends with a small patch release (`pipeline-v2.0.x`) here.
+
+**The pipeline stays local to that laptop.** Nothing from it is committed or pushed in the
+production repository: the files are copied in uncommitted, hidden from git by a local-only
+exclude list (4.2), and deleted again at the end (part 6). Only the fixes are pushed, to this
+repo.
 
 **Time:** one session for parts 2–4, part of another for part 5. **Cost:** a few dollars on the
 production side; $5–50 per golden-scenario re-run for the patch.
@@ -51,6 +55,25 @@ production side; $5–50 per golden-scenario re-run for the patch.
   - the base branch (`main` / `master` / `develop`)
   - its branch naming, if any
   - the CI workflow file
+- [ ] **Production does not track what the pipeline will add.** This must print nothing:
+
+      ```bash
+      git ls-files .claude/skills .claude/agents .claude/pipeline.md .claude/CHANGELOG.md .claude/PIPELINE_VERSION docs/features
+      ```
+
+      If it prints anything, production already has files there of its own. Tell Claude at the
+      start, so the copy and the exclude list leave them alone.
+- [ ] **Note what is there now**, to check against in part 6:
+
+      ```bash
+      git branch --list
+      ```
+
+      ```bash
+      git log --branches --not --remotes --oneline
+      ```
+
+      The second lists local commits that are on no remote. Usually it prints nothing.
 - [ ] **Pick a feature branch** for the gate: a recent, merged or open branch with a change of a few
       files to a few dozen. Write down its name.
 - [ ] Optional: **pick a small upcoming change** for the architect, if one is coming anyway.
@@ -66,7 +89,8 @@ cd ~/src/production-app && claude --add-dir ~/src/android-template-project
 First message:
 
 > Read `~/src/android-template-project/docs/ai-pipeline/HANDOFF.md` and run step 4 on this
-> project. The base branch is `…`, and the feature branch for the gate is `…`.
+> project. The base branch is `…`, and the feature branch for the gate is `…`. Keep every
+> pipeline file local to this laptop: nothing is committed or pushed in this repository.
 
 ## Part 4 — Your checkpoints during the session
 
@@ -94,13 +118,26 @@ Claude reads production's CI, build files and `CLAUDE.md`, and proposes producti
 Claude copies the pipeline from the `pipeline-v2.0.0` tag into production's working tree,
 uncommitted, so the files stay in place when you switch branches.
 
-- [ ] `git status` shows only new files under `.claude/` (`skills/`, `agents/`, `CHANGELOG.md`,
-      `PIPELINE_VERSION`, `pipeline.md`), and **no modified file**. If production already had a
-      `.claude/settings.json` or skills of its own, nothing of it was changed.
+- [ ] Right after the copy, `git status` shows only new (`??`) files under `.claude/` (`skills/`,
+      `agents/`, `CHANGELOG.md`, `PIPELINE_VERSION`, `pipeline.md`), and **no modified file**. If
+      production already had a `.claude/settings.json` or skills of its own, nothing of it changed.
+
+Then Claude adds those paths, and `docs/features/` for the optional spec and plan, to
+`.git/info/exclude`. That is git's ignore list that lives only in this clone; it is never committed
+or pushed. From then on, `git add -A` and Android Studio's commit dialog skip the files, and the
+skills still load, because Claude Code reads them from disk:
+
+```bash
+printf '%s\n' '.claude/skills/' '.claude/agents/' '.claude/pipeline.md' '.claude/CHANGELOG.md' '.claude/PIPELINE_VERSION' 'docs/features/' >> .git/info/exclude
+```
+
+(Leave out a line for any path production already tracks; see part 2.)
+
+- [ ] `git status` is now **clean**, with the pipeline files still on disk.
 
 ### 4.3 The gate on the feature branch
 
-Check out the feature branch you picked; the untracked `.claude/` files come along. Then:
+Check out the feature branch you picked; the excluded `.claude/` files come along. Then:
 
 > /pre-pr-checklist — feature name: `…`
 
@@ -108,7 +145,8 @@ Check out the feature branch you picked; the untracked `.claude/` files come alo
 (acceptance criteria) report that. That's fine. Look at the rest:
 
 - [ ] It diffed against the right base branch
-- [ ] The residue scan (Check 3) and git state (Check 4) make sense
+- [ ] The residue scan (Check 3) and git state (Check 4) make sense, and Check 4 does not report
+      the pipeline files (they are excluded)
 - [ ] The rule review (Check 5) quoted production's `CLAUDE.md`, not this template's
 - [ ] The pre-flight ran production's CI tasks and read the result correctly
 - [ ] Anything it did that only makes sense for the template (Konsist, `test/konsist`,
@@ -116,9 +154,21 @@ Check out the feature branch you picked; the untracked `.claude/` files come alo
 
 ### 4.4 Optional: the architect on a small real change
 
-Only if a small change is coming anyway. Start with `/product-owner` (it creates the feature branch
-and the spec), then `/architect`. Stop after the plan; don't build it. This is the stage most
-sensitive to wording, so it is worth one real run.
+Only if a small change is coming anyway. Start with `/product-owner` (it creates a local feature
+branch and the spec), then `/architect`. Stop after the plan; don't build it. This is the stage
+most sensitive to wording, so it is worth one real run.
+
+Both skills normally **commit** their SPEC.md and PLAN.md. Here they must not, so say it when you
+start each one:
+
+> /product-owner … — dry run: write SPEC.md, but do not commit it.
+
+> /architect … — dry run: write PLAN.md, but do not commit it.
+
+The files sit in `docs/features/`, which the exclude list hides. If a skill tries to commit
+them anyway, git refuses: it will not add an excluded path without `-f`.
+
+- [ ] Neither skill ran `git commit`, and `git status` is still clean
 
 - [ ] The plan's verification commands are production's, not `./gradlew :test:konsist:test`
 - [ ] The phases follow production's module structure
@@ -154,15 +204,20 @@ In the same session (it can see this repo), or a new one in this repo:
 
 - [ ] **Keep production's `pipeline.md`**: copy it somewhere safe outside the repo. It is needed again
       in step 6, when production installs the plugin and commits its config.
-- [ ] Delete the copied pipeline files from the working tree (only the ones the copy added):
+- [ ] Ask Claude to **remove exactly what the copy added**. The list is the tag's own files:
 
       ```bash
-      git status --short .claude
+      git -C ~/src/android-template-project ls-tree -r --name-only pipeline-v2.0.0 .claude
       ```
 
-      Remove each `??` path it lists. `git status` should then be clean.
-- [ ] Delete any branch the optional architect run created, unless the team wants to keep its
-      SPEC and PLAN.
+      plus `.claude/pipeline.md` and the optional run's `docs/features/{feature-name}/` folder.
+      Excluded files don't show in `git status`, so this list, not `git status`, says what to
+      delete. If `.claude/settings.local.json` did not exist before the session, it can go too; it
+      holds only this laptop's permission approvals.
+- [ ] **Remove the lines added to `.git/info/exclude`.** Leave any lines that were there before.
+- [ ] Delete any local branch the optional run created (`git branch -D …`). It was never pushed.
+- [ ] **Check nothing is left.** `git status` is clean. `git branch --list` and `git log --branches
+      --not --remotes --oneline` show what they showed in part 2.
 
 ## Done when
 
@@ -170,6 +225,7 @@ In the same session (it can see this repo), or a new one in this repo:
 - [ ] The gate (and optionally the architect) ran on production, and every finding is listed.
 - [ ] Every finding is fixed here or recorded as production's own gap.
 - [ ] `pipeline-v2.0.x` is tagged, and the suite still passes.
-- [ ] Production's working tree is clean.
+- [ ] Production is as it was: its working tree is clean, its branches and local commits match
+      part 2, and nothing was pushed to it.
 
 Next is step 5, packaging the plugin, in this repo. See the roadmap's §2.
