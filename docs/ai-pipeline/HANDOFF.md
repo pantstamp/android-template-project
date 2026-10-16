@@ -1,16 +1,68 @@
 # Handoff — after step 3 (project config), before step 4 (dry run on production)
 
-Written 2026-10-15. **Start the next session with:** *"Read docs/ai-pipeline/HANDOFF.md and
-continue."* Then read [`AI_PIPELINE_ROADMAP.md`](../AI_PIPELINE_ROADMAP.md) §1, §2 and §5.
+Written 2026-10-15, updated 2026-10-16. **Start the next session with:** *"Read
+docs/ai-pipeline/HANDOFF.md and continue."* If the production project is on another machine, see
+the next section for how to start instead. Then read
+[`AI_PIPELINE_ROADMAP.md`](../AI_PIPELINE_ROADMAP.md) §1, §2 and §5.
 
 ## Before you start
 
-- [ ] The step-3 PR (`chore/pipeline-split`) is merged, and `master` is tagged `pipeline-v2.0.0`
-  on the merge commit.
+- [x] The step-3 PR (#43) is merged, and `pipeline-v2.0.0` is tagged on the merge commit
+  (`8282a53`).
 - [ ] `git worktree list` shows only the main checkout, and `git branch | grep -- -eval-` is empty.
 - [ ] `claude --version` is 2.1.280 or newer, and `claude -p "reply with ok" --model claude-opus-5-5`
   answers.
-- [ ] The production Android project is cloned locally, and you know its base branch and CI.
+- [ ] The production Android project is cloned, and you know its base branch and CI.
+
+## Running step 4 on another laptop
+
+The production project may live on a different machine and in a different repository. That works:
+this repo is public, so the other machine can fetch everything step 4 needs. The session that wrote
+this file does not travel with it, so this file is the whole brief.
+
+**On that machine you need:**
+- Claude Code 2.1.280 or newer, logged in
+- the Android toolchain (JDK 21, the SDK), so the pre-flight can run
+- `gh` logged in with an account that can push to this repo, for the fixes
+
+**Set it up** with this repo cloned next to the production project, and one session that sees both:
+
+```bash
+git clone https://github.com/pantstamp/android-template-project.git ~/src/android-template-project
+```
+
+```bash
+cd ~/src/production-app && claude --add-dir ~/src/android-template-project
+```
+
+Then say: *"Read `~/src/android-template-project/docs/ai-pipeline/HANDOFF.md` and run step 4 on
+this project."* (Adjust both paths to where the projects actually are.)
+
+**How the steps change:**
+1. **Copy the pipeline from the tag**, not from this repo's `master`, onto a scratch branch in
+   production. Check first whether production already has a `.claude/` folder; the copy must not
+   overwrite anything of its own, such as a `settings.json`:
+
+   ```bash
+   git -C ~/src/android-template-project archive pipeline-v2.0.0 .claude | tar -x -C ~/src/production-app
+   ```
+2. **Write production's own `.claude/pipeline.md`** over the copied one, and show it to the user
+   before using it.
+3. **Fixes go to this repo**, as a branch and a PR from that machine. Releases are tagged here, as
+   before.
+4. **The golden scenarios run on either machine**: they need only this repo and the Android SDK.
+   Copy only the `sdk.dir` line into its `local.properties` (and the TMDB key, if the machine has
+   one).
+
+**Production code must not leak into this repo.** It is public. Everything written back here, from
+skill fixes to CHANGELOG lines, `RESULTS.md` notes and this file, describes the mechanism, never
+production's code:
+- **Fine:** "a project without an architecture-rule tool"
+- **Not fine:** production's class names, file paths, rules or snippets
+
+That is the retrospective's rule ("no feature names, file names"), and it matters more here because
+the code is not this repo's to publish. Confirm with the user that running Claude Code on
+production's code is allowed before starting.
 
 ## Where things stand
 
@@ -29,7 +81,7 @@ wording stay in the skill.
 
 ## What is left, in order
 
-1. **Step 4 — dry run on the production project** (roadmap §1):
+1. **Step 4 — dry run on the production project** (roadmap §1; on another machine, see above):
    - Write its `.claude/pipeline.md` from its CI workflow, build files and `CLAUDE.md`. Every name
      in this repo's table needs a value.
    - Copy `.claude/skills/` and `.claude/agents/` onto a scratch branch there. Run
