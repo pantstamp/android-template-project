@@ -50,11 +50,17 @@ this project."* (Adjust both paths to where the projects actually are.)
    ```bash
    git -C ~/src/android-template-project archive pipeline-v2.0.0 .claude | tar -x -C ~/src/production-app
    ```
-2. **Write production's own `.claude/pipeline.md`** over the copied one, and show it to the user
+2. **Keep it local.** Nothing from the pipeline is committed or pushed in production. Right after
+   the copy, add its paths and `docs/features/` to production's `.git/info/exclude` (local-only,
+   never committed), leaving out any path production already tracks. `/product-owner` and
+   `/architect`, if run, write SPEC.md and PLAN.md without committing them. At the end, remove
+   exactly what the copy added (the tag's `.claude` file list, `pipeline.md`, the optional
+   `docs/features/` folder) and the exclude lines. The guide's part 6 has the checks.
+3. **Write production's own `.claude/pipeline.md`** over the copied one, and show it to the user
    before using it.
-3. **Fixes go to this repo**, as a branch and a PR from that machine. Releases are tagged here, as
+4. **Fixes go to this repo**, as a branch and a PR from that machine. Releases are tagged here, as
    before.
-4. **The golden scenarios run on either machine**: they need only this repo and the Android SDK.
+5. **The golden scenarios run on either machine**: they need only this repo and the Android SDK.
    Copy only the `sdk.dir` line into its `local.properties` (and the TMDB key, if the machine has
    one).
 
@@ -88,10 +94,12 @@ wording stay in the skill.
 1. **Step 4 — dry run on the production project** (roadmap §1; on another machine, see above):
    - Write its `.claude/pipeline.md` from its CI workflow, build files and `CLAUDE.md`. Every name
      in this repo's table needs a value.
-   - Copy the pipeline from the `pipeline-v2.0.0` tag into its working tree, uncommitted. Run
+   - Copy the pipeline from the `pipeline-v2.0.0` tag into its working tree, uncommitted and listed
+     in its `.git/info/exclude`: nothing of the pipeline is committed or pushed there. Run
      `/pre-pr-checklist` on an existing feature branch. That branch has no SPEC.md or PLAN.md, so
      Checks 1 and 2 report that, which is expected; judge the rest. Optionally run
-     `/product-owner` then `/architect` on a small real change, stopping after the plan.
+     `/product-owner` then `/architect` on a small real change, stopping after the plan and
+     committing neither SPEC.md nor PLAN.md.
    - List every place a skill still assumes this template. Likely candidates:
      - Konsist (does production have an architecture-rule tool at all?)
      - the CLAUDE.md section names `{{rule-review}}` points to
