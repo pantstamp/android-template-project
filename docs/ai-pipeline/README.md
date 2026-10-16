@@ -1,7 +1,7 @@
 # Golden scenarios
 
-A suite that says whether a change to the pipeline (`.claude/skills/`, `.claude/agents/`, the
-pipeline sections of `CLAUDE.md`) made it worse. It is step 2 of
+A suite that says whether a change to the pipeline (`.claude/skills/`, `.claude/agents/`,
+`.claude/pipeline.md`, the pipeline sections of `CLAUDE.md`) made it worse. It is step 2 of
 [`AI_PIPELINE_ROADMAP.md`](../AI_PIPELINE_ROADMAP.md); §4 there is the brief.
 
 Each scenario replays a **historical snapshot whose outcome is already known**, with the
@@ -14,10 +14,10 @@ one scenario costs minutes and well over 100k tokens.
 
 | Decision | Choice | Why |
 |---|---|---|
-| Tooling | `eval.py`, a script around `claude -p` | `claude plugin eval` needs a newer CLI and a plugin manifest, runs each case in an empty workspace, and cannot answer a skill's questions mid-run. Revisit at roadmap step 4, when the skills are a plugin. |
+| Tooling | `eval.py`, a script around `claude -p` | `claude plugin eval` needs a newer CLI and a plugin manifest, runs each case in an empty workspace, and cannot answer a skill's questions mid-run. Revisit at roadmap step 5, when the skills are a plugin. |
 | Runs per scenario | 3 | Model output varies. 3 of 3 passes; 2 of 3 is `WARN`, a reason to look; less is `FAIL`. |
 | Order | gate → architect → developer → product owner | Cheapest and best-known baseline first; the architect next, because PR #32's defects started in the plan. |
-| Location | `scenarios/<name>/`, one folder each | Moves into the plugin repo at step 4. |
+| Location | `scenarios/<name>/`, one folder each | Stays in this repo; the plugin ships without it. |
 
 ## A scenario folder
 
@@ -42,7 +42,8 @@ Other `scenario.json` settings:
   They are deleted in that same commit. A seed or snapshot that tells the run what is being tested
   makes the result worthless. The first developer runs quoted the trap back from the plan's
   header.
-- **`done_when_committed`** (a file) or **`done_when_commits`** (a count): when a multi-turn
+- **`done_when_committed`** (a file) or **`done_when_subjects`** (a commit subject containing
+  each of these strings, such as the phase titles): when a multi-turn
   run has finished.
 - **`grade_file`** or **`grade_git`**: what the judge reads besides the dialogue. That is either
   one committed file, or the run's commits, diff and status.
@@ -91,11 +92,10 @@ the commit they were taken at.
 
 ## Status
 
-The official baseline was taken on 2026-10-12 through `eval.py`, 3 runs per scenario, and all
-four scenarios pass 3 of 3. Getting there took two harness fixes, which a developer re-run then
-confirmed, and one skill change, which a product owner re-run then confirmed. Each `RESULTS.md`
-has the details, newest first. Earlier entries there were taken in-session (subagents, with the
-orchestrating session as the user). Prefer the `eval.py` numbers.
+`pipeline-v2.0.0` (roadmap step 3, project facts in `.claude/pipeline.md`) passes 3 of 3 in all
+four scenarios, taken on 2026-10-15 at `32f5662`. Each `RESULTS.md` has the details, newest first,
+including the first attempt at step 3 that regressed two scenarios. Prefer the `eval.py` numbers
+over the in-session entries further down.
 
 Models are pinned: `--model` and `--judge-model` default to `claude-opus-5-5`, and `--user-model`
 to `claude-sonnet-5-5`. Every summary records the model that actually ran. Results taken with a
@@ -103,10 +103,21 @@ different model are not comparable.
 
 | # | Scenario | Folder | State |
 |---|---|---|---|
-| 1 | Gate | [`gate-movie-search`](scenarios/gate-movie-search/) | PASS, 3 of 3 (`eval.py`, 2026-10-12) |
-| 2 | Architect | [`architect-movie-search`](scenarios/architect-movie-search/) | PASS, 3 of 3 (`eval.py`, 2026-10-12) |
-| 3 | Developer | [`developer-dry-run`](scenarios/developer-dry-run/) | PASS, 3 of 3 (`eval.py`, 2026-10-12) |
-| 4 | Product owner | [`product-owner-movie-search`](scenarios/product-owner-movie-search/) | PASS, 3 of 3 (`eval.py`, 2026-10-12) |
+| 1 | Gate | [`gate-movie-search`](scenarios/gate-movie-search/) | PASS, 3 of 3 on a re-run (`2.0.0`, 2026-10-15) |
+| 2 | Architect | [`architect-movie-search`](scenarios/architect-movie-search/) | PASS, 3 of 3 (`2.0.0`, 2026-10-15) |
+| 3 | Developer | [`developer-dry-run`](scenarios/developer-dry-run/) | PASS, 3 of 3 (`2.0.0`, 2026-10-15) |
+| 4 | Product owner | [`product-owner-movie-search`](scenarios/product-owner-movie-search/) | PASS, 3 of 3 on a re-run (`2.0.0`, 2026-10-15) |
+
+**When a scenario drops below 3 of 3, compare with the previous release the same day** before
+changing a skill. Model behaviour drifts, and one failing run in three is common for P6 and F5:
+
+```bash
+git worktree add --detach <scratch>/prev pipeline-vX.Y.Z
+grep '^sdk.dir' local.properties > <scratch>/prev/local.properties   # Gradle needs the SDK path
+python3 <scratch>/prev/docs/ai-pipeline/eval.py run <scenario>
+```
+
+The comparison then runs with that release's skills and harness. Remove the worktree afterwards.
 
 A scenario that declares `answers` is multi-turn. `eval.py` starts a session, then loops: the
 skill's last message and the dialogue so far go to a second model (`--user-model`, default

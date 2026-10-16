@@ -18,10 +18,16 @@ it generously; the agent starts with no account of what was built and only reads
 is read-only, so it reports problems and cannot fix its way to GO. This skill runs it, shows
 the result, and handles everything that needs the user.
 
+## Pipeline context
+
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
+stands for that name's value in its table. If a value this skill uses is missing there, stop and tell the user which; do not
+guess it.
+
 ## Inputs
 
-- **Feature name** — locates `docs/features/{feature-name}/`. If not given, infer it from the
-  branch name (`feature/user-profiles` → `user-profiles`) and confirm.
+- **Feature name** — locates `{{feature-docs}}/`. If not given, infer it from the
+  branch name (`{{feat-prefix}}user-profiles` → `user-profiles`) and confirm.
 
 ## Workflow
 
@@ -45,8 +51,8 @@ item, say so separately and say why.
 - **NO GO** → show the errors and offer fixes within the limits below.
 
 Limits on fixes:
-- **Spotless** — run `./gradlew spotlessApply`. The only failure that needs no judgment call.
-- **Konsist** — fix the code to match the rule. Changing a rule is a conversation with the user,
+- **{{formatter}}** — run `{{format-fix}}`. The only failure that needs no judgment call.
+- **{{architecture-rules}}** — fix the code to match the rule. Changing a rule is a conversation with the user,
   not a silent edit.
 - **Lint** (`warningsAsErrors`) — fix the cause. No baseline or suppression without asking.
 

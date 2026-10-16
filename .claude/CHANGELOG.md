@@ -1,12 +1,33 @@
 # Pipeline CHANGELOG
 
-One version for the whole pipeline: `.claude/skills/`, `.claude/agents/` and the pipeline
-sections of `CLAUDE.md`. Each release is tagged `pipeline-vX.Y.Z` and passes the golden scenarios
-in `docs/ai-pipeline/` first. How to version and release: [`skills/README.md`](skills/README.md#versions).
+One version for the whole pipeline: `.claude/skills/`, `.claude/agents/`, the shape of
+`.claude/pipeline.md` and the pipeline sections of `CLAUDE.md`. Each release is tagged
+`pipeline-vX.Y.Z` and passes the golden scenarios in `docs/ai-pipeline/` first. How to version and release: [`skills/README.md`](skills/README.md#versions).
 
 Entries are grouped by stage and say what changed and why.
 
 ## Unreleased
+
+## 2.0.0 — 2026-10-15
+
+All four golden scenarios pass 3 of 3 through `eval.py` on `claude-opus-5-5`, at `32f5662`. The
+gate and product owner each needed a re-run after one failing run on a criterion with a history
+of occasional misses (F5, P6); `pipeline-v1.1.0` was compared the same day.
+
+### All stages
+- **Project facts moved into `.claude/pipeline.md`.** The base branch and branch prefixes, the
+  feature docs path, hosting, the pre-flight, format-fix and verification commands, the
+  architecture-rule tool and where its rules live, the CLAUDE.md sections the rule review reads,
+  and the review mechanism. Skills and agents name each one in double braces (`{{base}}`,
+  `{{pre-flight}}`) and stop when a value is missing instead of guessing. Everything else keeps
+  its 1.1.0 wording, the Android knowledge included. This is roadmap step 3: another Android
+  project adopts the pipeline by writing its own `pipeline.md`, not by editing skills.
+  Breaking: a project without `.claude/pipeline.md` cannot run any stage.
+- **The pre-flight command is held once**, in the config. The gate agent and `AI_WORKFLOW.md`
+  each had their own copy of `build.yml`'s task list.
+- **Not done: a platform profile.** Moving the Android knowledge into one, or rewording it,
+  regressed the product owner (6 of 9) and the architect (3 of 6) while 1.1.0, re-run the same
+  day, passed 3 of 3. Deferred to the Flutter step; see the roadmap's §5.
 
 ## 1.1.0 — 2026-10-13
 

@@ -3,7 +3,7 @@ name: retrospective
 description: >
   Runs a post-merge retrospective for a feature's pull request: reads the review comments, the
   diff, the fix commits, SPEC.md and PLAN.md, writes a RETRO.md comparing against earlier
-  retros, and routes each lesson to CLAUDE.md, a Konsist or lint rule, a skill, or the review
+  retros, and routes each lesson to CLAUDE.md, an architecture or lint rule, a skill, or the review
   prompt. Use after a
   PR is merged when the user asks for a retro, retrospective, lessons learned, or to turn
   review findings into project rules.
@@ -14,9 +14,15 @@ description: >
 Mistakes repeat unless something changes. This turns a merged PR's review findings into
 durable changes — project rules, mechanical checks, or process — and records what happened.
 
+## Pipeline context
+
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
+stands for that name's value in its table. If a value this skill uses is missing there, stop and tell the user which; do not
+guess it.
+
 ## Inputs
 
-- **Feature name** — locates `docs/features/{feature-name}/`
+- **Feature name** — locates `{{feature-docs}}/`
 - **PR number**
 
 If not given, infer from the branch or ask.
@@ -28,8 +34,8 @@ If not given, infer from the branch or ask.
 The feature branch is merged, so work on a new one:
 
 ```bash
-git checkout master && git pull --ff-only
-git checkout -b docs/{feature-name}-retro
+git checkout {{base}} && git pull --ff-only
+git checkout -b {{retro-prefix}}{feature-name}-retro
 ```
 
 ### 2. Gather
@@ -43,7 +49,7 @@ git checkout -b docs/{feature-name}-retro
   last commit was merged unaddressed
 - SPEC.md and PLAN.md, and the `pipeline:` version in PLAN.md's header: the release that
   built the feature. A plan written before versioning has none; write `unstamped`
-- Earlier `docs/features/*/RETRO.md` — for the comparison and for repeats
+- Earlier features' `RETRO.md` (in their `{{feature-docs}}`) — for the comparison and for repeats
 - **Ask the user** what they found outside review (manual testing, Android Studio, lint or CI
   failures during implementation)
 
@@ -66,20 +72,20 @@ For every lesson, pick exactly one destination:
 | The lesson is… | It goes in… |
 |---|---|
 | A rule about the code | **CLAUDE.md** — the rule plus a one-line reason |
-| Mechanically checkable | **A Konsist or lint rule** — prose gets violated, a rule can't be |
+| Mechanically checkable | **A {{architecture-rules}} rule (in `{{architecture-rules-home}}`) or a lint rule** — prose gets violated, a rule can't be |
 | About how a pipeline stage works | **The skill** — as a general process step |
-| Something the automated reviewer should check | **The review prompt** in `.github/workflows/claude-review.yml` |
+| Something the automated reviewer should check | **The review prompt** in `{{review-prompt}}` |
 | What happened and why | **RETRO.md only** |
 
 **Test for anything going into CLAUDE.md, a skill or the review prompt: would it still be true and useful if this
 feature had never existed?** If not, it is history — keep it in RETRO.md. Write rules as the
 mechanism ("a condition that treats `null` and empty alike needs a test for each"), never as
 the incident ("in feature X, phase 2 missed…"): no feature names, phase numbers, file names or
-counts. A new Konsist or lint rule must be shown to fail on the code that prompted it.
+counts. A new {{architecture-rules}} or lint rule must be shown to fail on the code that prompted it.
 
 ### 5. Write RETRO.md
 
-Save to `docs/features/{feature-name}/RETRO.md`:
+Save to `{{feature-docs}}/RETRO.md`:
 
 ```markdown
 # Retrospective: {Feature Name}
@@ -106,7 +112,7 @@ Per finding: issue · file · root cause (and which stage introduced it) · fix 
 
 ## Recommended changes
 ### CLAUDE.md
-### Konsist / lint
+### {{architecture-rules}} / lint
 ### Skills
 ### Review prompt
 Ready-to-paste text, each passing the test in step 4.

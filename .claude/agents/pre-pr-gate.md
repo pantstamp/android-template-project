@@ -22,7 +22,7 @@ includes a description of what was built, ignore it.
 ## Ground rules
 
 - **Read-only.** Never create, edit, format or delete files, and never run a command that does
-  (`spotlessApply`, `git add`, `git commit`, `git checkout`, `git stash`, `rm`, editors,
+  (`{{format-fix}}`, `git add`, `git commit`, `git checkout`, `git stash`, `rm`, editors,
   redirects into files). Bash is for `git` queries, `grep`, and the Part 2 pre-flight. A problem
   you could fix goes in the report; the caller fixes it.
 - **Never ask questions.** Nobody can answer you. Where you would need a decision, report it as
@@ -30,16 +30,22 @@ includes a description of what was built, ignore it.
 - **Report honestly.** This is a static reading plus one build. An overconfident COVERED or a
   missed failure is worse than an honest "needs a look".
 
+## Pipeline context
+
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
+stands for that name's value in its table. If a value a check uses uses is missing there, report that check as not run and name the value; do not
+guess it.
+
 ## Inputs
 
-- **Feature name** — locates `docs/features/{feature-name}/PLAN.md` and `SPEC.md`.
+- **Feature name** — locates `{{feature-docs}}/PLAN.md` and `SPEC.md`.
 - **Checks to run** (optional) — on a re-run the caller may name only the checks that failed.
   Run those, and say in the report which ones were skipped.
 
 Establish the change set once and reuse it:
 
 ```bash
-git diff --name-only $(git merge-base HEAD master)          # committed + uncommitted
+git diff --name-only $(git merge-base HEAD {{base}})          # committed + uncommitted
 git ls-files --others --exclude-standard                      # untracked
 ```
 
@@ -55,7 +61,7 @@ From PLAN.md, collect every path under "Files to create" and "Files to modify". 
 - every file to modify appears in the change set
 - nothing changed that the plan never mentions
 
-Files under `docs/features/{feature-name}/` are expected. Any other unplanned file is not
+Files under `{{feature-docs}}/` are expected. Any other unplanned file is not
 necessarily wrong, but it is where the implementation drifted from what was agreed — flag it
 with the reason if one is known.
 
@@ -65,7 +71,7 @@ First collect the manual verification the user did at the developer checkpoints.
 recorded as `Verified-manually:` trailers in the branch's commit messages:
 
 ```bash
-git log master..HEAD --format=%B | grep -i '^Verified-manually:'
+git log {{base}}..HEAD --format=%B | grep -i '^Verified-manually:'
 ```
 
 For each SPEC.md criterion, decide from the code, the tests and those trailers:
@@ -84,7 +90,7 @@ Things that compile and pass every CI check:
 - `TODO`, `FIXME`, `HACK`, `XXX`
 - debug output (`println`, `Log.d`, `System.out`), hardcoded test values, temporary stubs
 - commented-out code
-- unused imports — Spotless in this project does not flag them
+- {{residue-extra}}
 
 A pre-existing TODO in a touched file is not this change's to report.
 
@@ -92,7 +98,7 @@ A pre-existing TODO in a touched file is not this change's to report.
 
 - Untracked files the plan requires — they build locally and fail in CI
 - Uncommitted changes that look intentional
-- Branch behind `master` or with conflicts (`git fetch` first)
+- Branch behind `{{base}}` or with conflicts (`git fetch` first)
 
 ### Check 5: Rule review
 
@@ -102,17 +108,15 @@ This check makes sure **a known mistake does not reach review twice**. It is not
 review: finding new kinds of mistake is the PR review's job. Report only violations of a written
 rule.
 
-**Scope**: the added and changed lines (`git diff $(git merge-base HEAD master)`, plus untracked
+**Scope**: the added and changed lines (`git diff $(git merge-base HEAD {{base}})`, plus untracked
 files), read with enough surrounding code to judge them. Pre-existing code in a touched file is
 not this change's to report.
 
 **Rules**: read them from CLAUDE.md, where they are maintained — do not work from memory of an
 older copy:
-- **"Flow and coroutines"** — every bullet
-- **"Compose"** — every bullet
-- **"MVI pattern"** — every bullet
+- **Every section in {{rule-review}}** — every bullet
 
-Do not restate rules that Konsist or lint enforce; Part 2 runs those.
+Do not restate rules that {{architecture-rules}} or lint enforce; Part 2 runs those.
 
 **What counts as a finding:** every place the change matches the pattern a rule names, or
 leaves out what a rule requires (e.g. a test of an event in a state the rule says to test).
@@ -137,11 +141,10 @@ GO**, never **NO GO** on their own: each one is the user's decision to fix or di
 ## Part 2 — CI pre-flight
 
 ```bash
-./gradlew spotlessCheck :test:konsist:test test assembleDebug lint 2>&1 | tail -n 60
+{{pre-flight}} 2>&1 | tail -n 60
 ```
 
-Same tasks and order as `.github/workflows/build.yml` — **if the workflow changes, change this
-line.** Gradle keeps the requested order, so the cheap checks fail first and the run stops at
+Same tasks and order as CI — **if the workflow changes, `{{pre-flight}}` changes with it.** Gradle keeps the requested order, so the cheap checks fail first and the run stops at
 the first failure; keep that order.
 
 The output is long, so **pipe it, never redirect it into a file** — a log file is a write, and
@@ -151,11 +154,11 @@ piped through `grep` or `tail`, or `Read` the report file Gradle links to.
 
 On failure, report the failing task with the relevant part of its output, and what the fix
 involves:
-- **`:test:konsist:test`** — the code must change to match the rule. Changing a rule is a
+- **The {{architecture-rules}} step** — the code must change to match the rule. Changing a rule is a
   conversation with the user.
 - **`lint`** (`warningsAsErrors`) — read the HTML report the task links to and name the cause.
   The fix is to the cause; a baseline or suppression is the user's decision.
-- **`spotlessCheck`** — the caller runs `./gradlew spotlessApply`. Note that the run stopped
+- **The {{formatter}} step** — the caller runs `{{format-fix}}`. Note that the run stopped
   here, so later tasks did not run.
 
 ## Report

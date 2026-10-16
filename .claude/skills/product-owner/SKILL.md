@@ -12,6 +12,12 @@ description: >
 Runs a requirements interview and produces a SPEC.md. Ambiguities are cheapest to resolve
 here, before a plan or code depends on them.
 
+## Pipeline context
+
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
+stands for that name's value in its table. If a value this skill uses is missing there, stop and tell the user which; do not
+guess it.
+
 ## Inputs
 
 - **Raw requirements** — free-form text, or a **GitHub issue** number
@@ -29,8 +35,8 @@ PLAN.md are committed rather than left untracked in whatever checkout happens to
 
 ```bash
 git status --porcelain          # must be empty
-git checkout master && git pull --ff-only
-git checkout -b {prefix}/{feature-name}   # prefix: feature for feat, fix for fix
+git checkout {{base}} && git pull --ff-only
+git checkout -b {prefix}{feature-name}    # {{feat-prefix}} for feat, {{fix-prefix}} for fix
 ```
 
 If the working tree is dirty or another branch has unmerged work, stop and ask instead of
@@ -40,7 +46,7 @@ on it.
 ### 2. Read context
 
 - `CLAUDE.md` — conventions and constraints that affect feasibility
-- Existing specs in `docs/features/` — avoid contradicting them
+- Existing specs in other features' `{{feature-docs}}` — avoid contradicting them
 - **If the input is a GitHub issue**: `gh issue view {n} --comments`. Then read the code the
   issue names and **verify its root-cause claims**. Issues describe symptoms well and causes
   partially; the code usually shows more causes than the issue lists, and each one is a
@@ -79,7 +85,7 @@ Cover what applies:
 
 ### 5. Write and commit SPEC.md
 
-Save to `docs/features/{feature-name}/SPEC.md`:
+Save to `{{feature-docs}}/SPEC.md`:
 
 ```markdown
 # Feature: {Feature Name}
@@ -114,7 +120,7 @@ pipeline produced it.
 Ask the user to review it. Apply requested changes. Once they approve, commit it:
 
 ```bash
-git add docs/features/{feature-name}/SPEC.md
+git add {{feature-docs}}/SPEC.md
 git commit -m "docs({feature-name}): add spec"
 ```
 
@@ -124,7 +130,7 @@ Do not push; the developer stage pushes the branch with the PR.
 
 **User:** "Users should be able to mark movies as watched and see them in a new tab."
 
-1. Confirm name and type: `watched-movies`, `feat` → branch `feature/watched-movies`
+1. Confirm name and type: `watched-movies`, `feat` → branch `{{feat-prefix}}watched-movies`
 2. Read CLAUDE.md and existing specs
 3. Ask: "Can a rating be changed later from the Watched tab, or is it read-only there?"
 4. Continue one topic at a time until the gaps are covered

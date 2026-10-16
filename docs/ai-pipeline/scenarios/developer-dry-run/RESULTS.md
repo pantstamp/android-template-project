@@ -2,6 +2,23 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-15 — step 3, project facts in `.claude/pipeline.md`, at `32f5662` (3 runs)
+
+**PASS: 3 of 3 runs passed every required criterion**, on `claude-opus-5-5`, with no denials. B1
+failed in every run, as it always has.
+
+| Run | Duration | Exchanges | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|---|
+| 1 | 265 s | 7 | 31 | 8,076 | $6.60 | 0 |
+| 2 | 268 s | 6 | 40 | 10,087 | $5.16 | 0 |
+| 3 | 259 s | 5 | 40 | 8,907 | $4.30 | 0 |
+
+**The harness's stop condition changed on 2026-10-14.** A run used to end after three commits.
+In two runs of the first step-3 attempt the developer read ahead, raised the Phase 3 conflict
+early (which D3 accepts), and committed the PLAN.md change on its own; the third commit ended
+those runs before Phase 3 was approved, failing D5 and D6. `done_when_subjects` now waits for a
+commit naming each phase. With it, that attempt passed 3 of 3. No run in this batch read ahead.
+
 ## 2026-10-12 — official `eval.py` baseline, at `7acd123` plus the harness fixes on `chore/golden-baseline` (3 runs)
 
 **PASS: 3 of 3 runs passed every required criterion**, on `claude-opus-5-5`, with no denials.

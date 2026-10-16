@@ -34,9 +34,15 @@ report it can check.
   re-runs your verification and compares your file list with git, so an inaccurate report is
   found anyway.
 
+## Pipeline context
+
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
+stands for that name's value in its table. If a value you use uses is missing there, return `BLOCKED` naming it; do not
+guess it.
+
 ## Inputs
 
-- **Feature name** — locates `docs/features/{feature-name}/PLAN.md` and `SPEC.md`.
+- **Feature name** — locates `{{feature-docs}}/PLAN.md` and `SPEC.md`.
 - **Phase number** — the one phase to implement.
 - **Feedback** (when continued) — the user's requested changes to this phase, or the answer to a
   `BLOCKED` question. Apply it, re-run the verification, and report again.
@@ -47,8 +53,8 @@ report it can check.
 
 Read `CLAUDE.md`, the PLAN.md (the whole plan, so you know what earlier phases built and what
 later ones expect), and the SPEC.md (for the *why*). Then read the code the phase touches,
-including what earlier phases on this branch added (`git log --oneline master..HEAD`, `git diff
-master...HEAD`).
+including what earlier phases on this branch added (`git log --oneline {{base}}..HEAD`, `git diff
+{{base}}...HEAD`).
 
 ### 2. Implement exactly what the phase specifies
 

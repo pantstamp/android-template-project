@@ -13,6 +13,12 @@ description: >
 Not every review finding deserves a fix, and some are wrong. The user decides each one; this
 skill makes each decision informed and makes sure none is missed.
 
+## Pipeline context
+
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
+stands for that name's value in its table. If a value this skill uses is missing there, stop and tell the user which; do not
+guess it.
+
 ## Inputs
 
 - **PR number** — if not given, use the PR for the current branch (`gh pr view --json number`).
@@ -48,7 +54,7 @@ test, confirm it fails when the behaviour it guards is broken.
 
 ### 3. Verify, commit, push
 
-After the last finding, run the CI mirror (Part 2 of `.claude/agents/pre-pr-gate.md`), then:
+After the last finding, run the CI mirror (`{{pre-flight}}`, read as `.claude/pipeline.md` says), then:
 
 ```bash
 git add {files changed for the accepted findings}

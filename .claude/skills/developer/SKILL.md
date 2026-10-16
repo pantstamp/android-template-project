@@ -13,9 +13,15 @@ Implements a feature by following its PLAN.md phase by phase, with a human check
 each one. A defect caught right after the phase that introduced it is far cheaper than one
 found under the phases built on top of it.
 
+## Pipeline context
+
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
+stands for that name's value in its table. If a value this skill uses is missing there, stop and tell the user which; do not
+guess it.
+
 ## Inputs
 
-- **Feature name** — locates `docs/features/{feature-name}/PLAN.md`. If not given, use the
+- **Feature name** — locates `{{feature-docs}}/PLAN.md`. If not given, use the
   most recent PLAN.md and confirm.
 - **Starting phase** (optional) — when resuming.
 
@@ -29,12 +35,12 @@ The product-owner and architect stages created the branch and committed SPEC.md 
 on it. Check it out:
 
 ```bash
-git checkout {prefix}/{feature-name}     # feature/… or fix/…
+git checkout {prefix}{feature-name}      # {{feat-prefix}}… or {{fix-prefix}}…
 ```
 
-If no such branch exists (earlier stages were skipped), create it from an up-to-date `master`
+If no such branch exists (earlier stages were skipped), create it from an up-to-date `{{base}}`
 with the prefix matching the change type. Tell the user the branch and the phase you're
-starting from. When resuming, `git log --oneline master..HEAD` shows which phases are done.
+starting from. When resuming, `git log --oneline {{base}}..HEAD` shows which phases are done.
 
 ### 2. For each phase
 
@@ -97,7 +103,7 @@ Per-phase commits give each checkpoint a rollback point, let a resumed session s
 ### 3. Resuming
 
 PLAN.md is self-contained and every approved phase is a commit, so a new session resumes from
-the branch: `git log --oneline master..HEAD` shows which phases are done. Uncommitted changes in
+the branch: `git log --oneline {{base}}..HEAD` shows which phases are done. Uncommitted changes in
 the working tree are a phase that was never approved — show them to the user before spawning
 the next agent.
 
@@ -110,16 +116,15 @@ hand off to the **pre-pr-checklist** skill.
 
 ### 5. Create the PR
 
-- **If the gate was skipped**, run its Part 2 pre-flight command (in
-  `.claude/agents/pre-pr-gate.md`) first. It mirrors CI; skipping the gate should not mean pushing a branch CI rejects.
-- **Always** run `./gradlew spotlessApply` and commit any files it reformatted.
+- **If the gate was skipped**, run its Part 2 pre-flight command (`{{pre-flight}}`) first. It mirrors CI; skipping the gate should not mean pushing a branch CI rejects.
+- **Always** run `{{format-fix}}` and commit any files it reformatted.
 
 Then push and open the PR. Use the plan's phase titles as the structure of the description,
 not a fixed list of layers:
 
 ```bash
-git push -u origin {prefix}/{feature-name}
-gh pr create --base master --title "{type}: {title}" --body "$(cat <<'EOF'
+git push -u origin {prefix}{feature-name}
+gh pr create --base {{base}} --title "{type}: {title}" --body "$(cat <<'EOF'
 ## Summary
 {What this PR does and why. For a fix, the root cause. "Fixes #{issue}" if there is one.}
 
@@ -133,8 +138,8 @@ gh pr create --base master --title "{type}: {title}" --body "$(cat <<'EOF'
 - {tests added and what they cover; anything verified manually}
 
 ## References
-- Spec: `docs/features/{feature-name}/SPEC.md`
-- Plan: `docs/features/{feature-name}/PLAN.md`
+- Spec: `{{feature-docs}}/SPEC.md`
+- Plan: `{{feature-docs}}/PLAN.md`
 
 ## Checklist
 - [ ] Code review
@@ -144,8 +149,7 @@ EOF
 )"
 ```
 
-Do not merge. Tell the user the PR link, that a review is requested by commenting
-`@claude-review` on the PR, and that the **review-triage** skill walks through the findings.
+Do not merge. Tell the user the PR link, that a review is requested with: {{review}}; and that the **review-triage** skill walks through the findings.
 
 ## Key principles
 

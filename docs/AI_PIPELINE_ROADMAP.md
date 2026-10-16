@@ -1,129 +1,116 @@
 # AI pipeline roadmap — from this project to a reusable package
 
-Status: **step 1 done** (PR #35, [`docs/features/agent-pipeline/IMPROVEMENTS.md`](features/agent-pipeline/IMPROVEMENTS.md)).
-**Step 2 is in progress**; its brief is [§4](#4-step-2-brief--golden-scenarios), and the suite
-lives in [`docs/ai-pipeline/`](ai-pipeline/README.md). The open decisions are settled there;
-all four scenarios are runnable and have baselines. Before step 3, run `eval.py` end to end
-from a logged-in terminal once; the baselines were taken in-session.
+Status: steps 1–3 done; step 3 is `pipeline-v2.0.0`. **Next: step 4**, the dry run on the
+production project; the next session's brief is [`docs/ai-pipeline/HANDOFF.md`](ai-pipeline/HANDOFF.md). Re-planned on
+2026-10-15 after a first attempt at a platform split regressed two stages (see §5).
 
-**Continuing step 2:** read [`docs/ai-pipeline/HANDOFF.md`](ai-pipeline/HANDOFF.md) first. It
-lists what is left and how to resume.
+**Starting a new session on this roadmap:** read this file, then `CLAUDE.md`,
+`docs/AI_WORKFLOW.md`, `.claude/skills/README.md` and the HANDOFF.
 
-**Starting a new session on this roadmap:**
-- Read this file, then `CLAUDE.md`, `docs/AI_WORKFLOW.md` and `.claude/skills/README.md`.
-- For step 2, say: *"Read docs/AI_PIPELINE_ROADMAP.md and start step 2."* §4 is written to be
-  enough on its own; start with its open decisions.
+The pipeline (`.claude/skills/`, guide in [`AI_WORKFLOW.md`](AI_WORKFLOW.md)) was built for this
+Android project. The goals, in order:
 
-The pipeline (`.claude/skills/`, guide in [`AI_WORKFLOW.md`](AI_WORKFLOW.md)) was built for
-this Android project. This roadmap covers three goals:
+1. **Use it on a second, production Android project**, installed and pinned to a version, with
+   updates taken when that project chooses.
+2. **Use it on a Flutter project**, once one adopts it.
+3. **Detect a change that makes it worse, and roll it back** (§3), at every step.
 
-1. Separating the generic process from platform and project context.
-2. Packaging the pipeline so other codebases (Android, Flutter, iOS or other platforms) can install it.
-3. Versioning it, so a change that makes it worse can be detected and rolled back.
+This repo stays where the pipeline is developed and tested; the production project consumes
+released versions.
 
 ## Order
 
-1. ✅ **Finish the agent improvements** in `IMPROVEMENTS.md`, in this repo. Merged in PR #35.
-2. ✅ **Write golden scenarios before refactoring** (brief in §4). They are the safety net for step 3.
-   All four pass 3 of 3 through `eval.py`; see `docs/ai-pipeline/`.
-3. **Split the layers inside this repo**: generic skills, project config, Android profile. Re-run
-   the scenarios; Android must not get worse.
-4. **Extract to a plugin and marketplace** with semver, and pin this repo to `v1.0.0`.
-5. **Write a second profile** when a real Flutter or iOS project adopts it, not before. With
-   one platform you can't yet tell what is really generic; the second one shows you.
+1. ✅ **Finish the agent improvements** in `IMPROVEMENTS.md`. Merged in PR #35.
+2. ✅ **Golden scenarios** (§4, suite in [`docs/ai-pipeline/`](ai-pipeline/README.md)). The
+   safety net for every step below. All four pass 3 of 3 on `pipeline-v1.1.0`.
+3. ✅ **Project config** (§1): move the facts that differ between Android projects into
+   `.claude/pipeline.md`. The Android knowledge stays in the skills, word for word. Release as
+   `pipeline-v2.0.0`.
+4. **Dry run on the production project** (§1): write its `pipeline.md`, run the gate on an existing
+   branch there, and fix in this repo every place a skill still assumes this template.
+5. **Package as a plugin** (§2), in this repo, and switch this repo and the suite to it. Release as
+   `pipeline-v3.0.0` (the command and agent names change).
+6. **Install on the production project** (§2), pinned to the tag, and take one real feature
+   through the whole pipeline, retro included.
+7. **Flutter**, when a real Flutter project adopts it (§5). Not before: with one platform you
+   cannot tell what is generic, and the first attempt to guess cost two regressions.
+
+**Every release passes the suite**, and wherever a scenario drops below 3 of 3, it is compared with
+the previous release **run the same day**: model behaviour drifts, so an old baseline is not proof.
 
 ---
 
-## 1. Generic process vs platform and project context
+## 1. Project config (steps 3 and 4)
 
-The process (interview → outline gate → phased plan → checkpoints → gate → triage → retro) is
-already generic. The specific context sits in a known set of places:
+Another Android project shares all of this one's platform knowledge: lifecycle and process death,
+previews, lint, Compose and Flow pitfalls. What differs are facts, and only those move to
+`.claude/pipeline.md`:
 
-| What | Examples in the skills today | Layer |
-|---|---|---|
-| Commands | `./gradlew spotlessCheck :test:konsist:test test assembleDebug lint`, `spotlessApply`, the per-phase verification template | Project |
-| Git and hosting | the `master` base branch, `feature/`/`fix/` prefixes, `gh` and the GitHub API, `@claude-review` | Project |
-| Paths | `docs/features/{name}/` | Project |
-| Enforcement tools | "a Konsist or lint rule" in retro routing, `warningsAsErrors` handling | Platform + project |
-| Interview concerns | offline, lifecycle (rotation, process death), permissions, deep links | Platform |
-| Plan checklist | `@Preview` per visual state, a resource added in the phase that first uses it, Room/Retrofit/Compose types leaking into modules | Platform |
-| Residue patterns | `Log.d`, `println` | Platform |
-| Rule review (gate Check 5) | CLAUDE.md's Flow, Compose and MVI sections | Project |
-
-### Three layers
-
-```
-generic pipeline        → process: stages, checkpoints, gates, templates, routing rules
-  + platform profile    → profiles/android.md, flutter.md, ios.md
-  + project config      → .claude/pipeline.md in each repo, plus that repo's CLAUDE.md
-```
-
-- **Generic skills** describe *what* happens at each step and name an **extension point**
-  wherever context is needed:
-  - "run the **preflight** command from the pipeline config", not a gradle line
-  - "cover the **platform concerns** from the profile", not an Android list
-- **Platform profile**: a reference file per platform, holding:
-  - interview concerns: Android process death ↔ iOS backgrounding and state restoration ↔
-    Flutter widget lifecycle
-  - plan checklist items: Compose previews ↔ SwiftUI previews ↔ golden tests
-  - residue patterns: `Log.d` ↔ `print`/`NSLog` ↔ `debugPrint`
-  - enforcement tools to suggest: Konsist ↔ SwiftLint custom rules ↔ `custom_lint`/`dart analyze`
-- **Project config**: `.claude/pipeline.md`, holding:
-  - base branch, branch prefixes and docs path
-  - commands: preflight, format-fix, per-module test template, UI check
-  - review mechanism
-  - enforcement destinations (e.g. "architecture rules → `test/konsist`")
-  - the CLAUDE.md sections the gate's rule review reads
-
-  CLAUDE.md stays the project's coding rules; the config only says where things are.
-
-### Rules that keep the generic pipeline from being worse
-
-1. **Missing context is an error, not a fallback.** Every extension point is required. If
-   `preflight` is not defined, the gate stops and says so instead of guessing a command.
-2. **`/pipeline-init` bootstraps the config.** It reads the CI workflow, build files and
-   CLAUDE.md, proposes a config, and the user approves it.
-3. **Commands come from CI where possible.** The preflight command is currently written in three
-   places (`build.yml`, `AI_WORKFLOW.md`, the gate agent). Hold it once.
-4. **Profiles are allowed to be rich.** "Generic" applies to the process, not the knowledge; the
-   Android profile keeps everything the skills know today.
-5. **This repo is the reference consumer.** The golden scenarios must pass at least as well after
-   the split as before it.
-
-## 2. Packaging
-
-**A Claude Code plugin**, distributed through a **marketplace** (a git repo such as
-`pantstamp/ai-pipeline` with `.claude-plugin/marketplace.json`).
-
-- The plugin holds `skills/`, `agents/`, templates and `profiles/`, under a
-  `.claude-plugin/plugin.json` manifest.
-- **Installing:**
-  - `/plugin marketplace add …` then `/plugin install …`, or
-  - better for a project: declare the marketplace and the enabled plugin in the project's
-    committed `.claude/settings.json`, so anyone opening the repo is prompted to install it.
-- **Local development:** `claude --plugin-dir ../ai-pipeline` loads a working copy without
-  publishing.
-- **Note:** plugin skills are namespaced (e.g. `/ai-pipeline:architect`); the docs must use
-  those names.
-
-| In the plugin (shared) | In each project (owned by it) |
+| Fact | This repo |
 |---|---|
-| generic skills and agents | `.claude/pipeline.md` |
-| `PLAN_TEMPLATE.md`, `REPORT_FORMAT.md` | `CLAUDE.md` |
-| platform profiles | `docs/features/*` (SPEC, PLAN, RETRO) |
-| `/pipeline-init` | CI and review workflows |
-| a template for the review workflow | enforcement code (Konsist, lint, …) |
+| Base branch, branch prefixes | `master`; `feature/`, `fix/`, `docs/` |
+| Feature docs path | `docs/features/{feature-name}/` |
+| Hosting | GitHub, `gh` |
+| Pre-flight (mirrors CI), format fix, phase verification | `./gradlew spotlessCheck :test:konsist:test test assembleDebug lint`, `spotlessApply`, `:{module}:testDebugUnitTest assembleDebug` |
+| Architecture-rule tool and where new rules go | Konsist, `test/konsist` |
+| CLAUDE.md sections the gate's rule review reads | Flow and coroutines, Compose, MVI pattern |
+| Review mechanism | `@claude-review`, `.github/workflows/claude-review.yml` |
 
-The `@claude-review` workflow is a CI file and can't live in a plugin. `/pipeline-init` offers
-to install it from a template.
+**Rules:**
+1. **Facts move; knowledge and wording do not.** A sentence keeps its 1.1.0 wording unless it
+   names one of the facts above, and then only the fact is replaced.
+2. **A missing fact is an error, not a fallback.** A stage that needs one the config lacks stops
+   and says which.
+3. **The pre-flight is held once**, in the config, mirroring CI.
 
-**Alternatives considered:**
-- A git submodule or a copy-in script: no clean update or pin story.
-- Agent Skills (`SKILL.md`) as a cross-tool format: worth keeping compatible with, but the plugin
-  is the container for Claude Code.
+**Step 4 tests the table.** Every edit the production project still needs in a skill is a fact
+the table missed, or an assumption about this template (Konsist, CLAUDE.md's section names).
+Fix those here, as a patch release, before packaging.
 
-**Verify before building:** the manifest and marketplace field names against the Claude Code
-version in use.
+## 2. Packaging (steps 5 and 6)
+
+Verified against Claude Code 2.1.296's plugin docs on 2026-10-15.
+
+**Where it lives.** In this repo: the plugin in `plugins/ai-pipeline/` (skills, agents, templates,
+CHANGELOG, `.claude-plugin/plugin.json` with the version), and `.claude-plugin/marketplace.json` at
+the repo root listing it with source `./plugins/ai-pipeline`. The template app and the suite are
+not shipped. A release is a `pipeline-vX.Y.Z` tag. The repo is public, so installing needs no
+token; it can move to its own repo later by changing one line in each consumer.
+
+**How a project installs it.** It commits `.claude/pipeline.md` and a `.claude/settings.json`:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "ai-pipeline": {
+      "source": { "source": "github", "repo": "pantstamp/android-template-project", "ref": "pipeline-v3.0.0" },
+      "autoUpdate": false
+    }
+  },
+  "enabledPlugins": { "ai-pipeline@ai-pipeline": true }
+}
+```
+
+Each developer runs `claude plugin install ai-pipeline@ai-pipeline --scope project` once, after
+accepting the workspace trust dialog.
+
+**How it updates.** Only when the project chooses: a PR moves `ref` to the new tag, then
+`claude plugin update ai-pipeline@ai-pipeline`. Rollback moves it back.
+
+**Developing it here.** `claude --plugin-dir ./plugins/ai-pipeline` loads the working copy over an
+installed one; `/reload-plugins` picks up edits. `eval.py` loads it the same way.
+
+**What changes with packaging:**
+- Skills become `/ai-pipeline:architect` etc., agents `ai-pipeline:pre-pr-gate`; every reference
+  by bare name is updated.
+- Skills find their own files through `${CLAUDE_SKILL_DIR}` or `${CLAUDE_PLUGIN_ROOT}`, and the
+  project's config through `${CLAUDE_PROJECT_DIR}/.claude/pipeline.md`. Files outside the plugin
+  folder are not installed.
+- Plugin agents ignore `permissionMode`, `hooks` and `mcpServers` in their frontmatter.
+- The `@claude-review` workflow is a CI file and cannot ship in a plugin; the project copies it.
+
+**Verify before relying on it:** the exact `subagent_type` string for a plugin agent, and that a
+pinned tag is not refetched by auto-update.
 
 ## 3. Versioning and rollback
 
@@ -139,7 +126,7 @@ Rolling back is easy; **noticing that a change made things worse** is the hard p
   pin back.
 - **Until extraction:** commits that touch the pipeline use the `chore(pipeline): …` prefix, and
   releases are tagged `pipeline-vX.Y.Z`. The version is in `.claude/PIPELINE_VERSION`, the
-  CHANGELOG is `.claude/CHANGELOG.md`, and both move into the plugin at step 4. Roll back with
+  CHANGELOG is `.claude/CHANGELOG.md`, and both move into the plugin at step 5. Roll back with
   `git checkout pipeline-vX.Y.Z -- .claude/`; the version file goes back with it.
 
 ### Detecting regressions
@@ -299,7 +286,7 @@ does; otherwise say "I don't know yet".
    are a plugin.
    - `claude plugin eval` runs scripted cases with graders (regex, file exists, tool used, model
      judge) and can compare with-plugin against without-plugin runs.
-   - Its suites carry over to step 4 unchanged.
+   - Its suites carry over to step 5 unchanged.
    - **Check first** whether it works on project skills that are not yet a plugin.
 2. **Runs per scenario.** *Recommendation:* 3. A scenario passes at 3 of 3; 2 of 3 is a warning
    to investigate. Weigh this against the cost above: the suite is run before a pipeline release,
@@ -308,5 +295,34 @@ does; otherwise say "I don't know yet".
    2 (highest value: the plan is where PR #32's defects started), then 3, then 4.
 4. **Where scenarios live.** *Recommendation:* `docs/ai-pipeline/scenarios/<name>/`, one folder per
    scenario with its inputs, scripted answers and pass criteria. They move into the plugin repo
-   at step 4.
+   at step 5.
 
+
+---
+
+## 5. Platform split — deferred to the Flutter step
+
+The first plan for step 3 split the skills into three layers: generic skills, an Android profile
+(interview concerns, plan checklist, residue patterns) and a project config. It was built on
+`chore/pipeline-split` (`1d62a57`…`84b5cab`) and measured on 2026-10-14:
+
+| Stage | Split | `pipeline-v1.1.0`, same day |
+|---|---|---|
+| Gate | 3 of 3 | — |
+| Developer | 3 of 3 (after a harness fix) | — |
+| Product owner | 6 of 9 → 3 of 3 once the profile held the skill's lists verbatim | 3 of 3 |
+| Architect | 3 of 6 → 1 of 3 with its generic wording restored | 3 of 3 |
+
+**What it showed:**
+- **Moving knowledge out of a skill, or rewording it on the way, made stages worse.** A profile
+  that turned each concern into its own interview topic lengthened interviews by a third. An
+  architect told to "meet the profile's plan checklist" instead of the checklist itself failed the
+  `StateFlow` check (E6) in 4 of 9 runs.
+- **Moving facts did not.** The product owner read its branch, prefixes and paths from the config
+  and passed 3 of 3.
+- **Concrete text beats lookups.** "Run `./gradlew … lint`" is followed more reliably than "run the
+  config's UI check when the profile's condition holds".
+
+**When Flutter comes**, keep one shared process and give each platform its own concrete text: either
+skills generated from templates and a values file per platform, or two maintained editions. Choose
+once a real Flutter project shows how much of the Android knowledge actually changes.
