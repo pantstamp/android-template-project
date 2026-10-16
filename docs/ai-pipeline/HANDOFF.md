@@ -16,6 +16,9 @@ the next section for how to start instead. Then read
 
 ## Running step 4 on another laptop
 
+The user's step-by-step checklist for this phase is [`STEP4_GUIDE.md`](STEP4_GUIDE.md). Follow
+its checkpoints, so they can check each one.
+
 The production project may live on a different machine and in a different repository. That works:
 this repo is public, so the other machine can fetch everything step 4 needs. The session that wrote
 this file does not travel with it, so this file is the whole brief.
@@ -39,9 +42,10 @@ Then say: *"Read `~/src/android-template-project/docs/ai-pipeline/HANDOFF.md` an
 this project."* (Adjust both paths to where the projects actually are.)
 
 **How the steps change:**
-1. **Copy the pipeline from the tag**, not from this repo's `master`, onto a scratch branch in
-   production. Check first whether production already has a `.claude/` folder; the copy must not
-   overwrite anything of its own, such as a `settings.json`:
+1. **Copy the pipeline from the tag**, not from this repo's `master`, into production's working
+   tree, **uncommitted**: untracked files stay in place when the user switches to the feature
+   branch the gate runs on. Check first whether production already has a `.claude/` folder; the
+   copy must not overwrite anything of its own, such as a `settings.json`:
 
    ```bash
    git -C ~/src/android-template-project archive pipeline-v2.0.0 .claude | tar -x -C ~/src/production-app
@@ -84,9 +88,10 @@ wording stay in the skill.
 1. **Step 4 — dry run on the production project** (roadmap §1; on another machine, see above):
    - Write its `.claude/pipeline.md` from its CI workflow, build files and `CLAUDE.md`. Every name
      in this repo's table needs a value.
-   - Copy `.claude/skills/` and `.claude/agents/` onto a scratch branch there. Run
-     `/pre-pr-checklist` on an existing feature branch, and `/architect` on a small real change if
-     there is one.
+   - Copy the pipeline from the `pipeline-v2.0.0` tag into its working tree, uncommitted. Run
+     `/pre-pr-checklist` on an existing feature branch. That branch has no SPEC.md or PLAN.md, so
+     Checks 1 and 2 report that, which is expected; judge the rest. Optionally run
+     `/product-owner` then `/architect` on a small real change, stopping after the plan.
    - List every place a skill still assumes this template. Likely candidates:
      - Konsist (does production have an architecture-rule tool at all?)
      - the CLAUDE.md section names `{{rule-review}}` points to
