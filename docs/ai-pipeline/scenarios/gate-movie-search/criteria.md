@@ -33,10 +33,19 @@ and the problem, whatever words it uses and whichever CLAUDE.md rule it cites.
 
 ## Full run
 
-- [R1] (required, full) The result is CONDITIONAL GO.
-- [R2] (required, full) The CI pre-flight was run and passed.
-- [R3] (required, full) Plan coverage accounts for every planned file: no planned file is
+`full` and `elsewhere` both run every check; `elsewhere` runs the gate from a folder that holds the
+project's `CLAUDE.md`, `.claude/pipeline.md` and Gradle wrapper and none of the pipeline's files,
+as when the pipeline is installed machine-wide or as a plugin.
+
+- [R1] (required, full/elsewhere) The result is CONDITIONAL GO.
+- [R2] (required, full/elsewhere) The CI pre-flight was run and passed.
+- [R3] (required, full/elsewhere) Plan coverage accounts for every planned file: no planned file is
   reported missing or unchanged.
+
+- [R4] (required, elsewhere) The report uses the gate's own format: a box headed
+  `PRE-PR QUALITY GATE — movie-search` with a "What CI can't check" section, a "CI pre-flight" line
+  and a `RESULT:` line. It does not say that a format file, skill folder or other pipeline file is
+  missing.
 
 ## Bonus
 

@@ -33,7 +33,8 @@ REPO = Path(
         check=True, capture_output=True, text=True,
     ).stdout.strip()
 )
-CRITERION = re.compile(r"^- \[([A-Z0-9]+)\] \((required|bonus)(?:, ([a-z0-9-]+))?\)")
+# `- [ID] (required|bonus[, variant[/variant…]]) text`
+CRITERION = re.compile(r"^- \[([A-Z0-9]+)\] \((required|bonus)(?:, ([a-z0-9/-]+))?\)")
 REQUIRED_FILES = ("scenario.json", "prompt.md", "criteria.md")
 EVAL_GIT = ["-c", "user.name=ai-pipeline-eval", "-c", "user.email=eval@localhost"]
 # Pinned so results compare across machines and CLI versions: the CLI's own default model
@@ -95,15 +96,21 @@ def parse_criteria(text, name):
 
 
 def variant_of(config, requested):
+    """A variant is extra prompt text, or {"extra": text, "settings": {...}}, whose settings
+    override the scenario's for that run (for example `"install": "elsewhere"`)."""
     variants = config.get("variants", {"default": ""})
     variant = requested or config.get("default_variant") or next(iter(variants))
     if variant not in variants:
         raise ScenarioError(f"{config['name']}: unknown variant '{variant}' ({', '.join(variants)})")
-    return variant, variants[variant]
+    value = variants[variant]
+    if isinstance(value, dict):
+        config.update(value.get("settings", {}))
+        value = value.get("extra", "")
+    return variant, value
 
 
 def graded(config, variant):
-    return [c for c in config["criteria"] if c["variant"] in (None, variant)]
+    return [c for c in config["criteria"] if c["variant"] is None or variant in c["variant"].split("/")]
 
 
 # ── workspace ─────────────────────────────────────────────────────────────────────────────
@@ -166,8 +173,43 @@ def setup(config, run_dir, extra):
         prompt = f"{prompt.rstrip()}\n\n{extra}\n"
     (run_dir / "prompt.md").write_text(prompt)
     cwd = REPO if config["mode"] == "outside" else worktree
+    if config.get("install") == "elsewhere":
+        cwd = elsewhere_project(run_dir)
     return {"worktree": worktree, "branch": branch, "cwd": cwd, "scratch": scratch, "start": start,
             "prompt": prompt}
+
+
+def elsewhere_project(run_dir):
+    """An `outside` run's working directory when the pipeline is installed outside the project, as
+    machine-wide or as a plugin: the project's own files (`CLAUDE.md`, `.claude/pipeline.md`, the
+    Gradle wrapper the pre-flight runs) and none of the pipeline's. The agent is passed with
+    `--agents`, so neither it nor its files are on disk where the run looks."""
+    project = run_dir / "project"
+    for path in ("CLAUDE.md", ".claude/pipeline.md", "gradlew", *git("ls-files", "gradle/wrapper").split()):
+        (project / path).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(REPO / path, project / path)
+    return project
+
+
+def agent_definition(name):
+    """The `--agents` JSON for one agent file: its frontmatter's description, tools and model, and
+    its body as the prompt."""
+    text = (REPO / ".claude" / "agents" / f"{name}.md").read_text()
+    _, front, body = text.split("---\n", 2)
+    fields, key = {}, None
+    for line in front.splitlines():
+        match = re.match(r"^([a-z-]+):\s*(.*)$", line)
+        if match:
+            key, value = match[1], match[2].strip()
+            fields[key] = "" if value in (">", "|") else value
+        elif key:
+            fields[key] = (fields[key] + " " + line.strip()).strip()
+    agent = {"description": fields.get("description", ""), "prompt": body.strip()}
+    if fields.get("tools"):
+        agent["tools"] = [t.strip() for t in fields["tools"].split(",")]
+    if fields.get("model") and fields["model"] != "inherit":
+        agent["model"] = fields["model"]
+    return json.dumps({name: agent})
 
 
 def write_sdk_dir(worktree):
@@ -216,6 +258,8 @@ def claude_turn(config, workspace, message, transcript, session, first):
         command += ["--resume", session]
     command += ["--model", config["run_model"]]
     if config.get("agent"):
+        if config.get("install") == "elsewhere":
+            command += ["--agents", agent_definition(config["agent"])]
         command += ["--agent", config["agent"]]
     if config.get("tools"):
         command += ["--tools", config["tools"]]

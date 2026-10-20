@@ -54,6 +54,13 @@ Other `scenario.json` settings:
 - **`read_only`** and **`nested_no_git`**: the `READONLY` and `NESTEDGIT` checks. `NESTEDGIT`
   fails a run in which an agent spawned by the session (a phase implementer) ran a git command
   that changes history or undoes edits.
+- **`variants`**: named versions of the scenario. A value is extra prompt text, or
+  `{"extra": text, "settings": {...}}` whose settings override the scenario's for that variant. A
+  criterion tagged `(required, full/elsewhere)` is graded only in those variants.
+- **`install: "elsewhere"`** (an `outside` setting): the pipeline is not on disk where the run
+  looks, as when it is installed machine-wide or as a plugin. The run starts in a scratch folder
+  holding only the project's `CLAUDE.md`, `.claude/pipeline.md` and Gradle wrapper, and the agent
+  is passed with `--agents`, built from its file in this repo.
 
 `forbidden_paths` are files that would reveal the outcome (a feature's `RETRO.md`), matched by
 their full repo path; `forbidden_patterns` are other strings (a later commit, `master`). The
@@ -61,6 +68,9 @@ run is denied reading forbidden paths, and any reading tool call that names eith
 run as `LEAK`.
 
 ## Running
+
+`eval.py check` runs the static checks on the pipeline files: free, no model call. `eval.py run`
+runs them first and stops if one fails.
 
 ```bash
 python3 docs/ai-pipeline/eval.py list

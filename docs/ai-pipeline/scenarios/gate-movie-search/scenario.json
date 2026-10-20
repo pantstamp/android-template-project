@@ -7,18 +7,38 @@
   "agent": "pre-pr-gate",
   "tools": "Read,Grep,Glob,Bash",
   "allowed_tools": [
-    "Read", "Grep", "Glob",
-    "Bash(git:*)", "Bash(grep:*)", "Bash(cd:*)", "Bash(./gradlew:*)",
-    "Bash(ls:*)", "Bash(cat:*)", "Bash(head:*)", "Bash(tail:*)", "Bash(sed -n:*)",
-    "Bash(wc:*)", "Bash(find:*)", "Bash(sort:*)", "Bash(uniq:*)"
+    "Read",
+    "Grep",
+    "Glob",
+    "Bash(git:*)",
+    "Bash(grep:*)",
+    "Bash(cd:*)",
+    "Bash(./gradlew:*)",
+    "Bash(ls:*)",
+    "Bash(cat:*)",
+    "Bash(head:*)",
+    "Bash(tail:*)",
+    "Bash(sed -n:*)",
+    "Bash(wc:*)",
+    "Bash(find:*)",
+    "Bash(sort:*)",
+    "Bash(uniq:*)"
   ],
   "read_only": true,
-  "forbidden_paths": ["docs/features/movie-search/RETRO.md"],
+  "forbidden_paths": [
+    "docs/features/movie-search/RETRO.md"
+  ],
   "runs": 3,
   "timeout_minutes": 20,
   "variants": {
     "full": "",
-    "check5": "Checks to run: Check 5 only. Do not run gradle."
+    "check5": "Checks to run: Check 5 only. Do not run gradle.",
+    "elsewhere": {
+      "extra": "This run's working directory is not a checkout: it holds only this project's `CLAUDE.md`, `.claude/pipeline.md` and Gradle wrapper. The rest of the instructions above still apply.",
+      "settings": {
+        "install": "elsewhere"
+      }
+    }
   },
   "default_variant": "full"
 }
