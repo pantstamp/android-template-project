@@ -6,12 +6,36 @@
   "branch": "feature/movie-search",
   "tools": "Read,Grep,Glob,Bash,Write,Edit",
   "allowed_tools": [
-    "Read", "Grep", "Glob", "Write", "Edit",
-    "Bash(git:*)", "Bash(grep:*)", "Bash(ls:*)", "Bash(cat:*)", "Bash(head:*)", "Bash(tail:*)",
-    "Bash(sed -n:*)", "Bash(wc:*)", "Bash(find:*)", "Bash(sort:*)", "Bash(mkdir:*)"
+    "Read",
+    "Grep",
+    "Glob",
+    "Write",
+    "Edit",
+    "Bash(git:*)",
+    "Bash(grep:*)",
+    "Bash(ls:*)",
+    "Bash(cat:*)",
+    "Bash(head:*)",
+    "Bash(tail:*)",
+    "Bash(sed -n:*)",
+    "Bash(wc:*)",
+    "Bash(find:*)",
+    "Bash(sort:*)",
+    "Bash(mkdir:*)"
   ],
-  "forbidden_paths": ["docs/features/movie-search/RETRO.md"],
-  "forbidden_patterns": ["2ca290e", "master", "origin/", "--all"],
+  "forbidden_paths": [
+    "docs/features/movie-search/RETRO.md"
+  ],
+  "forbidden_patterns": [
+    "2ca290e",
+    "master",
+    "origin/",
+    "log --all",
+    "branch --all",
+    "branch -a",
+    "rev-list --all",
+    "show-branch --all"
+  ],
   "answers": "answers.md",
   "done_when_committed": "docs/features/movie-search/PLAN.md",
   "grade_file": "docs/features/movie-search/PLAN.md",
