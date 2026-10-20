@@ -38,6 +38,39 @@
       "settings": {
         "install": "elsewhere"
       }
+    },
+    "stale-base": {
+      "extra": "",
+      "settings": {
+        "install": "elsewhere",
+        "stale_base": "c53bc39",
+        "prompt_file": "prompt-stale-base.md"
+      }
+    },
+    "no-spec": {
+      "extra": "",
+      "settings": {
+        "hidden_paths": [
+          "docs/features/movie-search/SPEC.md",
+          "docs/features/movie-search/PLAN.md"
+        ],
+        "seed_files": {
+          "docs/features/movie-search/NOTES.md": "NOTES.md"
+        }
+      }
+    },
+    "none-tools": {
+      "extra": "This run's working directory is not a checkout: it holds only this project's `CLAUDE.md`, `.claude/pipeline.md` and Gradle wrapper. The rest of the instructions above still apply.",
+      "settings": {
+        "install": "elsewhere",
+        "pipeline_values": {
+          "formatter": "none",
+          "format-fix": "none",
+          "architecture-rules": "none",
+          "architecture-rules-home": "none",
+          "pre-flight": "`./gradlew test assembleDebug lint`"
+        }
+      }
     }
   },
   "default_variant": "full"

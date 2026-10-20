@@ -50,10 +50,10 @@ item, say so separately and say why.
   finding, and ask whether to fix, verify manually, or dismiss. Then fix what was agreed.
 - **NO GO** → show the errors and offer fixes within the limits below.
 
-Limits on fixes:
+Limits on fixes (skip a tool whose value is `none`; it cannot fail):
 - **{{formatter}}** — run `{{format-fix}}`. The only failure that needs no judgment call.
-- **{{architecture-rules}}** — fix the code to match the rule. Changing a rule is a conversation with the user,
-  not a silent edit.
+- **{{architecture-rules}}** — fix the code to match the rule. Changing a rule is a conversation
+  with the user, not a silent edit.
 - **Lint** (`warningsAsErrors`) — fix the cause. No baseline or suppression without asking.
 
 When the user reports a manual check (on a device, emulator or preview), record it in the next

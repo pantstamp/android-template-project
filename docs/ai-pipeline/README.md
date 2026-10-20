@@ -61,6 +61,12 @@ Other `scenario.json` settings:
   looks, as when it is installed machine-wide or as a plugin. The run starts in a scratch folder
   holding only the project's `CLAUDE.md`, `.claude/pipeline.md` and Gradle wrapper, and the agent
   is passed with `--agents`, built from its file in this repo.
+- **`pipeline_values`** (with `install: "elsewhere"`): `{name: value}` replacing rows of that
+  folder's `pipeline.md`, such as a tool set to `none`.
+- **`stale_base`**: the branch is checked out in a separate clone, whose `origin` is a scratch
+  bare repository holding only the base branch at `base`. The clone's own base branch is left at
+  this older commit, and it has no `origin/<base>` until it fetches.
+- **`prompt_file`**: a variant's own prompt, in place of `prompt.md`.
 
 `forbidden_paths` are files that would reveal the outcome (a feature's `RETRO.md`), matched by
 their full repo path; `forbidden_patterns` are other strings (a later commit, `master`). The

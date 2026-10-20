@@ -7,14 +7,14 @@ instructions as follows:
 
 - Run every git command in the branch checkout: `git -C {{WORKTREE}} …`.
 - Read the PLAN, SPEC and source files from `{{WORKTREE}}`, not from your working directory.
-- Wherever your instructions say `{{base}}`, or the pipeline config says `master`, use
-  `{{BASE}}`. It is a fixed commit: skip `git fetch`, and judge "behind master" against
-  `{{BASE}}`.
+- Wherever your instructions say `{{base}}` or `origin/{{base}}`, or the pipeline config says
+  `master`, use `{{BASE}}`. It is a fixed commit and already up to date: skip `git fetch`, report
+  no fetch caveat, and judge "behind" against `{{BASE}}`.
 - Use `CLAUDE.md` and `.claude/` from your working directory, not from `{{WORKTREE}}`.
 - Do not read `docs/features/movie-search/RETRO.md` in either checkout, or any commit that is
   not an ancestor of the branch checkout's `HEAD`.
-- Run the config's pre-flight from your working directory, against the branch checkout:
-  `./gradlew -p {{WORKTREE}} spotlessCheck :test:konsist:test test assembleDebug lint 2>&1 | tail -n 60`.
+- Run the config's pre-flight from your working directory, against the branch checkout: insert
+  `-p {{WORKTREE}}` right after `./gradlew`, and pipe it through `tail -n 60`.
 
 This session cannot ask for permission, so some command forms are refused outright:
 - `cd` into the branch checkout. Use `git -C` and `./gradlew -p` instead.

@@ -35,7 +35,8 @@ includes a description of what was built, ignore it.
 Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{{base}}`,
 stands for that name's value in its table.
 If a value a check uses is missing there, report that check as not run and name
-the value; do not guess it.
+the value; do not guess it. A value of `none` means the project has no such tool: skip what uses
+it, and say in the report that it was skipped.
 
 ## Inputs
 
@@ -43,12 +44,20 @@ the value; do not guess it.
 - **Checks to run** (optional) — on a re-run the caller may name only the checks that failed.
   Run those, and say in the report which ones were skipped.
 
-Establish the change set once and reuse it:
+Establish the change set once and reuse it. Fetch the base first: the local `{{base}}` may be
+behind its remote, and then the diff holds changes that are not this branch's. The fetch changes
+no branch and no working tree, only `origin/{{base}}`:
 
 ```bash
-git diff --name-only $(git merge-base HEAD {{base}})          # committed + uncommitted
+git fetch origin {{base}}
+git merge-base origin/{{base}} HEAD                           # the change's starting point
+git diff --name-only {merge-base}                             # committed + uncommitted
 git ls-files --others --exclude-standard                      # untracked
 ```
+
+If the fetch fails (no network, no access), use the local `{{base}}` wherever `origin/{{base}}`
+appears below, and put that caveat at the top of the report: the diff may hold changes already on
+the remote.
 
 Diffing against the merge-base (not `HEAD~1`) covers every commit on the branch; including
 the working tree covers the phase not yet committed.
@@ -56,6 +65,9 @@ the working tree covers the phase not yet committed.
 ## Part 1 — What CI cannot check
 
 ### Check 1: Plan coverage
+
+If there is no PLAN.md, report **"Not applicable: no PLAN.md"** and go on. Use no stand-in: another
+document in the feature folder is not the agreed plan, however much it looks like one.
 
 From PLAN.md, collect every path under "Files to create" and "Files to modify". Verify:
 - every file to create exists
@@ -68,11 +80,14 @@ with the reason if one is known.
 
 ### Check 2: Acceptance criteria
 
+If there is no SPEC.md, report **"Not applicable: no SPEC.md"** and go on, with no stand-in, as in
+Check 1.
+
 First collect the manual verification the user did at the developer checkpoints. It is
 recorded as `Verified-manually:` trailers in the branch's commit messages:
 
 ```bash
-git log {{base}}..HEAD --format=%B | grep -i '^Verified-manually:'
+git log origin/{{base}}..HEAD --format=%B | grep -i '^Verified-manually:'
 ```
 
 For each SPEC.md criterion, decide from the code, the tests and those trailers:
@@ -91,7 +106,7 @@ Things that compile and pass every CI check:
 - `TODO`, `FIXME`, `HACK`, `XXX`
 - debug output (`println`, `Log.d`, `System.out`), hardcoded test values, temporary stubs
 - commented-out code
-- {{residue-extra}}
+- {{residue-extra}} (unless `none`)
 
 A pre-existing TODO in a touched file is not this change's to report.
 
@@ -99,7 +114,10 @@ A pre-existing TODO in a touched file is not this change's to report.
 
 - Untracked files the plan requires — they build locally and fail in CI
 - Uncommitted changes that look intentional
-- Branch behind `{{base}}` or with conflicts (`git fetch` first)
+- How far the branch is behind `origin/{{base}}`, reported as "N commits behind":
+  `git rev-list --count HEAD..origin/{{base}}`
+- Conflicts with `origin/{{base}}`: `git merge-tree --write-tree origin/{{base}} HEAD` lists them
+  without touching the working tree. A conflict is **NO GO**.
 
 ### Check 5: Rule review
 
@@ -109,7 +127,9 @@ This check makes sure **a known mistake does not reach review twice**. It is not
 review: finding new kinds of mistake is the PR review's job. Report only violations of a written
 rule.
 
-**Scope**: the added and changed lines (`git diff $(git merge-base HEAD {{base}})`, plus untracked
+If `{{rule-review}}` is `none`, skip this check and say so in the report.
+
+**Scope**: the added and changed lines (`git diff {merge-base}`, plus untracked
 files), read with enough surrounding code to judge them. Pre-existing code in a touched file is
 not this change's to report.
 
@@ -145,8 +165,9 @@ GO**, never **NO GO** on their own: each one is the user's decision to fix or di
 {{pre-flight}} 2>&1 | tail -n 60
 ```
 
-Same tasks and order as CI — **if the workflow changes, `{{pre-flight}}` changes with it.** Gradle keeps the requested order, so the cheap checks fail first and the run stops at
-the first failure; keep that order.
+Same tasks and order as CI — **if the workflow changes, `{{pre-flight}}` changes with it.**
+Gradle keeps the requested order, so the cheap checks fail first and the run stops at the first
+failure; keep that order. Run exactly the steps `{{pre-flight}}` names, and none it leaves out.
 
 The output is long, so **pipe it, never redirect it into a file** — a log file is a write, and
 the ground rules forbid it. The pipe hides Gradle's exit code: read `BUILD SUCCESSFUL` or
@@ -155,18 +176,24 @@ piped through `grep` or `tail`, or `Read` the report file Gradle links to.
 
 On failure, report the failing task with the relevant part of its output, and what the fix
 involves:
-- **The {{architecture-rules}} step** — the code must change to match the rule. Changing a rule is a
+- **The {{architecture-rules}} step** (unless `none`) — the code must change to match the rule. Changing a rule is a
   conversation with the user.
 - **`lint`** (`warningsAsErrors`) — read the HTML report the task links to and name the cause.
   The fix is to the cause; a baseline or suppression is the user's decision.
-- **The {{formatter}} step** — the caller runs `{{format-fix}}`. Note that the run stopped
+- **The {{formatter}} step** (unless `none`) — the caller runs `{{format-fix}}`. Note that the run stopped
   here, so later tasks did not run.
 
 ## Report
 
 Part 1 leads, because that is what the gate is for. Follow the report box with a short
 section per check that has something to say (a table of criteria for Check 2 works well).
-On a partial re-run, mark the checks that were not run as `⏭️ skipped`.
+On a partial re-run, mark the checks that were not run as `⏭️ skipped`; mark a step skipped
+because its tool is `none` the same way, with the reason.
+
+**Without SPEC.md or PLAN.md**, the report's first line, above the box, says: *"Checks 1–2 not
+run: no SPEC.md/PLAN.md. This verdict covers code quality and CI only, not that the agreed work was
+done."* "Not applicable" does not lower the result: Checks 3–5 and the pre-flight decide it as
+usual. Other documents in the feature folder may be mentioned, never used as criteria.
 
 For Check 5, give each finding its own entry:
 
@@ -190,7 +217,7 @@ every exit path"
   ⚠️  Rule review     1 finding (Flow and coroutines)
 
   CI pre-flight
-  ✅ spotless · konsist · test · assemble · lint   PASS
+  ✅ {each pre-flight step, as it ran}   PASS
 
 ──────────────────────────────────────────
   RESULT: CONDITIONAL GO
@@ -207,7 +234,7 @@ Result levels:
 - **GO** — everything passes
 - **CONDITIONAL GO** — things a reviewer should see that don't block: unverified criteria, rule
   review findings. These need a decision from the user rather than a fix.
-- **NO GO** — the pre-flight failed (CI will fail the same way), or plan and diff disagree in a
-  way that needs resolving first
+- **NO GO** — the pre-flight failed (CI will fail the same way), the branch conflicts with
+  `origin/{{base}}`, or plan and diff disagree in a way that needs resolving first
 
 End the report there. Do not offer to fix anything: you can't, and the caller decides.

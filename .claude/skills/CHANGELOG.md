@@ -8,6 +8,17 @@ Entries are grouped by stage and say what changed and why.
 
 ## Unreleased
 
+### Pre-PR gate
+- **Fetches the base and diffs against `origin/{{base}}`.** A stale local base put other merged
+  work into the diff, so the rule review judged code that was not the branch's. If the fetch
+  fails, the gate uses the local base and says so at the top. Check 4 reports how far the branch
+  is behind, and a conflict with the base is NO GO.
+- **A branch without SPEC.md or PLAN.md gets "not applicable" for Checks 1–2**, and the report's
+  first line says the verdict covers code quality and CI only. In a dry run the gate used another
+  document in the feature folder as a stand-in, which no contract covers and another run may not
+  pick.
+- **Skips a tool whose value is `none`**, and builds its pre-flight line from the steps that ran.
+
 ### All stages
 - **The pipeline finds its own files wherever it is installed.** Skills and agents no longer open
   pipeline files by project-relative paths, which resolved only when the pipeline was copied into
@@ -19,6 +30,10 @@ Entries are grouped by stage and say what changed and why.
 - **The "Pipeline context" note reads correctly.** In 2.0.0 its example showed `{base}` with single
   braces, and the agents' copy said "a value a check uses uses". Every run read the table right
   anyway; the note now matches the names it describes.
+- **`none` means the project has no such tool.** A step that uses it is skipped and the report
+  says so; an empty or missing value still stops the stage. `pipeline.md`'s table marks which
+  names may be `none`. A project without a formatter, an architecture-rule tool or an automated
+  review had no defined way to say so.
 - **`pipeline.md` names a path only if it exists in the project.** A project may check its
   AI-instruction files for paths that do not exist, and this file is one.
 

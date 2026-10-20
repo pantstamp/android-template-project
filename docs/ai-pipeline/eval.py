@@ -131,13 +131,15 @@ def setup(config, run_dir, extra):
     scratch = run_dir / "scratch"
     scratch.mkdir(exist_ok=True)
     branch = None
-    if config.get("branch"):
+    if config.get("stale_base"):
+        stale_clone(config, run_dir, worktree)
+    elif config.get("branch"):
         # Branch names are shared by every worktree of the repo, so each run gets its own.
         # Two scenarios can share a branch prefix and start in the same second.
         tag = re.sub(r"[^A-Za-z0-9-]", "-", f"{config['name']}-{run_dir.parent.name}-{run_dir.name}")
         branch = f"{config['branch']}-eval-{tag}"
         git("worktree", "add", "-b", branch, str(worktree), config["snapshot"])
-    else:
+    elif not config.get("stale_base"):
         git("worktree", "add", "--detach", str(worktree), config["snapshot"])
     write_sdk_dir(worktree)
     if config["mode"] == "inside":
@@ -166,6 +168,8 @@ def setup(config, run_dir, extra):
         git(*EVAL_GIT, "commit", "-q", "--allow-empty", "-m", "eval: use the current pipeline", cwd=worktree)
     start = git("rev-parse", "HEAD", cwd=worktree).strip()
     prompt = config["prompt"]
+    if config.get("prompt_file"):
+        prompt = (config["folder"] / config["prompt_file"]).read_text()
     for key, value in {"WORKTREE": worktree, "BASE": config.get("base", ""), "BRANCH": branch or "",
                        "SCRATCH": scratch}.items():
         prompt = prompt.replace("{{" + key + "}}", str(value))
@@ -174,12 +178,32 @@ def setup(config, run_dir, extra):
     (run_dir / "prompt.md").write_text(prompt)
     cwd = REPO if config["mode"] == "outside" else worktree
     if config.get("install") == "elsewhere":
-        cwd = elsewhere_project(run_dir)
+        cwd = elsewhere_project(run_dir, config.get("pipeline_values", {}))
     return {"worktree": worktree, "branch": branch, "cwd": cwd, "scratch": scratch, "start": start,
             "prompt": prompt}
 
 
-def elsewhere_project(run_dir):
+def stale_clone(config, run_dir, clone):
+    """A checkout whose local base is behind its remote, as a developer's clone often is. A bare
+    repository stands in for the remote, with `{{base}}` at `base`; the checkout is detached at
+    the snapshot, its local `{{base}}` is left at `stale_base`, and it has no `origin/{{base}}`
+    until it fetches. Both share this repo's objects, so neither copies them."""
+    base_branch = config.get("base_branch", "master")
+    remote = run_dir / "origin.git"
+    git("clone", "-q", "--bare", "--shared", str(REPO), str(remote))
+    # Only the base branch, at the snapshot's base: this repo's other branches and tags are later
+    # work the run must not find.
+    for ref in git("for-each-ref", "--format=%(refname)", cwd=remote).split():
+        git("update-ref", "-d", ref, cwd=remote)
+    git("update-ref", f"refs/heads/{base_branch}", config["base"], cwd=remote)
+    git("symbolic-ref", "HEAD", f"refs/heads/{base_branch}", cwd=remote)
+    git("clone", "-q", "--shared", "--no-checkout", str(remote), str(clone))
+    git("checkout", "-q", "--detach", config["snapshot"], cwd=clone)
+    git("branch", "-f", base_branch, config["stale_base"], cwd=clone)
+    git("update-ref", "-d", f"refs/remotes/origin/{base_branch}", cwd=clone)
+
+
+def elsewhere_project(run_dir, values=None):
     """An `outside` run's working directory when the pipeline is installed outside the project, as
     machine-wide or as a plugin: the project's own files (`CLAUDE.md`, `.claude/pipeline.md`, the
     Gradle wrapper the pre-flight runs) and none of the pipeline's. The agent is passed with
@@ -188,6 +212,17 @@ def elsewhere_project(run_dir):
     for path in ("CLAUDE.md", ".claude/pipeline.md", "gradlew", *git("ls-files", "gradle/wrapper").split()):
         (project / path).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(REPO / path, project / path)
+    if values:
+        config_file = project / ".claude" / "pipeline.md"
+        lines = config_file.read_text().splitlines()
+        for name, value in values.items():
+            rows = [i for i, l in enumerate(lines) if l.startswith(f"| `{{{{{name}}}}}` | ")]
+            if len(rows) != 1:
+                raise ScenarioError(f"pipeline_values: no single row for {{{{{name}}}}}")
+            cells = lines[rows[0]].split(" | ")
+            cells[1] = value
+            lines[rows[0]] = " | ".join(cells)
+        config_file.write_text("\n".join(lines) + "\n")
     return project
 
 
@@ -222,6 +257,10 @@ def write_sdk_dir(worktree):
 
 
 def remove(workspace):
+    if (workspace["worktree"] / ".git").is_dir():  # a clone (stale_base), not a worktree
+        shutil.rmtree(workspace["worktree"], ignore_errors=True)
+        shutil.rmtree(workspace["worktree"].parent / "origin.git", ignore_errors=True)
+        return
     subprocess.run(["git", "worktree", "remove", "--force", str(workspace["worktree"])],
                    cwd=REPO, capture_output=True)
     if workspace.get("branch"):
@@ -659,7 +698,32 @@ def check_project_paths():
             for path, number, line in pipeline_lines() if found.search(line)]
 
 
-STATIC_CHECKS = (check_project_paths,)
+def config_names():
+    """{name: may it be `none`?} from `.claude/pipeline.md`'s table."""
+    names = {}
+    for line in (REPO / ".claude" / "pipeline.md").read_text().splitlines():
+        match = re.match(r"^\| `\{\{([a-z-]+)\}\}` \| .*? \| (yes|no) \| ", line)
+        if match:
+            names[match[1]] = match[2] == "yes"
+        elif line.startswith("| `{{"):
+            names[line.split("`")[1].strip("{}")] = None  # a row without a yes/no mark
+    return names
+
+
+def check_config_names():
+    """Every `{{name}}` a skill or agent uses is a row in `.claude/pipeline.md`, and every row says
+    whether it may be `none`."""
+    names = config_names()
+    problems = [f".claude/pipeline.md: {{{{{name}}}}} does not say whether it may be `none`"
+                for name, may in names.items() if may is None]
+    for path, number, line in pipeline_lines():
+        for name in re.findall(r"\{\{([a-z-]+)\}\}", line):
+            if name not in names:
+                problems.append(f"{path}:{number}: {{{{{name}}}}} is not in .claude/pipeline.md's table")
+    return problems
+
+
+STATIC_CHECKS = (check_project_paths, check_config_names)
 
 
 def static_problems():
