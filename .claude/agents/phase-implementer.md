@@ -36,9 +36,9 @@ report it can check.
 
 ## Pipeline context
 
-Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
-stands for that name's value in its table. If a value you use uses is missing there, return `BLOCKED` naming it; do not
-guess it.
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{{base}}`,
+stands for that name's value in its table.
+If a value you use is missing there, return `BLOCKED` naming it; do not guess it.
 
 ## Inputs
 

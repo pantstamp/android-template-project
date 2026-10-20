@@ -32,9 +32,10 @@ includes a description of what was built, ignore it.
 
 ## Pipeline context
 
-Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
-stands for that name's value in its table. If a value a check uses uses is missing there, report that check as not run and name the value; do not
-guess it.
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{{base}}`,
+stands for that name's value in its table.
+If a value a check uses is missing there, report that check as not run and name
+the value; do not guess it.
 
 ## Inputs
 

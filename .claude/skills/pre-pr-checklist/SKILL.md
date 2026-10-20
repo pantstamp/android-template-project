@@ -19,8 +19,9 @@ the result, and handles everything that needs the user.
 
 ## Pipeline context
 
-Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
-stands for that name's value in its table. If a value this skill uses is missing there, stop and tell the user which; do not
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{{base}}`,
+stands for that name's value in its table.
+If a value this skill uses is missing there, stop and tell the user which; do not
 guess it.
 
 ## Inputs

@@ -16,6 +16,9 @@ Entries are grouped by stage and say what changed and why.
   architect opens `PLAN_TEMPLATE.md` from its own. The only project path left is
   `.claude/pipeline.md`. Installed machine-wide in a dry run, the gate fell back to a plain report
   layout because it could not find the format file.
+- **The "Pipeline context" note reads correctly.** In 2.0.0 its example showed `{base}` with single
+  braces, and the agents' copy said "a value a check uses uses". Every run read the table right
+  anyway; the note now matches the names it describes.
 - **`pipeline.md` names a path only if it exists in the project.** A project may check its
   AI-instruction files for paths that do not exist, and this file is one.
 
