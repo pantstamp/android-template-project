@@ -161,7 +161,7 @@ order does not change — the user still proposes before you do.
 
 #### 6. Draft the plan
 
-Use the structure in [PLAN_TEMPLATE.md](PLAN_TEMPLATE.md). The diagrams and decision record
+Use the structure in `PLAN_TEMPLATE.md`, in this skill's base directory. The diagrams and decision record
 from step 5 go into it as agreed — the final design only, not how it was reached.
 
 **Phases are dependency-ordered slices, not fixed layers.** Order them so each builds on the

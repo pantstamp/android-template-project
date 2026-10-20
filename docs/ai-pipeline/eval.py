@@ -5,6 +5,7 @@ Each scenario replays a historical snapshot with the current pipeline files and 
 result against criteria whose outcome is already known. See docs/ai-pipeline/README.md.
 
   eval.py list
+  eval.py check                          # static checks on the pipeline files, no model call
   eval.py run <scenario> [--runs N] [--variant V] [--keep] [--judge-model M] [--user-model M]
   eval.py setup <scenario> <dir>         # worktree + rendered prompt, no model call
   eval.py grade <scenario> <output.md> [--variant V] [--transcript FILE]
@@ -438,7 +439,7 @@ def nested_git(events):
 def stamp(config, workspace):
     """Whether the committed grade_file records the pipeline version under its title, as the
     SPEC and PLAN templates ask. The version is the one the run was given."""
-    version = (REPO / ".claude" / "PIPELINE_VERSION").read_text().strip()
+    version = (REPO / ".claude" / "skills" / "PIPELINE_VERSION").read_text().strip()
     expected = f"pipeline: v{version}"
     try:
         content = git("show", f"HEAD:{config['grade_file']}", cwd=workspace["worktree"])
@@ -589,7 +590,47 @@ def summarise(config, variant, runs):
     return verdict, "\n".join(lines) + "\n"
 
 
+# ── static checks ─────────────────────────────────────────────────────────────────────────
+# Free checks on the pipeline's own files, run before every suite run. Each returns a list of
+# problems as "path:line: what is wrong".
+
+PIPELINE_DIRS = (REPO / ".claude" / "skills", REPO / ".claude" / "agents")
+
+
+def pipeline_lines():
+    for folder in PIPELINE_DIRS:
+        for path in sorted(folder.rglob("*.md")):
+            if path.name in ("README.md", "CHANGELOG.md"):  # about the pipeline, not read by it
+                continue
+            for number, line in enumerate(path.read_text().splitlines(), 1):
+                yield path.relative_to(REPO), number, line
+
+
+def check_project_paths():
+    """A skill or agent opens its own files from its base directory, and the project's only through
+    `.claude/pipeline.md`. Any other `.claude/…` path resolves only when the pipeline is copied
+    into the project, not when it is installed machine-wide or as a plugin."""
+    found = re.compile(r"\.claude/(?!pipeline\.md)")
+    return [f"{path}:{number}: names a project-relative pipeline path: {line.strip()}"
+            for path, number, line in pipeline_lines() if found.search(line)]
+
+
+STATIC_CHECKS = (check_project_paths,)
+
+
+def static_problems():
+    return [problem for check in STATIC_CHECKS for problem in check()]
+
+
 # ── commands ──────────────────────────────────────────────────────────────────────────────
+
+
+def cmd_check(_):
+    problems = static_problems()
+    for problem in problems:
+        print(problem)
+    print(f"{len(STATIC_CHECKS)} static checks: " + (f"{len(problems)} problems" if problems else "pass"))
+    return 1 if problems else 0
 
 
 def cmd_list(_):
@@ -626,6 +667,10 @@ def cmd_grade(args):
 
 
 def cmd_run(args):
+    problems = static_problems()
+    if problems:
+        print("\n".join(problems))
+        sys.exit("error: the static checks fail; fix them first (eval.py check)")
     config = load(args.scenario)
     variant, extra = variant_of(config, args.variant)
     config["run_model"] = args.model or config.get("model") or DEFAULT_MODEL
@@ -665,6 +710,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("list").set_defaults(func=cmd_list)
+    sub.add_parser("check").set_defaults(func=cmd_check)
     p = sub.add_parser("run")
     p.add_argument("scenario")
     p.add_argument("--runs", type=int)

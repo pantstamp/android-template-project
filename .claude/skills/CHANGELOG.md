@@ -2,11 +2,22 @@
 
 One version for the whole pipeline: `.claude/skills/`, `.claude/agents/`, the shape of
 `.claude/pipeline.md` and the pipeline sections of `CLAUDE.md`. Each release is tagged
-`pipeline-vX.Y.Z` and passes the golden scenarios in `docs/ai-pipeline/` first. How to version and release: [`skills/README.md`](skills/README.md#versions).
+`pipeline-vX.Y.Z` and passes the golden scenarios in `docs/ai-pipeline/` first. How to version and release: [`README.md`](README.md#versions).
 
 Entries are grouped by stage and say what changed and why.
 
 ## Unreleased
+
+### All stages
+- **The pipeline finds its own files wherever it is installed.** Skills and agents no longer open
+  pipeline files by project-relative paths, which resolved only when the pipeline was copied into
+  the project. The gate's report format is part of the `pre-pr-gate` agent;
+  `PIPELINE_VERSION` and this CHANGELOG are in `skills/`, read from a skill's base directory; the
+  architect opens `PLAN_TEMPLATE.md` from its own. The only project path left is
+  `.claude/pipeline.md`. Installed machine-wide in a dry run, the gate fell back to a plain report
+  layout because it could not find the format file.
+- **`pipeline.md` names a path only if it exists in the project.** A project may check its
+  AI-instruction files for paths that do not exist, and this file is one.
 
 ## 2.0.0 — 2026-10-15
 

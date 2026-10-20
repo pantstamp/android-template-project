@@ -114,8 +114,8 @@ What this does NOT include.
 Undecided points, with the options discussed.
 ```
 
-`pipeline:` is the version in `.claude/PIPELINE_VERSION`, so a later retro can tell which
-pipeline produced it.
+`pipeline:` is the version in `PIPELINE_VERSION`, in the folder above this skill's base directory
+(`<base directory>/../PIPELINE_VERSION`), so a later retro can tell which pipeline produced it.
 
 Ask the user to review it. Apply requested changes. Once they approve, commit it:
 

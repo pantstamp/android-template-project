@@ -108,6 +108,9 @@ installed one; `/reload-plugins` picks up edits. `eval.py` loads it the same way
   folder are not installed.
 - Plugin agents ignore `permissionMode`, `hooks` and `mcpServers` in their frontmatter.
 - The `@claude-review` workflow is a CI file and cannot ship in a plugin; the project copies it.
+- Committing `.claude/pipeline.md` (step 6) puts it under the project's own CI checks. A project
+  that checks its AI-instruction files, for example for paths that do not exist, checks this one
+  too; it must pass them.
 
 **Verify before relying on it:** the exact `subagent_type` string for a plugin agent, and that a
 pinned tag is not refetched by auto-update.
@@ -125,8 +128,8 @@ Rolling back is easy; **noticing that a change made things worse** is the hard p
 - **Each project pins a version** through its marketplace entry's git ref. Rollback is moving the
   pin back.
 - **Until extraction:** commits that touch the pipeline use the `chore(pipeline): …` prefix, and
-  releases are tagged `pipeline-vX.Y.Z`. The version is in `.claude/PIPELINE_VERSION`, the
-  CHANGELOG is `.claude/CHANGELOG.md`, and both move into the plugin at step 5. Roll back with
+  releases are tagged `pipeline-vX.Y.Z`. The version is in `.claude/skills/PIPELINE_VERSION`,
+  the CHANGELOG is `.claude/skills/CHANGELOG.md`, and both move into the plugin's `skills/` at step 5. Roll back with
   `git checkout pipeline-vX.Y.Z -- .claude/`; the version file goes back with it.
 
 ### Detecting regressions

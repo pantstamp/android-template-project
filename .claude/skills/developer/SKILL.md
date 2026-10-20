@@ -44,9 +44,9 @@ starting from. When resuming, `git log --oneline {{base}}..HEAD` shows which pha
 
 ### 2. For each phase
 
-Each phase is implemented by the **`phase-implementer` agent** (`.claude/agents/phase-implementer.md`,
-Sonnet), not in this conversation. Implementation is the bulky part of the work — file reads,
-build output, fix loops — and running it in the agent keeps this conversation down to the plan,
+Each phase is implemented by the **`phase-implementer` agent** (Sonnet), not in this
+conversation. Implementation is the bulky part of the work — file reads, build output, fix
+loops — and running it in the agent keeps this conversation down to the plan,
 the reports and the user's decisions for the whole feature. Every phase also starts from PLAN.md
 alone, so a gap in the plan shows up immediately instead of being covered by what this session
 remembers. This conversation keeps the checkpoint and the commit.

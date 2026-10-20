@@ -12,8 +12,7 @@ description: >
 
 CI checks that the code is correct. This gate checks that it is **the code that was agreed**.
 
-The checks themselves run in the **`pre-pr-gate` agent** (`.claude/agents/pre-pr-gate.md`),
-not in this conversation. The conversation that wrote the code is the one most likely to judge
+The checks themselves run in the **`pre-pr-gate` agent**, not in this conversation. The conversation that wrote the code is the one most likely to judge
 it generously; the agent starts with no account of what was built and only reads the branch. It
 is read-only, so it reports problems and cannot fix its way to GO. This skill runs it, shows
 the result, and handles everything that needs the user.

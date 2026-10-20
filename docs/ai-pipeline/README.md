@@ -50,7 +50,7 @@ Other `scenario.json` settings:
 - **`judge_references`**: files only the judge reads, as `{"commit", "path", "label"}` read from
   git. The product owner's coverage bonus compares against the real spec this way.
 - **`stamped`**: the `STAMP` check. The committed `grade_file` must have
-  `pipeline: vX.Y.Z` under its title, matching `.claude/PIPELINE_VERSION`.
+  `pipeline: vX.Y.Z` under its title, matching `.claude/skills/PIPELINE_VERSION`.
 - **`read_only`** and **`nested_no_git`**: the `READONLY` and `NESTEDGIT` checks. `NESTEDGIT`
   fails a run in which an agent spawned by the session (a phase implementer) ran a git command
   that changes history or undoes edits.

@@ -25,7 +25,7 @@ this file does not travel with it, so this file is the whole brief.
 
 **On that machine you need:**
 - Claude Code 2.1.280 or newer, logged in
-- the Android toolchain (JDK 21, the SDK), so the pre-flight can run
+- the Android toolchain (the JDK the project's CI uses, the SDK), so the pre-flight can run
 - `gh` logged in with an account that can push to this repo, for the fixes
 
 **Set it up** with this repo cloned next to the production project, and one session that sees both:
@@ -41,23 +41,19 @@ cd ~/src/production-app && claude --add-dir ~/src/android-template-project
 Then say: *"Read `~/src/android-template-project/docs/ai-pipeline/HANDOFF.md` and run step 4 on
 this project."* (Adjust both paths to where the projects actually are.)
 
-**How the steps change:**
-1. **Copy the pipeline from the tag**, not from this repo's `master`, into production's working
-   tree, **uncommitted**: untracked files stay in place when the user switches to the feature
-   branch the gate runs on. Check first whether production already has a `.claude/` folder; the
-   copy must not overwrite anything of its own, such as a `settings.json`:
-
-   ```bash
-   git -C ~/src/android-template-project archive pipeline-v2.0.0 .claude | tar -x -C ~/src/production-app
-   ```
-2. **Keep it local.** Nothing from the pipeline is committed or pushed in production. Right after
-   the copy, add its paths and `docs/features/` to production's `.git/info/exclude` (local-only,
-   never committed), leaving out any path production already tracks. `/product-owner` and
-   `/architect`, if run, write SPEC.md and PLAN.md without committing them. At the end, remove
-   exactly what the copy added (the tag's `.claude` file list, `pipeline.md`, the optional
-   `docs/features/` folder) and the exclude lines. The guide's part 6 has the checks.
-3. **Write production's own `.claude/pipeline.md`** over the copied one, and show it to the user
-   before using it.
+**How the steps change** (the guide's 4.2 and part 6 have the commands and checks):
+1. **Install from the newest tag**, not from this repo's `master`: machine-wide (`~/.claude/skills`,
+   `~/.claude/agents`, after backing up any skill or agent of the same name) or into the project's
+   working tree, uncommitted. Machine-wide is the closer rehearsal of the plugin. Check first
+   whether the project already has a `.claude/` folder; nothing of its own may be overwritten.
+2. **Keep it local.** Nothing from the pipeline is committed or pushed in the project. Add the new
+   project paths and `docs/features/` to its `.git/info/exclude` (local-only, never committed),
+   leaving out any path it already tracks. Lines there are relative to the git root: if the
+   build root is a subfolder, prefix them with it. `/product-owner` and `/architect`, if run,
+   write SPEC.md and PLAN.md without committing them. At the end, remove exactly what the install
+   added and the exclude lines, and restore any backups.
+3. **Write the project's own `.claude/pipeline.md`**, show it to the user before using it, and run
+   any check the project's CI makes on AI-instruction or docs files against it.
 4. **Fixes go to this repo**, as a branch and a PR from that machine. Releases are tagged here, as
    before.
 5. **The golden scenarios run on either machine**: they need only this repo and the Android SDK.
@@ -108,8 +104,12 @@ wording stay in the skill.
      - the CLAUDE.md section names `{{rule-review}}` points to
      - `warningsAsErrors`
      - the `@claude-review` workflow
-   - Fix each one here as a `2.0.x` patch: a new name in the table if it is a fact, a skill change
-     if it is process. Run the affected scenarios.
+   - Fix each one here: a new name in the table if it is a fact, a skill change if it is process.
+     Run the affected scenarios. (The first dry run's fixes became `2.1.0`, not a patch.)
+   - **Building 2.1.0** (from 2026-10-20, branch `chore/pipeline-2.1.0`), in four slices, each
+     followed by the scenarios it touches: (a) entries 1, 10, 11 and the `eval.py` static checks;
+     (b) the gate's behaviour, 2, 4, 7; (c) the new names in the architect and developer, 5, 6, 8;
+     (d) GitLab and `{{issues}}`, 9 (the production project is on GitLab). Released together.
 2. **Step 5 — package as a plugin** (roadmap §2). Verify first:
    - the `subagent_type` string for a plugin agent (`ai-pipeline:pre-pr-gate`?)
    - that a pinned tag is not refetched by auto-update

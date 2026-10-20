@@ -9,6 +9,9 @@ every Android project, stays in the skills. `CLAUDE.md` stays the project's codi
 **Every value is required.** A stage that needs one that is missing or empty stops and says which;
 it never guesses.
 
+**Write values as plain names and commands. Name a path only if it exists in this project.** A
+project may check its AI-instruction files for paths that do not exist, and this file is one.
+
 | Name | Value | Meaning |
 |---|---|---|
 | `{{base}}` | `master` | The branch features start from and PRs target |

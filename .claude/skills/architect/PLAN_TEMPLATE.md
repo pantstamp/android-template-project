@@ -3,8 +3,9 @@
 The plan must be **self-contained**: a developer or agent can implement it with no context
 beyond this file, `CLAUDE.md` and `.claude/pipeline.md` (whose values, such as
 `{{verification}}`, the plan writes out in full). Phase titles are the change's own steps — the developer
-skill reuses them in commit messages and the PR description. `pipeline:` is the version in
-`.claude/PIPELINE_VERSION`, so a later retro can tell which pipeline produced it.
+skill reuses them in commit messages and the PR description. `pipeline:` is
+the version in `PIPELINE_VERSION`, in the folder above this skill's base directory
+(`<base directory>/../PIPELINE_VERSION`), so a later retro can tell which pipeline produced it.
 
 ```markdown
 # Implementation Plan: {Feature Name}
