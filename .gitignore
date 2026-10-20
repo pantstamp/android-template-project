@@ -66,3 +66,6 @@ captures/
 
 # Claude Code local settings (machine-specific permissions)
 .claude/settings.local.json
+
+# Python bytecode (docs/ai-pipeline/eval.py)
+__pycache__/
