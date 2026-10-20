@@ -723,7 +723,15 @@ def check_config_names():
     return problems
 
 
-STATIC_CHECKS = (check_project_paths, check_config_names)
+def check_lint_named_once():
+    """The lint task and whether warnings fail it are a project fact, `{{lint}}`: a skill names
+    neither `lint` as a task nor `warningsAsErrors`. Prose ("a lint rule") is fine."""
+    found = re.compile(r"`lint`|warningsAsErrors")
+    return [f"{path}:{number}: names the lint task or its warning policy instead of {{{{lint}}}}: {line.strip()}"
+            for path, number, line in pipeline_lines() if found.search(line)]
+
+
+STATIC_CHECKS = (check_project_paths, check_config_names, check_lint_named_once)
 
 
 def static_problems():

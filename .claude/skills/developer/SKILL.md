@@ -30,7 +30,7 @@ guess it.
 
 ### 1. Read context and check out the branch
 
-Read `CLAUDE.md`, the PLAN.md, and the SPEC.md (for the *why*).
+Read `{{rules}}`, the PLAN.md, and the SPEC.md (for the *why*).
 
 The product-owner and architect stages created the branch and committed SPEC.md and PLAN.md
 on it. Check it out:
@@ -39,8 +39,9 @@ on it. Check it out:
 git checkout {prefix}{feature-name}      # {{feat-prefix}}… or {{fix-prefix}}…
 ```
 
-If no such branch exists (earlier stages were skipped), create it from an up-to-date `{{base}}`
-with the prefix matching the change type. Tell the user the branch and the phase you're
+If no such branch exists (earlier stages were skipped), create it from an up-to-date base, with
+the prefix matching the change type: `git fetch origin {{base}}`, then branch from
+`origin/{{base}}`. Tell the user the branch and the phase you're
 starting from. When resuming, `git log --oneline {{base}}..HEAD` shows which phases are done.
 
 ### 2. For each phase
@@ -118,7 +119,7 @@ hand off to the **pre-pr-checklist** skill.
 ### 5. Create the PR
 
 - **If the gate was skipped**, run its Part 2 pre-flight command (`{{pre-flight}}`) first. It mirrors CI; skipping the gate should not mean pushing a branch CI rejects.
-- **Always** run `{{format-fix}}` and commit any files it reformatted.
+- **Always**, unless `{{format-fix}}` is `none`, run it and commit any files it reformatted.
 
 Then push and open the PR. Use the plan's phase titles as the structure of the description,
 not a fixed list of layers:

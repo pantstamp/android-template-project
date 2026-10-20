@@ -3,7 +3,7 @@ name: pre-pr-checklist
 description: >
   Runs a pre-PR quality gate on a feature branch: checks that the PLAN.md was followed, that
   each SPEC.md acceptance criterion is covered, that no debug leftovers or TODOs are in the
-  diff, and that the changed code follows CLAUDE.md's judgement rules, then runs a local mirror
+  diff, and that the changed code follows the project's written judgement rules, then runs a local mirror
   of CI and reports GO, CONDITIONAL GO or NO GO. Use when the user asks whether a branch is
   ready for a PR, or for a pre-PR check, quality gate or final check.
 ---
@@ -54,7 +54,7 @@ Limits on fixes (skip a tool whose value is `none`; it cannot fail):
 - **{{formatter}}** — run `{{format-fix}}`. The only failure that needs no judgment call.
 - **{{architecture-rules}}** — fix the code to match the rule. Changing a rule is a conversation
   with the user, not a silent edit.
-- **Lint** (`warningsAsErrors`) — fix the cause. No baseline or suppression without asking.
+- **Lint** (`{{lint}}`) — fix the cause. No baseline or suppression without asking.
 
 When the user reports a manual check (on a device, emulator or preview), record it in the next
 commit as a `Verified-manually:` trailer, as the developer skill does. The gate reads those

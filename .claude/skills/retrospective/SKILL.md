@@ -3,7 +3,7 @@ name: retrospective
 description: >
   Runs a post-merge retrospective for a feature's pull request: reads the review comments, the
   diff, the fix commits, SPEC.md and PLAN.md, writes a RETRO.md comparing against earlier
-  retros, and routes each lesson to CLAUDE.md, an architecture or lint rule, a skill, or the review
+  retros, and routes each lesson to the project's rules, an architecture or lint rule, a skill, or the review
   prompt. Use after a
   PR is merged when the user asks for a retro, retrospective, lessons learned, or to turn
   review findings into project rules.
@@ -72,13 +72,13 @@ For every lesson, pick exactly one destination:
 
 | The lesson is… | It goes in… |
 |---|---|
-| A rule about the code | **CLAUDE.md** — the rule plus a one-line reason |
+| A rule about the code | **`{{rules-home}}`** — the rule plus a one-line reason |
 | Mechanically checkable | **A {{architecture-rules}} rule (in `{{architecture-rules-home}}`) or a lint rule** — prose gets violated, a rule can't be |
 | About how a pipeline stage works | **The skill** — as a general process step |
 | Something the automated reviewer should check | **The review prompt** in `{{review-prompt}}` |
 | What happened and why | **RETRO.md only** |
 
-**Test for anything going into CLAUDE.md, a skill or the review prompt: would it still be true and useful if this
+**Test for anything going into `{{rules-home}}`, a skill or the review prompt: would it still be true and useful if this
 feature had never existed?** If not, it is history — keep it in RETRO.md. Write rules as the
 mechanism ("a condition that treats `null` and empty alike needs a test for each"), never as
 the incident ("in feature X, phase 2 missed…"): no feature names, phase numbers, file names or
@@ -112,7 +112,7 @@ Per finding: issue · file · root cause (and which stage introduced it) · fix 
 ## Patterns to watch
 
 ## Recommended changes
-### CLAUDE.md
+### Coding rules (`{{rules-home}}`)
 ### {{architecture-rules}} / lint
 ### Skills
 ### Review prompt

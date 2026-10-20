@@ -30,7 +30,10 @@ project may check its AI-instruction files for paths that do not exist, and this
 | `{{verification}}` | `./gradlew :{module}:testDebugUnitTest assembleDebug` | no | A phase's verification command: one test task per module the phase touches |
 | `{{architecture-rules}}` | Konsist | yes | The tool enforcing architecture, layering and naming rules; its step in `{{pre-flight}}` is `:test:konsist:test` |
 | `{{architecture-rules-home}}` | `test/konsist` | yes | Where a new architecture rule is written |
-| `{{rule-review}}` | "Flow and coroutines", "Compose", "MVI pattern" | yes | The `CLAUDE.md` sections whose rules the toolchain cannot check |
+| `{{rules}}` | `CLAUDE.md` | no | The files holding the project's coding rules, read before planning or writing code |
+| `{{rules-home}}` | `CLAUDE.md` | no | Where a new coding rule is written |
+| `{{rule-review}}` | "Flow and coroutines", "Compose", "MVI pattern" | yes | The sections or files of `{{rules}}` whose rules the toolchain cannot check |
+| `{{lint}}` | `./gradlew lint`; warnings fail it (`warningsAsErrors`) | yes | The lint task a phase adds when it touches UI or resources, and whether warnings fail it |
 | `{{residue-extra}}` | unused imports — Spotless in this project does not flag them | yes | Residue the gate looks for beyond the skills' own list |
 | `{{review}}` | comment `@claude-review` on the PR | yes | How an automated review is requested (opt-in: it costs API credits) |
 | `{{review-prompt}}` | `.github/workflows/claude-review.yml` | yes | Where the automated reviewer's prompt is |

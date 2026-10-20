@@ -1,7 +1,7 @@
 # PLAN.md template
 
 The plan must be **self-contained**: a developer or agent can implement it with no context
-beyond this file, `CLAUDE.md` and `.claude/pipeline.md` (whose values, such as
+beyond this file, `{{rules}}` and `.claude/pipeline.md` (whose values, such as
 `{{verification}}`, the plan writes out in full). Phase titles are the change's own steps — the developer
 skill reuses them in commit messages and the PR description. `pipeline:` is
 the version in `PIPELINE_VERSION`, in the folder above this skill's base directory
@@ -17,7 +17,7 @@ What the change does and the approach, in a few sentences. List the phases in on
 
 ## References
 - Spec: `{{feature-docs}}/SPEC.md`
-- Project conventions: `CLAUDE.md`
+- Project conventions: `{{rules}}`
 
 ## Design
 The diagrams agreed at the shape stage, as Mermaid. Modules, classes and data flow only — no
@@ -68,7 +68,7 @@ table; every cell where work is pending or running names its test:
 
 ### Verification
 ```bash
-{{verification}}        # add lint if UI or res/ changed
+{{verification}}        # add {{lint}} if UI or res/ changed (unless none)
 ```
 
 ## Phase 2: {what this phase delivers}

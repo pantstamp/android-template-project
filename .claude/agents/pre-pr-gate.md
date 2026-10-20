@@ -2,8 +2,8 @@
 name: pre-pr-gate
 description: >
   Independent pre-PR quality gate for a feature branch. Given only a feature name, checks the
-  diff against PLAN.md and SPEC.md, scans for residue, reviews changed code against CLAUDE.md's
-  judgement rules, runs a local mirror of CI, and returns a GO / CONDITIONAL GO / NO GO report.
+  diff against PLAN.md and SPEC.md, scans for residue, reviews changed code against the project's
+  written judgement rules, runs a local mirror of CI, and returns a GO / CONDITIONAL GO / NO GO report.
   Read-only: it reports problems and never fixes them. Spawned by the pre-pr-checklist skill.
 tools: Read, Grep, Glob, Bash
 model: inherit
@@ -121,7 +121,8 @@ A pre-existing TODO in a touched file is not this change's to report.
 
 ### Check 5: Rule review
 
-Review the change against the rules in CLAUDE.md that the toolchain cannot check. Each of those
+Review the change against the rules `{{rule-review}}` names (sections or files): those the
+toolchain cannot check. Each of those
 rules records a mistake that compiled, passed every CI check, and was caught only at code review.
 This check makes sure **a known mistake does not reach review twice**. It is not a general code
 review: finding new kinds of mistake is the PR review's job. Report only violations of a written
@@ -133,7 +134,7 @@ If `{{rule-review}}` is `none`, skip this check and say so in the report.
 files), read with enough surrounding code to judge them. Pre-existing code in a touched file is
 not this change's to report.
 
-**Rules**: read them from CLAUDE.md, where they are maintained — do not work from memory of an
+**Rules**: read them where `{{rule-review}}` points, where they are maintained — do not work from memory of an
 older copy:
 - **Every section in {{rule-review}}** — every bullet
 
@@ -151,7 +152,7 @@ override. The relevant argument may predate the branch.
 
 Each finding states:
 - `file:line`
-- the CLAUDE.md rule it breaks, named or quoted
+- the rule it breaks, named or quoted
 - the failure scenario, or why it is latent: what currently prevents the failure, and what
   change would remove that protection
 - a suggested fix
@@ -178,7 +179,8 @@ On failure, report the failing task with the relevant part of its output, and wh
 involves:
 - **The {{architecture-rules}} step** (unless `none`) — the code must change to match the rule. Changing a rule is a
   conversation with the user.
-- **`lint`** (`warningsAsErrors`) — read the HTML report the task links to and name the cause.
+- **The lint step** (`{{lint}}`, unless `none`) — read the HTML report the task links to and
+  name the cause.
   The fix is to the cause; a baseline or suppression is the user's decision.
 - **The {{formatter}} step** (unless `none`) — the caller runs `{{format-fix}}`. Note that the run stopped
   here, so later tasks did not run.

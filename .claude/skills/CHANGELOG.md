@@ -8,6 +8,20 @@ Entries are grouped by stage and say what changed and why.
 
 ## Unreleased
 
+### Architect
+- **Resolves every placeholder in a config command before writing it into the plan**, from the
+  build files or the task list, and asks when it cannot. A per-module test task differs with a
+  module's product flavours, and a guessed name gives a phase whose command does not exist.
+- **Adds `{{lint}}` to a UI phase only when the project has lint**, and splits resources across
+  phases only when warnings fail it. Plans for a project without lint, or without
+  `warningsAsErrors`, got a slow task and phase splits they did not need.
+
+### Developer
+- **Phase implementer: a verification task that does not exist is BLOCKED**, never swapped for
+  another task. A wrong command in the plan is a planning error the user should see.
+- Creates a missing branch from `origin/{{base}}` after fetching, and skips the format fix when
+  `{{format-fix}}` is `none`.
+
 ### Pre-PR gate
 - **Fetches the base and diffs against `origin/{{base}}`.** A stale local base put other merged
   work into the diff, so the rule review judged code that was not the branch's. If the fetch
@@ -20,6 +34,11 @@ Entries are grouped by stage and say what changed and why.
 - **Skips a tool whose value is `none`**, and builds its pre-flight line from the steps that ran.
 
 ### All stages
+- **The project's coding rules are `{{rules}}`, and new ones go to `{{rules-home}}`.** Both are
+  `CLAUDE.md` here. Some projects keep their rules in files `CLAUDE.md` only points to, which a
+  stage reading `CLAUDE.md` never saw, and where the retrospective would have written new rules
+  against the project's own instructions. The gate's rule review reads what `{{rule-review}}`
+  names, sections or files.
 - **The pipeline finds its own files wherever it is installed.** Skills and agents no longer open
   pipeline files by project-relative paths, which resolved only when the pipeline was copied into
   the project. The gate's report format is part of the `pre-pr-gate` agent;

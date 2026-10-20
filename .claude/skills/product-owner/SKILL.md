@@ -46,7 +46,7 @@ on it.
 
 ### 2. Read context
 
-- `CLAUDE.md` — conventions and constraints that affect feasibility
+- `{{rules}}` — conventions and constraints that affect feasibility
 - Existing specs in other features' `{{feature-docs}}` — avoid contradicting them
 - **If the input is a GitHub issue**: `gh issue view {n} --comments`. Then read the code the
   issue names and **verify its root-cause claims**. Issues describe symptoms well and causes
@@ -132,7 +132,7 @@ Do not push; the developer stage pushes the branch with the PR.
 **User:** "Users should be able to mark movies as watched and see them in a new tab."
 
 1. Confirm name and type: `watched-movies`, `feat` → branch `{{feat-prefix}}watched-movies`
-2. Read CLAUDE.md and existing specs
+2. Read `{{rules}}` and existing specs
 3. Ask: "Can a rating be changed later from the Watched tab, or is it read-only there?"
 4. Continue one topic at a time until the gaps are covered
 5. Save the spec, get approval, commit it on the branch

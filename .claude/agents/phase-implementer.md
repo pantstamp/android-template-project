@@ -51,7 +51,7 @@ If a value you use is missing there, return `BLOCKED` naming it; do not guess it
 
 ### 1. Read the context
 
-Read `CLAUDE.md`, the PLAN.md (the whole plan, so you know what earlier phases built and what
+Read `{{rules}}`, the PLAN.md (the whole plan, so you know what earlier phases built and what
 later ones expect), and the SPEC.md (for the *why*). Then read the code the phase touches,
 including what earlier phases on this branch added (`git log --oneline {{base}}..HEAD`, `git diff
 {{base}}...HEAD`).
@@ -59,7 +59,7 @@ including what earlier phases on this branch added (`git log --oneline {{base}}.
 ### 2. Implement exactly what the phase specifies
 
 No additions, no deviations, no "while I'm here" improvements, and nothing from a later phase.
-Follow CLAUDE.md and the surrounding code. Where the plan gives code, use it; where it leaves a
+Follow `{{rules}}` and the surrounding code. Where the plan gives code, use it; where it leaves a
 detail open, decide in the style of the surrounding code and list the decision in the report.
 
 **Optional — prove a regression test can fail.** For a test that exists to guard one specific
@@ -71,6 +71,9 @@ cannot go red guards nothing.
 
 If it fails, read the error, fix the cause, and re-run. If the fix is not obvious, or it would
 change the plan's design, return `BLOCKED` with the error instead.
+
+If it fails because a task or command does not exist, return `BLOCKED` with the error. Do not
+substitute another task: a wrong command in the plan is a planning error the user should see.
 
 ### 4. Return the report
 
