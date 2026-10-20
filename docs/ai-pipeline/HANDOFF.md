@@ -1,7 +1,7 @@
 # Handoff — after step 3 (project config), before step 4 (dry run on production)
 
-Written 2026-10-15, updated 2026-10-16. **Start the next session with:** *"Read
-docs/ai-pipeline/HANDOFF.md and continue."* If the production project is on another machine, see
+Written 2026-10-15, updated 2026-10-20. **Start the next session with:** *"Read
+docs/ai-pipeline/HANDOFF.md and V2.1.0_FIXES.md, and build pipeline-v2.1.0."* If the production project is on another machine, see
 the next section for how to start instead. Then read
 [`AI_PIPELINE_ROADMAP.md`](../AI_PIPELINE_ROADMAP.md) §1, §2 and §5.
 
@@ -92,6 +92,9 @@ wording stay in the skill.
 ## What is left, in order
 
 1. **Step 4 — dry run on the production project** (roadmap §1; on another machine, see above):
+   - **Status (2026-10-20):** dry run done on the production project; the gate ran on one branch.
+     The agreed fixes, and how to check each, are in [`V2.1.0_FIXES.md`](V2.1.0_FIXES.md). Build
+     them as one `2.1.0` (not `2.0.x`), then run the scenarios it lists.
    - Write its `.claude/pipeline.md` from its CI workflow, build files and `CLAUDE.md`. Every name
      in this repo's table needs a value.
    - Copy the pipeline from the `pipeline-v2.0.0` tag into its working tree, uncommitted and listed
