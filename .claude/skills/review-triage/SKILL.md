@@ -22,11 +22,17 @@ guess it.
 
 ## Inputs
 
-- **PR number** — if not given, use the PR for the current branch (`gh pr view --json number`).
+- **PR number** — if not given, use the PR for the current branch:
+  - **On GitHub**: `gh pr view --json number`
+  - **On GitLab** (a merge request): `glab mr view {branch} -F json --jq .iid`
 
 ## Workflow
 
 ### 1. Fetch
+
+The host's way (`{{hosting}}`).
+
+**On GitHub:**
 
 ```bash
 gh api repos/{owner}/{repo}/pulls/{n}/comments --paginate \
@@ -34,8 +40,21 @@ gh api repos/{owner}/{repo}/pulls/{n}/comments --paginate \
 gh api repos/{owner}/{repo}/issues/{n}/comments --jq '.[] | {user: .user.login, body}'
 ```
 
-Top-level comments (`in_reply_to_id == null`) are findings; replies are discussion. Tell the
-user how many findings there are and their severities.
+Top-level comments (`in_reply_to_id == null`) are findings; replies are discussion.
+
+**On GitLab**, comments live in discussions. `glab api` has no `--jq`, so pipe it to `jq`:
+
+```bash
+glab api projects/:id/merge_requests/{n}/discussions --paginate --output ndjson \
+  | jq -c 'select(.notes[0].system | not) | {discussion: .id, resolved: .notes[0].resolved,
+      path: .notes[0].position.new_path, line: .notes[0].position.new_line,
+      notes: [.notes[] | {id, user: .author.username, created_at, body}]}'
+```
+
+A discussion whose first note has a `position` is a finding on the diff; its later notes are the
+replies. A discussion with no `position` is a general comment, like a review summary.
+
+Tell the user how many findings there are and their severities.
 
 ### 2. One finding per message
 
@@ -63,18 +82,29 @@ git commit -m "{type}({feature-name}): address review feedback on PR #{n}"
 git push
 ```
 
-Only with the user's go-ahead: reply on each thread with what changed and the commit hash
-(`gh api -X POST repos/{owner}/{repo}/pulls/{n}/comments/{id}/replies -f body=…`). For a
+Only with the user's go-ahead: reply on each thread with what changed and the commit hash. For a
 rejected finding, reply with the reason. Leave resolving threads to the user.
+- **On GitHub**: `gh api -X POST repos/{owner}/{repo}/pulls/{n}/comments/{id}/replies -f body=…`
+- **On GitLab**: `glab api -X POST projects/:id/merge_requests/{n}/discussions/{discussion}/notes -f body=…`
 
 ### 4. Before merge — late comments
 
 A second review round can land after the fix commit, and it is easy to merge past. Before the
 user merges:
 
+**On GitHub:**
+
 ```bash
 gh api repos/{owner}/{repo}/pulls/{n}/comments \
   --jq '.[] | select(.created_at > "{last commit time}") | {path, line, body}'
+```
+
+**On GitLab:**
+
+```bash
+glab api projects/:id/merge_requests/{n}/discussions --paginate --output ndjson \
+  | jq -c '.notes[] | select((.system | not) and .created_at > "{last commit time}")
+      | {path: .position.new_path, line: .position.new_line, body}'
 ```
 
 Anything returned is unaddressed by definition — triage it the same way.

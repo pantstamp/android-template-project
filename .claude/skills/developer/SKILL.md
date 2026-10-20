@@ -121,8 +121,10 @@ hand off to the **pre-pr-checklist** skill.
 - **If the gate was skipped**, run its Part 2 pre-flight command (`{{pre-flight}}`) first. It mirrors CI; skipping the gate should not mean pushing a branch CI rejects.
 - **Always**, unless `{{format-fix}}` is `none`, run it and commit any files it reformatted.
 
-Then push and open the PR. Use the plan's phase titles as the structure of the description,
-not a fixed list of layers:
+Then push and open the PR, the host's way (`{{hosting}}`). Use the plan's phase titles as the
+structure of the description, not a fixed list of layers.
+
+**On GitHub:**
 
 ```bash
 git push -u origin {prefix}{feature-name}
@@ -149,6 +151,17 @@ gh pr create --base {{base}} --title "{type}: {title}" --body "$(cat <<'EOF'
 - {anything the gate marked NEEDS VERIFICATION}
 EOF
 )"
+```
+
+**On GitLab**, the PR is a merge request, with the same description read from stdin so its line
+breaks survive:
+
+```bash
+git push -u origin {prefix}{feature-name}
+glab mr create --source-branch {prefix}{feature-name} --target-branch {{base}} \
+  --title "{type}: {title}" --description-file - --yes <<'EOF'
+{the same description as above}
+EOF
 ```
 
 Do not merge. Tell the user the PR link, that a review is requested with: {{review}}; and that the **review-triage** skill walks through the findings.

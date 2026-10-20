@@ -41,11 +41,16 @@ git checkout -b {{retro-prefix}}{feature-name}-retro
 
 ### 2. Gather
 
-- Inline review comments: `gh api repos/{owner}/{repo}/pulls/{n}/comments` — path, line,
-  severity, suggestion, and whether a reply says it was fixed
-- The review summary: `gh api repos/{owner}/{repo}/issues/{n}/comments`
-- The PR diff (`gh pr diff {n}`) and its commits; compare the original commit with any fix
-  commits
+- Inline review comments — path, line, severity, suggestion, and whether a reply says it was
+  fixed — and the review summary, the host's way (`{{hosting}}`):
+  - **On GitHub**: `gh api repos/{owner}/{repo}/pulls/{n}/comments` and
+    `gh api repos/{owner}/{repo}/issues/{n}/comments`
+  - **On GitLab**: `glab api projects/:id/merge_requests/{n}/discussions --paginate --output ndjson`.
+    A discussion whose first note has a `position` is an inline comment, with its replies; one
+    without is the summary or another general comment.
+- The PR diff and its commits; compare the original commit with any fix commits:
+  - **On GitHub**: `gh pr diff {n}`
+  - **On GitLab**: `glab mr diff {n} --raw`
 - Timeline: comment times against the last commit and the merge — any comment newer than the
   last commit was merged unaddressed
 - SPEC.md and PLAN.md, and the `pipeline:` version in PLAN.md's header: the release that

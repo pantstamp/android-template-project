@@ -1,10 +1,10 @@
 ---
 name: product-owner
 description: >
-  Interviews the user one topic at a time to turn raw requirements or a GitHub issue into a
+  Interviews the user one topic at a time to turn raw requirements or an issue into a
   SPEC.md with user stories, acceptance criteria, edge cases and out-of-scope items, on a new
   feature or fix branch. Use when the user wants to spec, scope or define a feature or bug fix,
-  write user stories or acceptance criteria, or start work on a GitHub issue.
+  write user stories or acceptance criteria, or start work on an issue.
 ---
 
 # Product Owner / Business Analyst
@@ -21,7 +21,7 @@ guess it.
 
 ## Inputs
 
-- **Raw requirements** — free-form text, or a **GitHub issue** number
+- **Raw requirements** — free-form text, or an **issue** number from `{{issues}}`
 - **Feature name** — a short kebab-case identifier (e.g. `user-profiles`). If not given,
   infer one and confirm it.
 - **Type** — `feat` (new behaviour) or `fix` (a bug). Infer it (an issue labelled `bug` is a
@@ -36,8 +36,8 @@ PLAN.md are committed rather than left untracked in whatever checkout happens to
 
 ```bash
 git status --porcelain          # must be empty
-git checkout {{base}} && git pull --ff-only
-git checkout -b {prefix}{feature-name}    # {{feat-prefix}} for feat, {{fix-prefix}} for fix
+git fetch origin {{base}}
+git checkout -b {prefix}{feature-name} origin/{{base}}    # {{feat-prefix}} for feat, {{fix-prefix}} for fix
 ```
 
 If the working tree is dirty or another branch has unmerged work, stop and ask instead of
@@ -48,8 +48,12 @@ on it.
 
 - `{{rules}}` — conventions and constraints that affect feasibility
 - Existing specs in other features' `{{feature-docs}}` — avoid contradicting them
-- **If the input is a GitHub issue**: `gh issue view {n} --comments`. Then read the code the
-  issue names and **verify its root-cause claims**. Issues describe symptoms well and causes
+- **If the input is an issue**, read it with its comments from `{{issues}}`:
+  - **On GitHub**: `gh issue view {n} --comments`
+  - **On GitLab**: `glab issue view {n} --comments`
+  - **`none`**: ask the user to paste the issue's text and comments.
+
+  Then read the code the issue names and **verify its root-cause claims**. Issues describe symptoms well and causes
   partially; the code usually shows more causes than the issue lists, and each one is a
   requirement the spec must cover. Report what you confirmed and what you found beyond it.
 

@@ -33,6 +33,18 @@ Entries are grouped by stage and say what changed and why.
   pick.
 - **Skips a tool whose value is `none`**, and builds its pre-flight line from the steps that ran.
 
+### Product owner
+- **Reads an issue from `{{issues}}`**: GitHub issues, GitLab issues, or `none` (the user pastes
+  it). A project's issues are not always on its code host.
+- Creates the branch from `origin/{{base}}` after fetching, instead of pulling the local base.
+
+### Developer, review triage, retrospective
+- **GitLab support: written, not yet run.** Each has a GitLab step beside its GitHub one, chosen
+  by `{{hosting}}`: creating the merge request, reading and replying to discussions, reading the
+  diff. On a GitLab project these stages used to stop. The commands follow GitLab's CLI and API
+  docs; the suite cannot run them (this repo is on GitHub), so their first real run is on a GitLab
+  project.
+
 ### All stages
 - **The project's coding rules are `{{rules}}`, and new ones go to `{{rules-home}}`.** Both are
   `CLAUDE.md` here. Some projects keep their rules in files `CLAUDE.md` only points to, which a

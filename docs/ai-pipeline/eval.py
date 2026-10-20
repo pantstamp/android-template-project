@@ -731,7 +731,31 @@ def check_lint_named_once():
             for path, number, line in pipeline_lines() if found.search(line)]
 
 
-STATIC_CHECKS = (check_project_paths, check_config_names, check_lint_named_once)
+HOSTS = {"GitHub": re.compile(r"(^|[\s`(])gh (api|pr|issue|repo)\b"),
+         "GitLab": re.compile(r"(^|[\s`(])glab (api|mr|issue|repo)\b")}
+
+
+def check_host_sections():
+    """Every `gh` call is inside an **On GitHub** section and every `glab` call inside an **On
+    GitLab** one, so a skill picks its steps by `{{hosting}}` and never runs one host's command on
+    the other. A section starts at its marker and ends at the next marker or heading."""
+    problems, current = [], {}
+    for path, number, line in pipeline_lines():
+        state = current.setdefault(path, {"host": None, "fence": False})
+        if line.lstrip().startswith("```"):
+            state["fence"] = not state["fence"]
+        elif not state["fence"] and line.startswith("#"):
+            state["host"] = None
+        for host in HOSTS:
+            if f"**On {host}" in line:
+                state["host"] = host
+        for host, call in HOSTS.items():
+            if call.search(line) and state["host"] != host:
+                problems.append(f"{path}:{number}: a {host} command outside an **On {host}** section: {line.strip()}")
+    return problems
+
+
+STATIC_CHECKS = (check_project_paths, check_config_names, check_lint_named_once, check_host_sections)
 
 
 def static_problems():

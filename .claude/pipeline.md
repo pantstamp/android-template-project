@@ -23,7 +23,8 @@ project may check its AI-instruction files for paths that do not exist, and this
 | `{{fix-prefix}}` | `fix/` | no | Branch prefix for a `fix` change |
 | `{{retro-prefix}}` | `docs/` | no | Branch prefix for a retrospective |
 | `{{feature-docs}}` | `docs/features/{feature-name}` | no | Folder holding a feature's `SPEC.md`, `PLAN.md` and `RETRO.md` |
-| `{{hosting}}` | GitHub, through the `gh` CLI | no | The skills' issue, PR and review-comment commands are written for it; any other value means stop and say so |
+| `{{hosting}}` | GitHub, through the `gh` CLI | no | The code host. Supported: GitHub (`gh`) and GitLab (`glab`); the skills have steps for each. Any other value means stop and say so |
+| `{{issues}}` | GitHub issues (`gh`) | yes | Where the product owner reads an issue: GitHub issues (`gh`), GitLab issues (`glab`), or `none` (the user pastes the text) |
 | `{{pre-flight}}` | `./gradlew spotlessCheck :test:konsist:test test assembleDebug lint` | no | Mirrors CI (`.github/workflows/build.yml`): same tasks, same order. If the workflow changes, change this |
 | `{{format-fix}}` | `./gradlew spotlessApply` | yes | Fixes the formatting step of `{{pre-flight}}` |
 | `{{formatter}}` | Spotless (ktlint) | yes | The formatting step of `{{pre-flight}}`: `spotlessCheck` |

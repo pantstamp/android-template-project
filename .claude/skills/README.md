@@ -35,6 +35,10 @@ words. Moving that knowledge out, or rewording it, made the golden scenarios wor
 [`docs/AI_PIPELINE_ROADMAP.md`](../../docs/AI_PIPELINE_ROADMAP.md) §5). To change a command or a
 branch, change the config, never a skill.
 
+**"PR" means the code host's change request:** a pull request on GitHub, a merge request on
+GitLab. The skills that talk to the host (developer, review-triage, retrospective, and the product
+owner for issues) have a step for each host `{{hosting}}` supports.
+
 ## Agents
 
 Two skills hand bounded work to an agent in `../agents/`:

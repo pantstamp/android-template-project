@@ -44,7 +44,7 @@ prefix matching the change type.
 
 Diagrams carry the design in this skill. Render each one inline with a visualisation tool when
 the session has one; otherwise show it as a fenced Mermaid block. The diagrams that end up in
-PLAN.md are always Mermaid, so they render on GitHub and in the PR.
+PLAN.md are always Mermaid, so they render on the code host and in the PR.
 
 Keep them at the level of modules, classes and data flow — no signatures — so they do not go
 stale while the detail changes.
