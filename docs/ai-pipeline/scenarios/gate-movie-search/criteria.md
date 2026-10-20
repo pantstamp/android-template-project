@@ -12,11 +12,16 @@ and the problem, whatever words it uses and whichever CLAUDE.md rule it cites.
 
 ## Rule review catches the rule-backed findings
 
-- [F1] (required) Refresh while a new query's debounce is pending, in `MovieSearchViewModel`:
+- [F1] (required, full/check5/elsewhere/stale-base/none-tools) Refresh while a new query's debounce is pending, in `MovieSearchViewModel`:
   a Refresh (pull-to-refresh) during the pause before a new query is searched sends a search
   immediately, then again when the pause ends, or otherwise has no defined behaviour for the
   pending state. Expected rule: an event that starts work defines what happens when work is
   already pending or running, and is tested in that state.
+
+  Not graded in `no-spec`. Which events start work, and what they should do while one is
+  pending, comes from the spec; without it the gate found this in 1 of 3 runs (2026-10-20). That
+  variant tests that Checks 1–2 are not applicable and nothing stands in for them, not the rule
+  review's reach without a spec.
 - [F2] (required) The `reruns` `MutableSharedFlow` in `MovieSearchViewModel` is used with
   `tryEmit` but has no explicit `onBufferOverflow`, so a request can be silently dropped.
 - [F5] (required) The `LaunchedEffect` in `DiscoverScreen` that calls `onSearchEvent` reads the
