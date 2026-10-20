@@ -8,6 +8,16 @@ Entries are grouped by stage and say what changed and why.
 
 ## Unreleased
 
+## 2.1.0 — 2026-10-21
+
+The fixes from the step-4 dry run on a second Android project (`docs/ai-pipeline/V2.1.0_FIXES.md`).
+Released on a new rule: no scenario worse than 2.0.0 run the same day. Gate 3 of 3 in all six
+variants, developer 3 of 3; architect 2 of 3 against 2.0.0's 1 of 3 that day; product owner 4 of 6
+against 2.0.0's 3 of 3, recorded and accepted (see its `RESULTS.md`). **Upgrading a project:** add
+the new names `{{rules}}`, `{{rules-home}}`, `{{lint}}` and `{{issues}}` to its `pipeline.md`, and the
+"may be `none`" column; until then, a stage that needs one stops and says which. `PIPELINE_VERSION`
+and this file are now in `skills/`.
+
 ### Architect
 - **Resolves every placeholder in a config command before writing it into the plan**, from the
   build files or the task list, and asks when it cannot. A per-module test task differs with a

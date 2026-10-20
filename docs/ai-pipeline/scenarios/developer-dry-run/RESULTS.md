@@ -2,6 +2,19 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-20 — 2.1.0 (slices a–d), at `923200a` (3 runs)
+
+**PASS: 3 of 3 runs passed every required criterion**, on `claude-opus-5-5`, with no denials. B1
+failed in every run, as it always has. The skill and the phase implementer changed in slices c and
+d (`{{rules}}`, `origin/{{base}}`, a `none` format fix, BLOCKED on a missing task, the GitLab PR
+step); the dry run's plan exercises none of the new paths, so this shows no regression only.
+
+| Run | Duration | Exchanges | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|---|
+| 1 | 323 s | 6 | 25 | 6,392 | $5.09 | 0 |
+| 2 | 300 s | 6 | 30 | 7,474 | $5.39 | 0 |
+| 3 | 261 s | 5 | 31 | 7,014 | $4.79 | 0 |
+
 ## 2026-10-15 — step 3, project facts in `.claude/pipeline.md`, at `32f5662` (3 runs)
 
 **PASS: 3 of 3 runs passed every required criterion**, on `claude-opus-5-5`, with no denials. B1

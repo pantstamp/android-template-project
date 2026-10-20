@@ -73,7 +73,8 @@ SPEC, PLAN and RETRO headers record it as `pipeline: vX.Y.Z`.
 
 - **Every change to the pipeline adds a line to the `Unreleased` section of
   [`CHANGELOG.md`](CHANGELOG.md)**, under its stage, saying what changed and why.
-- **A release** runs the golden scenarios ([`docs/ai-pipeline/`](../../docs/ai-pipeline/README.md)).
+- **A release** runs the golden scenarios ([`docs/ai-pipeline/`](../../docs/ai-pipeline/README.md)),
+  and passes when none is worse than the previous release run the same day (the suite README, "Status").
   Then, in the release PR itself, it renames `Unreleased` to the version and date and sets
   `PIPELINE_VERSION` (once the plugin exists, `.claude-plugin/plugin.json`'s version with it), so
   the tagged commit carries both. After merge, tag the merge commit
