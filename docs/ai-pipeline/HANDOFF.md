@@ -1,124 +1,79 @@
-# Handoff — after step 3 (project config), before step 4 (dry run on production)
+# Handoff — after 2.1.0, before step 5 (the plugin)
 
-Written 2026-10-15, updated 2026-10-20. **Start the next session with:** *"Read
-docs/ai-pipeline/HANDOFF.md and V2.1.0_FIXES.md, and build pipeline-v2.1.0."* If the production project is on another machine, see
-the next section for how to start instead. Then read
-[`AI_PIPELINE_ROADMAP.md`](../AI_PIPELINE_ROADMAP.md) §1, §2 and §5.
+Written 2026-10-21. **Start the next session with:** *"Read docs/ai-pipeline/HANDOFF.md and
+continue."* Then read [`AI_PIPELINE_ROADMAP.md`](../AI_PIPELINE_ROADMAP.md) §2 (packaging) and §3
+(versioning).
 
 ## Before you start
 
-- [x] The step-3 PR (#43) is merged, and `pipeline-v2.0.0` is tagged on the merge commit
-  (`8282a53`).
+- [ ] The 2.1.0 PR is merged, and `pipeline-v2.1.0` is tagged on the merge commit.
 - [ ] `git worktree list` shows only the main checkout, and `git branch | grep -- -eval-` is empty.
 - [ ] `claude --version` is 2.1.280 or newer, and `claude -p "reply with ok" --model claude-opus-5-5`
   answers.
-- [ ] The production Android project is cloned, and you know its base branch and CI.
-
-## Running step 4 on another laptop
-
-The user's step-by-step checklist for this phase is [`STEP4_GUIDE.md`](STEP4_GUIDE.md). Follow
-its checkpoints, so they can check each one.
-
-The production project may live on a different machine and in a different repository. That works:
-this repo is public, so the other machine can fetch everything step 4 needs. The session that wrote
-this file does not travel with it, so this file is the whole brief.
-
-**On that machine you need:**
-- Claude Code 2.1.280 or newer, logged in
-- the Android toolchain (JDK 21, the SDK), so the pre-flight can run
-- `gh` logged in with an account that can push to this repo, for the fixes
-
-**Set it up** with this repo cloned next to the production project, and one session that sees both:
-
-```bash
-git clone https://github.com/pantstamp/android-template-project.git ~/src/android-template-project
-```
-
-```bash
-cd ~/src/production-app && claude --add-dir ~/src/android-template-project
-```
-
-Then say: *"Read `~/src/android-template-project/docs/ai-pipeline/HANDOFF.md` and run step 4 on
-this project."* (Adjust both paths to where the projects actually are.)
-
-**How the steps change:**
-1. **Copy the pipeline from the tag**, not from this repo's `master`, into production's working
-   tree, **uncommitted**: untracked files stay in place when the user switches to the feature
-   branch the gate runs on. Check first whether production already has a `.claude/` folder; the
-   copy must not overwrite anything of its own, such as a `settings.json`:
-
-   ```bash
-   git -C ~/src/android-template-project archive pipeline-v2.0.0 .claude | tar -x -C ~/src/production-app
-   ```
-2. **Keep it local.** Nothing from the pipeline is committed or pushed in production. Right after
-   the copy, add its paths and `docs/features/` to production's `.git/info/exclude` (local-only,
-   never committed), leaving out any path production already tracks. `/product-owner` and
-   `/architect`, if run, write SPEC.md and PLAN.md without committing them. At the end, remove
-   exactly what the copy added (the tag's `.claude` file list, `pipeline.md`, the optional
-   `docs/features/` folder) and the exclude lines. The guide's part 6 has the checks.
-3. **Write production's own `.claude/pipeline.md`** over the copied one, and show it to the user
-   before using it.
-4. **Fixes go to this repo**, as a branch and a PR from that machine. Releases are tagged here, as
-   before.
-5. **The golden scenarios run on either machine**: they need only this repo and the Android SDK.
-   Copy only the `sdk.dir` line into its `local.properties` (and the TMDB key, if the machine has
-   one).
-
-**Production code must not leak into this repo.** It is public. Everything written back here, from
-skill fixes to CHANGELOG lines, `RESULTS.md` notes and this file, describes the mechanism, never
-production's code:
-- **Fine:** "a project without an architecture-rule tool"
-- **Not fine:** production's class names, file paths, rules or snippets
-
-That is the retrospective's rule ("no feature names, file names"), and it matters more here because
-the code is not this repo's to publish. Confirm with the user that running Claude Code on
-production's code is allowed before starting.
+- [ ] `python3 docs/ai-pipeline/eval.py check` passes (free, no model call).
 
 ## Where things stand
 
-**The goal changed on 2026-10-15:** first a second, production Android project, then Flutter. The
-roadmap is re-planned around it.
+**Steps 1–4 are done.** Step 4 was a dry run of `pipeline-v2.0.0` on a second, production Android
+project, on another machine. It found eleven problems, and ten were fixed as
+[`V2.1.0_FIXES.md`](V2.1.0_FIXES.md) describes. That is `pipeline-v2.1.0`:
+- The pipeline finds its own files from any install: the report format is inside the gate agent,
+  and `PIPELINE_VERSION` and the CHANGELOG are in `.claude/skills/`.
+- The gate fetches its base, says "not applicable" without SPEC or PLAN, and skips tools set to
+  `none`.
+- New config names: `{{rules}}`, `{{rules-home}}`, `{{lint}}` and `{{issues}}`; `none` is defined.
+- The architect resolves task names before writing a command; the phase implementer stops on a
+  missing task.
+- GitLab steps sit beside the GitHub ones in the developer, review-triage, retrospective and
+  product-owner skills. **They are written, not yet run**: the production project is on GitLab,
+  and step 6 is their first real use.
+- `eval.py check`: four static checks on the pipeline's files, run before every suite run.
+- New gate variants: `elsewhere`, `stale-base`, `no-spec` and `none-tools`.
 
-**Step 3 is done as `pipeline-v2.0.0`.** The skills and agents are `pipeline-v1.1.0`'s text with
-only project facts replaced by named values, such as `{{base}}`, `{{pre-flight}}` and
-`{{architecture-rules}}`. Their values are in [`.claude/pipeline.md`](../../.claude/pipeline.md).
-All four scenarios pass 3 of 3 (gate and product owner on a re-run).
+**The release rule changed on 2026-10-20.** A release passes when no scenario is worse than the
+previous release, run the same day. The released 2.0.0 scored 1 of 3 on the architect that day, so
+"3 of 3 everywhere" had become a bar no version met. See the suite README, "Status".
 
-**A first attempt at step 3 was dropped.** It moved the Android knowledge into a platform profile,
-and the product owner and architect regressed while 1.1.0, re-run the same day, did not. The roadmap's
-§5 and each `RESULTS.md` have the numbers. The lesson: facts can move to a config; knowledge and
-wording stay in the skill.
+**2.1.0's numbers:**
+- gate 3 of 3 in all six variants
+- developer 3 of 3
+- architect 2 of 3, against 2.0.0's 1 of 3
+- product owner 4 of 6, against 2.0.0's 3 of 3, recorded and accepted
 
 ## What is left, in order
 
-1. **Step 4 — dry run on the production project** (roadmap §1; on another machine, see above):
-   - **Status (2026-10-20):** dry run done on the production project; the gate ran on one branch.
-     The agreed fixes, and how to check each, are in [`V2.1.0_FIXES.md`](V2.1.0_FIXES.md). Build
-     them as one `2.1.0` (not `2.0.x`), then run the scenarios it lists.
-   - Write its `.claude/pipeline.md` from its CI workflow, build files and `CLAUDE.md`. Every name
-     in this repo's table needs a value.
-   - Copy the pipeline from the `pipeline-v2.0.0` tag into its working tree, uncommitted and listed
-     in its `.git/info/exclude`: nothing of the pipeline is committed or pushed there. Run
-     `/pre-pr-checklist` on an existing feature branch. That branch has no SPEC.md or PLAN.md, so
-     Checks 1 and 2 report that, which is expected; judge the rest. Optionally run
-     `/product-owner` then `/architect` on a small real change, stopping after the plan and
-     committing neither SPEC.md nor PLAN.md.
-   - List every place a skill still assumes this template. Likely candidates:
-     - Konsist (does production have an architecture-rule tool at all?)
-     - the CLAUDE.md section names `{{rule-review}}` points to
-     - `warningsAsErrors`
-     - the `@claude-review` workflow
-   - Fix each one here as a `2.0.x` patch: a new name in the table if it is a fact, a skill change
-     if it is process. Run the affected scenarios.
-2. **Step 5 — package as a plugin** (roadmap §2). Verify first:
-   - the `subagent_type` string for a plugin agent (`ai-pipeline:pre-pr-gate`?)
+1. **Step 5: package the pipeline as a plugin** (roadmap §2), in this repo. Verify these three
+   first, each with a throwaway plugin and `claude -p`:
+   - a plugin skill is told its base directory, so `<base directory>/../PIPELINE_VERSION` resolves
+   - the exact `subagent_type` string for a plugin agent (`ai-pipeline:pre-pr-gate`?)
    - that a pinned tag is not refetched by auto-update
-3. **Step 6 — install on production**, pinned to the tag, and take one real feature through the
-   whole pipeline, ending with a retro.
+
+   Then move `.claude/skills/` and `.claude/agents/` into `plugins/ai-pipeline/`, add the manifests,
+   and switch this repo and `eval.py` to `--plugin-dir`. The gate's `elsewhere` variant becomes
+   the run with the pipeline installed as a plugin. Release as `3.0.0`: the skill and agent names
+   change.
+2. **Step 6: install on the production project** (GitLab), pinned to the tag:
+   - commit its `pipeline.md`; it then runs under the project's own CI checks
+   - take one real feature through the whole pipeline, ending with a retro
+   - this is the first run of the GitLab steps, of rules kept outside `CLAUDE.md`, and of a
+     flavoured project's verification commands
+3. **Follow-ups for the skills themselves**, not for a release. Each costs a batch or two to look
+   at:
+   - **Architect, E6.** Both 2.0.0 and 2.1.0 now fail it in 1–2 runs of 3. The failing plans pass
+     the query through a conflating `snapshotFlow` or `StateFlow` and ignore a query equal to the
+     current one, so "matrix" → "" → "matrix" can be lost. The `StateFlow` rule is in `CLAUDE.md`,
+     and the plans argue it does not apply.
+   - **Product owner, P6.** A spec states a decision the user never made. This was 4 of 6 on
+     2.1.0 against 3 of 3 on 2.0.0. If more batches confirm the gap, the first suspect is
+     `{{rules}}` replacing the concrete `CLAUDE.md` in the skill.
 
 **Decided, so not to be raised again:**
 - No platform profile until a real Flutter project adopts the pipeline (roadmap §5).
 - No retrospective scenario until the roadmap is complete. `review-triage` gets no scenario.
+- The gate does not stop early on an already-merged branch ([`V2.1.0_FIXES.md`](V2.1.0_FIXES.md),
+  entry 3).
+
+**Another project's dry run** follows [`STEP4_GUIDE.md`](STEP4_GUIDE.md), written for reuse.
 
 ## Things that bit us, and how they are handled now
 
@@ -127,19 +82,25 @@ wording stay in the skill.
 | `claude -p` 401, or "does not support this model" | `claude auth login` / `claude update`. The runner stops at the first one. |
 | Under `dontAsk`, `cd`, `$(…)` and shell variables are refused | The gate and developer prompts say so. The gate still loses 1–3 calls a run to `W=…; git -C $W`; harmless. |
 | A developer run that commits a plan change on its own ended early | `done_when_subjects`: a run ends when a commit names each phase. |
-| One failing run in three on P6 or F5 | Compare with the previous release the same day before touching a skill (suite README, Status). |
+| One failing run in three on P6, E6 or F1 | Compare with the previous release the same day before touching a skill (suite README, Status). |
 | A same-day comparison checkout has no `local.properties` | Copy only its `sdk.dir` line; the root file holds the API key. |
+| A forbidden pattern matched a legitimate command (`--all` in `./gradlew tasks --all`) | Forbidden patterns name the exact git forms (`log --all`, `branch -a` …), never a bare flag. |
+| A run reads this checkout's pipeline while you edit it | `full` gate runs read the agent and `pipeline.md` live; edit in a separate worktree until they finish. |
+| A heredoc's `EOF` inside the text it writes cut the script short | Write long edit scripts to a file, or use a delimiter the text cannot contain. |
+| `CLAUDE_CONFIG_DIR` to fake a machine-wide install loses the login | The `elsewhere` setting: a scratch project and `--agents` instead. |
 
 **Costs:** a full suite run is about $90 at API prices (architect about $45–50, product owner
-about $27, developer about $16, gate about $5). Step 3 cost about $500 in runs, most of it on the
-dropped first attempt.
+about $27, developer about $16, gate about $5 per variant). Step 3 cost about $500 in runs, 2.1.0
+about $230 (two same-day comparisons included).
 
 ## Known limits of the suite
 
-- **Three runs show a rate, not a guarantee.** P6 and F5 each fail about one run in ten or more;
+- **Three runs show a rate, not a guarantee.** P6, E6 and F1 each fail some runs on any version;
   a single miss is not a regression until a same-day comparison says so.
 - **Judge consistency is unmeasured.**
-- **The suite only tests this template project.** Production quality shows on the first real
-  feature there.
+- **The suite only tests this template project**, on GitHub. GitLab steps, rules kept outside
+  `CLAUDE.md` and flavoured projects are first tested in step 6.
+- **Without SPEC.md, the gate's rule review is weaker.** It found the Refresh-while-pending finding
+  in 1 of 3 runs with no spec, against nearly every run with one.
 - **Not blockers:** the architect's and developer's B1 bonuses rarely pass, and the product owner
   never covers AC11.

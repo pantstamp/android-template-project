@@ -1,8 +1,9 @@
 # AI pipeline roadmap — from this project to a reusable package
 
-Status: steps 1–3 done; step 3 is `pipeline-v2.0.0`. **Next: step 4**, the dry run on the
-production project; the next session's brief is [`docs/ai-pipeline/HANDOFF.md`](ai-pipeline/HANDOFF.md). Re-planned on
-2026-10-15 after a first attempt at a platform split regressed two stages (see §5).
+Status: steps 1–4 done. Step 3 is `pipeline-v2.0.0`; step 4's fixes are `pipeline-v2.1.0`.
+**Next: step 5**, the plugin. The next session's brief is
+[`docs/ai-pipeline/HANDOFF.md`](ai-pipeline/HANDOFF.md). Re-planned on 2026-10-15 after a first
+attempt at a platform split regressed two stages (see §5).
 
 **Starting a new session on this roadmap:** read this file, then `CLAUDE.md`,
 `docs/AI_WORKFLOW.md`, `.claude/skills/README.md` and the HANDOFF.
@@ -26,8 +27,10 @@ released versions.
 3. ✅ **Project config** (§1): move the facts that differ between Android projects into
    `.claude/pipeline.md`. The Android knowledge stays in the skills, word for word. Release as
    `pipeline-v2.0.0`.
-4. **Dry run on the production project** (§1): write its `pipeline.md`, run the gate on an existing
-   branch there, and fix in this repo every place a skill still assumes this template.
+4. ✅ **Dry run on the production project** (§1): write its `pipeline.md`, run the gate on an existing
+   branch there, and fix in this repo every place a skill still assumes this template. Done on
+   2026-10-20; its eleven findings, ten fixed, are `pipeline-v2.1.0`
+   ([`V2.1.0_FIXES.md`](ai-pipeline/V2.1.0_FIXES.md)).
 5. **Package as a plugin** (§2), in this repo, and switch this repo and the suite to it. Release as
    `pipeline-v3.0.0` (the command and agent names change).
 6. **Install on the production project** (§2), pinned to the tag, and take one real feature
@@ -35,8 +38,9 @@ released versions.
 7. **Flutter**, when a real Flutter project adopts it (§5). Not before: with one platform you
    cannot tell what is generic, and the first attempt to guess cost two regressions.
 
-**Every release passes the suite**, and wherever a scenario drops below 3 of 3, it is compared with
-the previous release **run the same day**: model behaviour drifts, so an old baseline is not proof.
+**A release passes when no scenario is worse than the previous release, run the same day.** Model
+behaviour drifts, so an old baseline is not proof: on 2026-10-20 the released 2.0.0 scored 1 of 3
+on the architect, where it had scored 3 of 3 five days before.
 
 ---
 
@@ -108,6 +112,9 @@ installed one; `/reload-plugins` picks up edits. `eval.py` loads it the same way
   folder are not installed.
 - Plugin agents ignore `permissionMode`, `hooks` and `mcpServers` in their frontmatter.
 - The `@claude-review` workflow is a CI file and cannot ship in a plugin; the project copies it.
+- Committing `.claude/pipeline.md` (step 6) puts it under the project's own CI checks. A project
+  that checks its AI-instruction files, for example for paths that do not exist, checks this one
+  too; it must pass them.
 
 **Verify before relying on it:** the exact `subagent_type` string for a plugin agent, and that a
 pinned tag is not refetched by auto-update.
@@ -125,8 +132,8 @@ Rolling back is easy; **noticing that a change made things worse** is the hard p
 - **Each project pins a version** through its marketplace entry's git ref. Rollback is moving the
   pin back.
 - **Until extraction:** commits that touch the pipeline use the `chore(pipeline): …` prefix, and
-  releases are tagged `pipeline-vX.Y.Z`. The version is in `.claude/PIPELINE_VERSION`, the
-  CHANGELOG is `.claude/CHANGELOG.md`, and both move into the plugin at step 5. Roll back with
+  releases are tagged `pipeline-vX.Y.Z`. The version is in `.claude/skills/PIPELINE_VERSION`,
+  the CHANGELOG is `.claude/skills/CHANGELOG.md`, and both move into the plugin's `skills/` at step 5. Roll back with
   `git checkout pipeline-vX.Y.Z -- .claude/`; the version file goes back with it.
 
 ### Detecting regressions

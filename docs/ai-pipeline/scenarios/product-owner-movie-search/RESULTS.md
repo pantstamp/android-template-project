@@ -2,6 +2,31 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-20 — 2.1.0 (slices a–d), at `923200a` (3 + 3 runs), and `pipeline-v2.0.0` the same day
+
+**2.1.0: WARN, 2 of 3 twice (4 of 6).** **2.0.0, run the same day: 3 of 3.** Every failure is P6:
+the spec states a decision the user never made (opening search results' details offline; a Retry
+button's touch target and "no toast"). Every other criterion, STAMP included, passed in all six
+runs, so the moved `PIPELINE_VERSION` is found.
+
+**Released anyway, on the rule adopted that day** (*no worse than the previous release, run the
+same day*), with this gap recorded rather than settled. Three clean runs at a one-in-three failure
+rate happen about 30% of the time, so 4 of 6 against 3 of 3 does not show a regression; it does
+not rule one out either. P6 failed the same way in 2.0.0's own first batch (2026-10-15) and in the
+first baseline (2026-10-11).
+
+The skill's changes since 2.0.0 touch nothing about writing decisions: `{{rules}}` for `CLAUDE.md`
+(twice), the issue input from `{{issues}}` (GitHub, GitLab or pasted), branching from
+`origin/{{base}}` after a fetch, and where the version file is. If a later batch confirms the gap,
+`{{rules}}` replacing a concrete name is the first suspect: the same kind of lookup that hurt in
+step 3.
+
+| Run (2.1.0, re-run) | Duration | Exchanges | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|---|
+| 1 | 352 s | 11 | 22 | 17,181 | $8.04 | 0 |
+| 2 | 391 s | 13 | 30 | 18,695 | $9.55 | 1 |
+| 3 | 322 s | 13 | 30 | 18,979 | $9.74 | 1 |
+
 ## 2026-10-15 — step 3, project facts in `.claude/pipeline.md`, at `32f5662` (3 + 3 runs)
 
 **PASS on the re-run: 3 of 3 runs passed every required criterion**, bonuses included, on

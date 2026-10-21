@@ -2,6 +2,32 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-20 — 2.1.0 (slices a–d), at `923200a` (3 runs), and `pipeline-v2.0.0` the same day
+
+**2.1.0: 2 of 3** on `claude-opus-5-5`, with two LEAK failures discounted. **2.0.0, run the same
+day: 1 of 3.** No regression: E6 failed in both, more often in the released version. Released on
+the rule adopted that day, *no worse than the previous release run the same day*.
+
+| | 2.1.0 | 2.0.0 same day |
+|---|---|---|
+| E6 (`StateFlow` / conflating query pipeline) | ✅ ✅ ❌ | ✅ ❌ ❌ |
+| every other required criterion | ✅ ✅ ✅ | ✅ ✅ ✅ |
+
+- **The two LEAKs were the harness, not the run.** 2.1.0 tells the architect to resolve task names
+  with `./gradlew :{module}:tasks --all` instead of guessing; runs 1 and 3 did, and the plain
+  `--all` forbidden pattern (meant for `git log --all`) matched it. The pattern now names git's
+  `--all` forms only (`588dc6f`).
+- **E6 is unreliable today in both versions.** On 2026-10-15 2.0.0 passed it 3 of 3. The failing
+  plans pass the query through a conflating `snapshotFlow` or `StateFlow` and ignore a query equal
+  to the current one, so "matrix" → "" → "matrix" can be lost. A follow-up for the architect
+  itself, not for this release.
+
+| Run (2.1.0) | Duration | Exchanges | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|---|
+| 1 | 899 s | 6 | 90 | 83,052 | $16.84 | 2 |
+| 2 | 953 s | 5 | 85 | 94,098 | $14.50 | 1 |
+| 3 | 902 s | 5 | 50 | 84,652 | $14.19 | 4 |
+
 ## 2026-10-15 — step 3, project facts in `.claude/pipeline.md`, at `32f5662` (3 runs)
 
 **PASS: 3 of 3 runs passed every required criterion**, on `claude-opus-5-5`. The skill is

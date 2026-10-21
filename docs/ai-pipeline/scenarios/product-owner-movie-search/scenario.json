@@ -6,16 +6,44 @@
   "branch": "feature/movie-search",
   "tools": "Read,Grep,Glob,Bash,Write,Edit",
   "allowed_tools": [
-    "Read", "Grep", "Glob", "Write", "Edit",
-    "Bash(git:*)", "Bash(ls:*)", "Bash(cat:*)", "Bash(head:*)", "Bash(tail:*)", "Bash(sed -n:*)",
-    "Bash(wc:*)", "Bash(find:*)", "Bash(grep:*)", "Bash(mkdir:*)"
+    "Read",
+    "Grep",
+    "Glob",
+    "Write",
+    "Edit",
+    "Bash(git:*)",
+    "Bash(ls:*)",
+    "Bash(cat:*)",
+    "Bash(head:*)",
+    "Bash(tail:*)",
+    "Bash(sed -n:*)",
+    "Bash(wc:*)",
+    "Bash(find:*)",
+    "Bash(grep:*)",
+    "Bash(mkdir:*)"
   ],
-  "forbidden_patterns": ["master", "origin", "--all", "bdfacd9", "2ca290e", "gh issue", "gh pr"],
+  "forbidden_patterns": [
+    "master",
+    "origin",
+    "log --all",
+    "branch --all",
+    "branch -a",
+    "rev-list --all",
+    "show-branch --all",
+    "bdfacd9",
+    "2ca290e",
+    "gh issue",
+    "gh pr"
+  ],
   "answers": "answers.md",
   "done_when_committed": "docs/features/movie-search/SPEC.md",
   "grade_file": "docs/features/movie-search/SPEC.md",
   "judge_references": [
-    {"commit": "bdfacd9", "path": "docs/features/movie-search/SPEC.md", "label": "the real spec (for B3)"}
+    {
+      "commit": "bdfacd9",
+      "path": "docs/features/movie-search/SPEC.md",
+      "label": "the real spec (for B3)"
+    }
   ],
   "stamped": true,
   "max_turns": 30,

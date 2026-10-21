@@ -3,7 +3,7 @@ name: pre-pr-checklist
 description: >
   Runs a pre-PR quality gate on a feature branch: checks that the PLAN.md was followed, that
   each SPEC.md acceptance criterion is covered, that no debug leftovers or TODOs are in the
-  diff, and that the changed code follows CLAUDE.md's judgement rules, then runs a local mirror
+  diff, and that the changed code follows the project's written judgement rules, then runs a local mirror
   of CI and reports GO, CONDITIONAL GO or NO GO. Use when the user asks whether a branch is
   ready for a PR, or for a pre-PR check, quality gate or final check.
 ---
@@ -12,16 +12,16 @@ description: >
 
 CI checks that the code is correct. This gate checks that it is **the code that was agreed**.
 
-The checks themselves run in the **`pre-pr-gate` agent** (`.claude/agents/pre-pr-gate.md`),
-not in this conversation. The conversation that wrote the code is the one most likely to judge
+The checks themselves run in the **`pre-pr-gate` agent**, not in this conversation. The conversation that wrote the code is the one most likely to judge
 it generously; the agent starts with no account of what was built and only reads the branch. It
 is read-only, so it reports problems and cannot fix its way to GO. This skill runs it, shows
 the result, and handles everything that needs the user.
 
 ## Pipeline context
 
-Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
-stands for that name's value in its table. If a value this skill uses is missing there, stop and tell the user which; do not
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{{base}}`,
+stands for that name's value in its table.
+If a value this skill uses is missing there, stop and tell the user which; do not
 guess it.
 
 ## Inputs
@@ -50,11 +50,11 @@ item, say so separately and say why.
   finding, and ask whether to fix, verify manually, or dismiss. Then fix what was agreed.
 - **NO GO** → show the errors and offer fixes within the limits below.
 
-Limits on fixes:
+Limits on fixes (skip a tool whose value is `none`; it cannot fail):
 - **{{formatter}}** — run `{{format-fix}}`. The only failure that needs no judgment call.
-- **{{architecture-rules}}** — fix the code to match the rule. Changing a rule is a conversation with the user,
-  not a silent edit.
-- **Lint** (`warningsAsErrors`) — fix the cause. No baseline or suppression without asking.
+- **{{architecture-rules}}** — fix the code to match the rule. Changing a rule is a conversation
+  with the user, not a silent edit.
+- **Lint** (`{{lint}}`) — fix the cause. No baseline or suppression without asking.
 
 When the user reports a manual check (on a device, emulator or preview), record it in the next
 commit as a `Verified-manually:` trailer, as the developer skill does. The gate reads those

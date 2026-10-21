@@ -3,7 +3,7 @@ name: retrospective
 description: >
   Runs a post-merge retrospective for a feature's pull request: reads the review comments, the
   diff, the fix commits, SPEC.md and PLAN.md, writes a RETRO.md comparing against earlier
-  retros, and routes each lesson to CLAUDE.md, an architecture or lint rule, a skill, or the review
+  retros, and routes each lesson to the project's rules, an architecture or lint rule, a skill, or the review
   prompt. Use after a
   PR is merged when the user asks for a retro, retrospective, lessons learned, or to turn
   review findings into project rules.
@@ -16,8 +16,9 @@ durable changes — project rules, mechanical checks, or process — and records
 
 ## Pipeline context
 
-Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
-stands for that name's value in its table. If a value this skill uses is missing there, stop and tell the user which; do not
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{{base}}`,
+stands for that name's value in its table.
+If a value this skill uses is missing there, stop and tell the user which; do not
 guess it.
 
 ## Inputs
@@ -40,11 +41,16 @@ git checkout -b {{retro-prefix}}{feature-name}-retro
 
 ### 2. Gather
 
-- Inline review comments: `gh api repos/{owner}/{repo}/pulls/{n}/comments` — path, line,
-  severity, suggestion, and whether a reply says it was fixed
-- The review summary: `gh api repos/{owner}/{repo}/issues/{n}/comments`
-- The PR diff (`gh pr diff {n}`) and its commits; compare the original commit with any fix
-  commits
+- Inline review comments — path, line, severity, suggestion, and whether a reply says it was
+  fixed — and the review summary, the host's way (`{{hosting}}`):
+  - **On GitHub**: `gh api repos/{owner}/{repo}/pulls/{n}/comments` and
+    `gh api repos/{owner}/{repo}/issues/{n}/comments`
+  - **On GitLab**: `glab api projects/:id/merge_requests/{n}/discussions --paginate --output ndjson`.
+    A discussion whose first note has a `position` is an inline comment, with its replies; one
+    without is the summary or another general comment.
+- The PR diff and its commits; compare the original commit with any fix commits:
+  - **On GitHub**: `gh pr diff {n}`
+  - **On GitLab**: `glab mr diff {n} --raw`
 - Timeline: comment times against the last commit and the merge — any comment newer than the
   last commit was merged unaddressed
 - SPEC.md and PLAN.md, and the `pipeline:` version in PLAN.md's header: the release that
@@ -71,13 +77,13 @@ For every lesson, pick exactly one destination:
 
 | The lesson is… | It goes in… |
 |---|---|
-| A rule about the code | **CLAUDE.md** — the rule plus a one-line reason |
+| A rule about the code | **`{{rules-home}}`** — the rule plus a one-line reason |
 | Mechanically checkable | **A {{architecture-rules}} rule (in `{{architecture-rules-home}}`) or a lint rule** — prose gets violated, a rule can't be |
 | About how a pipeline stage works | **The skill** — as a general process step |
 | Something the automated reviewer should check | **The review prompt** in `{{review-prompt}}` |
 | What happened and why | **RETRO.md only** |
 
-**Test for anything going into CLAUDE.md, a skill or the review prompt: would it still be true and useful if this
+**Test for anything going into `{{rules-home}}`, a skill or the review prompt: would it still be true and useful if this
 feature had never existed?** If not, it is history — keep it in RETRO.md. Write rules as the
 mechanism ("a condition that treats `null` and empty alike needs a test for each"), never as
 the incident ("in feature X, phase 2 missed…"): no feature names, phase numbers, file names or
@@ -111,7 +117,7 @@ Per finding: issue · file · root cause (and which stage introduced it) · fix 
 ## Patterns to watch
 
 ## Recommended changes
-### CLAUDE.md
+### Coding rules (`{{rules-home}}`)
 ### {{architecture-rules}} / lint
 ### Skills
 ### Review prompt

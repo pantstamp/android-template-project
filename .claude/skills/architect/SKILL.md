@@ -26,8 +26,9 @@ design honestly, and turn the agreed design into a plan.
 
 ## Pipeline context
 
-Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
-stands for that name's value in its table. If a value this skill uses is missing there, stop and tell the user which; do not
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{{base}}`,
+stands for that name's value in its table.
+If a value this skill uses is missing there, stop and tell the user which; do not
 guess it.
 
 ## Inputs
@@ -43,7 +44,7 @@ prefix matching the change type.
 
 Diagrams carry the design in this skill. Render each one inline with a visualisation tool when
 the session has one; otherwise show it as a fenced Mermaid block. The diagrams that end up in
-PLAN.md are always Mermaid, so they render on GitHub and in the PR.
+PLAN.md are always Mermaid, so they render on the code host and in the PR.
 
 Keep them at the level of modules, classes and data flow — no signatures — so they do not go
 stale while the detail changes.
@@ -54,7 +55,7 @@ stale while the detail changes.
 
 #### 1. Read the context — and judge it
 
-Read in order: `CLAUDE.md`, the SPEC.md, the architecture docs in `docs/`, then the code the
+Read in order: `{{rules}}`, the SPEC.md, the architecture docs in `docs/`, then the code the
 feature touches (module structure, navigation, database, DI, and the closest existing
 equivalent of what you are building).
 
@@ -89,7 +90,7 @@ complete enough to design from and free of hints about the answer:
   they are today. Mark the parts with known weaknesses.
 - **The closest existing equivalent**, walked through step by step: how it loads, caches,
   maps and displays its data.
-- **The rules that bind this feature** — the {{architecture-rules}} and `CLAUDE.md` rules it will run into,
+- **The rules that bind this feature** — the {{architecture-rules}} rules and those in `{{rules}}` that it will run into,
   so the user designs inside them rather than discovering them in review.
 - **Known weaknesses** this feature could copy, stated as facts with their consequence ("this
   collects a Room flow on every resume, which leaks a collector per resume"), without saying
@@ -119,7 +120,7 @@ Go through their design **one decision at a time**. For each:
 
 - **Verdict** — sound, a trade-off, or a problem; and for a problem, how serious: a real
   defect, a trade-off to make knowingly, or a matter of taste.
-- **Evidence** — the code, the `CLAUDE.md` rule or the established practice behind the
+- **Evidence** — the code, the rule in `{{rules}}` or the established practice behind the
   verdict. Never "I'd prefer…" without a reason.
 - **The principle, by name** — single responsibility, cancellation safety, an irreversible
   migration, an abstraction with one implementor — so the lesson carries to the next design.
@@ -161,7 +162,7 @@ order does not change — the user still proposes before you do.
 
 #### 6. Draft the plan
 
-Use the structure in [PLAN_TEMPLATE.md](PLAN_TEMPLATE.md). The diagrams and decision record
+Use the structure in `PLAN_TEMPLATE.md`, in this skill's base directory. The diagrams and decision record
 from step 5 go into it as agreed — the final design only, not how it was reached.
 
 **Phases are dependency-ordered slices, not fixed layers.** Order them so each builds on the
@@ -172,10 +173,14 @@ actually touches. Every phase:
 - **includes its own tests** — no code phase ships untested waiting for a later "testing"
   phase
 - **leaves the project compiling and its tests passing**
-- ends with a **verification command**. If the phase touches a composable or anything under
-  `res/`, the command includes `lint`: lint is the only check that sees Compose and resource
-  misuse, and it runs with `warningsAsErrors`. To make that possible, **add each resource in
-  the phase that first uses it** — an unused resource is itself a lint error.
+- ends with a **verification command**. If `{{lint}}` is not `none` and the phase touches a
+  composable or anything under `res/`, the command includes `{{lint}}`: lint is the only check
+  that sees Compose and resource misuse. When `{{lint}}` says warnings fail it, **add each
+  resource in the phase that first uses it** — an unused resource is then itself a lint error.
+- writes every command out in full. **If a config value has placeholders** (`{module}`,
+  `{unit-test-task}`, …), resolve each from the project — its build files, or
+  `./gradlew :{module}:tasks --all` — and write the exact command. Never guess a task name. If
+  one cannot be resolved, ask.
 - for a phase that adds or changes a screen, lists the **`@Preview`s to add, one per visual
   state** (loading, each error variant, empty, content). CI compiles previews but never
   renders them, so a preview is often the only way to see a state that is hard to reach on a
@@ -207,9 +212,9 @@ Spend the effort on what the build can't check:
   Compose type named in `:architecture:mapper` or `:core:model` is the signal.
 - **Does a default or constant encode behaviour that belongs elsewhere?** e.g. a `UiState`
   default describing what the ViewModel does on start.
-- **Does every phase compile on its own, include its tests, run `lint` if it touches UI or
-  resources, and list a preview per new screen state?**
-- **Is every code block in the plan held to CLAUDE.md?** The developer implements plan code
+- **Does every phase compile on its own, include its tests, run `{{lint}}` (unless `none`) if
+  it touches UI or resources, and list a preview per new screen state?**
+- **Is every code block in the plan held to `{{rules}}`?** The developer implements plan code
   verbatim, so a rule broken in the plan ships. Check each snippet as you would a diff: flows,
   effects, buffers, flags.
 - **Does every new or changed ViewModel whose events start work have its event × state table**,

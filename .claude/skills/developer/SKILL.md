@@ -15,8 +15,9 @@ found under the phases built on top of it.
 
 ## Pipeline context
 
-Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{base}`,
-stands for that name's value in its table. If a value this skill uses is missing there, stop and tell the user which; do not
+Read `.claude/pipeline.md` before you start. A name in double braces below, such as `{{base}}`,
+stands for that name's value in its table.
+If a value this skill uses is missing there, stop and tell the user which; do not
 guess it.
 
 ## Inputs
@@ -29,7 +30,7 @@ guess it.
 
 ### 1. Read context and check out the branch
 
-Read `CLAUDE.md`, the PLAN.md, and the SPEC.md (for the *why*).
+Read `{{rules}}`, the PLAN.md, and the SPEC.md (for the *why*).
 
 The product-owner and architect stages created the branch and committed SPEC.md and PLAN.md
 on it. Check it out:
@@ -38,15 +39,16 @@ on it. Check it out:
 git checkout {prefix}{feature-name}      # {{feat-prefix}}… or {{fix-prefix}}…
 ```
 
-If no such branch exists (earlier stages were skipped), create it from an up-to-date `{{base}}`
-with the prefix matching the change type. Tell the user the branch and the phase you're
+If no such branch exists (earlier stages were skipped), create it from an up-to-date base, with
+the prefix matching the change type: `git fetch origin {{base}}`, then branch from
+`origin/{{base}}`. Tell the user the branch and the phase you're
 starting from. When resuming, `git log --oneline {{base}}..HEAD` shows which phases are done.
 
 ### 2. For each phase
 
-Each phase is implemented by the **`phase-implementer` agent** (`.claude/agents/phase-implementer.md`,
-Sonnet), not in this conversation. Implementation is the bulky part of the work — file reads,
-build output, fix loops — and running it in the agent keeps this conversation down to the plan,
+Each phase is implemented by the **`phase-implementer` agent** (Sonnet), not in this
+conversation. Implementation is the bulky part of the work — file reads, build output, fix
+loops — and running it in the agent keeps this conversation down to the plan,
 the reports and the user's decisions for the whole feature. Every phase also starts from PLAN.md
 alone, so a gap in the plan shows up immediately instead of being covered by what this session
 remembers. This conversation keeps the checkpoint and the commit.
@@ -117,10 +119,12 @@ hand off to the **pre-pr-checklist** skill.
 ### 5. Create the PR
 
 - **If the gate was skipped**, run its Part 2 pre-flight command (`{{pre-flight}}`) first. It mirrors CI; skipping the gate should not mean pushing a branch CI rejects.
-- **Always** run `{{format-fix}}` and commit any files it reformatted.
+- **Always**, unless `{{format-fix}}` is `none`, run it and commit any files it reformatted.
 
-Then push and open the PR. Use the plan's phase titles as the structure of the description,
-not a fixed list of layers:
+Then push and open the PR, the host's way (`{{hosting}}`). Use the plan's phase titles as the
+structure of the description, not a fixed list of layers.
+
+**On GitHub:**
 
 ```bash
 git push -u origin {prefix}{feature-name}
@@ -147,6 +151,17 @@ gh pr create --base {{base}} --title "{type}: {title}" --body "$(cat <<'EOF'
 - {anything the gate marked NEEDS VERIFICATION}
 EOF
 )"
+```
+
+**On GitLab**, the PR is a merge request, with the same description read from stdin so its line
+breaks survive:
+
+```bash
+git push -u origin {prefix}{feature-name}
+glab mr create --source-branch {prefix}{feature-name} --target-branch {{base}} \
+  --title "{type}: {title}" --description-file - --yes <<'EOF'
+{the same description as above}
+EOF
 ```
 
 Do not merge. Tell the user the PR link, that a review is requested with: {{review}}; and that the **review-triage** skill walks through the findings.

@@ -5,6 +5,7 @@ Each scenario replays a historical snapshot with the current pipeline files and 
 result against criteria whose outcome is already known. See docs/ai-pipeline/README.md.
 
   eval.py list
+  eval.py check                          # static checks on the pipeline files, no model call
   eval.py run <scenario> [--runs N] [--variant V] [--keep] [--judge-model M] [--user-model M]
   eval.py setup <scenario> <dir>         # worktree + rendered prompt, no model call
   eval.py grade <scenario> <output.md> [--variant V] [--transcript FILE]
@@ -32,7 +33,8 @@ REPO = Path(
         check=True, capture_output=True, text=True,
     ).stdout.strip()
 )
-CRITERION = re.compile(r"^- \[([A-Z0-9]+)\] \((required|bonus)(?:, ([a-z0-9-]+))?\)")
+# `- [ID] (required|bonus[, variant[/variant…]]) text`
+CRITERION = re.compile(r"^- \[([A-Z0-9]+)\] \((required|bonus)(?:, ([a-z0-9/-]+))?\)")
 REQUIRED_FILES = ("scenario.json", "prompt.md", "criteria.md")
 EVAL_GIT = ["-c", "user.name=ai-pipeline-eval", "-c", "user.email=eval@localhost"]
 # Pinned so results compare across machines and CLI versions: the CLI's own default model
@@ -94,15 +96,21 @@ def parse_criteria(text, name):
 
 
 def variant_of(config, requested):
+    """A variant is extra prompt text, or {"extra": text, "settings": {...}}, whose settings
+    override the scenario's for that run (for example `"install": "elsewhere"`)."""
     variants = config.get("variants", {"default": ""})
     variant = requested or config.get("default_variant") or next(iter(variants))
     if variant not in variants:
         raise ScenarioError(f"{config['name']}: unknown variant '{variant}' ({', '.join(variants)})")
-    return variant, variants[variant]
+    value = variants[variant]
+    if isinstance(value, dict):
+        config.update(value.get("settings", {}))
+        value = value.get("extra", "")
+    return variant, value
 
 
 def graded(config, variant):
-    return [c for c in config["criteria"] if c["variant"] in (None, variant)]
+    return [c for c in config["criteria"] if c["variant"] is None or variant in c["variant"].split("/")]
 
 
 # ── workspace ─────────────────────────────────────────────────────────────────────────────
@@ -123,13 +131,15 @@ def setup(config, run_dir, extra):
     scratch = run_dir / "scratch"
     scratch.mkdir(exist_ok=True)
     branch = None
-    if config.get("branch"):
+    if config.get("stale_base"):
+        stale_clone(config, run_dir, worktree)
+    elif config.get("branch"):
         # Branch names are shared by every worktree of the repo, so each run gets its own.
         # Two scenarios can share a branch prefix and start in the same second.
         tag = re.sub(r"[^A-Za-z0-9-]", "-", f"{config['name']}-{run_dir.parent.name}-{run_dir.name}")
         branch = f"{config['branch']}-eval-{tag}"
         git("worktree", "add", "-b", branch, str(worktree), config["snapshot"])
-    else:
+    elif not config.get("stale_base"):
         git("worktree", "add", "--detach", str(worktree), config["snapshot"])
     write_sdk_dir(worktree)
     if config["mode"] == "inside":
@@ -158,6 +168,8 @@ def setup(config, run_dir, extra):
         git(*EVAL_GIT, "commit", "-q", "--allow-empty", "-m", "eval: use the current pipeline", cwd=worktree)
     start = git("rev-parse", "HEAD", cwd=worktree).strip()
     prompt = config["prompt"]
+    if config.get("prompt_file"):
+        prompt = (config["folder"] / config["prompt_file"]).read_text()
     for key, value in {"WORKTREE": worktree, "BASE": config.get("base", ""), "BRANCH": branch or "",
                        "SCRATCH": scratch}.items():
         prompt = prompt.replace("{{" + key + "}}", str(value))
@@ -165,8 +177,74 @@ def setup(config, run_dir, extra):
         prompt = f"{prompt.rstrip()}\n\n{extra}\n"
     (run_dir / "prompt.md").write_text(prompt)
     cwd = REPO if config["mode"] == "outside" else worktree
+    if config.get("install") == "elsewhere":
+        cwd = elsewhere_project(run_dir, config.get("pipeline_values", {}))
     return {"worktree": worktree, "branch": branch, "cwd": cwd, "scratch": scratch, "start": start,
             "prompt": prompt}
+
+
+def stale_clone(config, run_dir, clone):
+    """A checkout whose local base is behind its remote, as a developer's clone often is. A bare
+    repository stands in for the remote, with `{{base}}` at `base`; the checkout is detached at
+    the snapshot, its local `{{base}}` is left at `stale_base`, and it has no `origin/{{base}}`
+    until it fetches. Both share this repo's objects, so neither copies them."""
+    base_branch = config.get("base_branch", "master")
+    remote = run_dir / "origin.git"
+    git("clone", "-q", "--bare", "--shared", str(REPO), str(remote))
+    # Only the base branch, at the snapshot's base: this repo's other branches and tags are later
+    # work the run must not find.
+    for ref in git("for-each-ref", "--format=%(refname)", cwd=remote).split():
+        git("update-ref", "-d", ref, cwd=remote)
+    git("update-ref", f"refs/heads/{base_branch}", config["base"], cwd=remote)
+    git("symbolic-ref", "HEAD", f"refs/heads/{base_branch}", cwd=remote)
+    git("clone", "-q", "--shared", "--no-checkout", str(remote), str(clone))
+    git("checkout", "-q", "--detach", config["snapshot"], cwd=clone)
+    git("branch", "-f", base_branch, config["stale_base"], cwd=clone)
+    git("update-ref", "-d", f"refs/remotes/origin/{base_branch}", cwd=clone)
+
+
+def elsewhere_project(run_dir, values=None):
+    """An `outside` run's working directory when the pipeline is installed outside the project, as
+    machine-wide or as a plugin: the project's own files (`CLAUDE.md`, `.claude/pipeline.md`, the
+    Gradle wrapper the pre-flight runs) and none of the pipeline's. The agent is passed with
+    `--agents`, so neither it nor its files are on disk where the run looks."""
+    project = run_dir / "project"
+    for path in ("CLAUDE.md", ".claude/pipeline.md", "gradlew", *git("ls-files", "gradle/wrapper").split()):
+        (project / path).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(REPO / path, project / path)
+    if values:
+        config_file = project / ".claude" / "pipeline.md"
+        lines = config_file.read_text().splitlines()
+        for name, value in values.items():
+            rows = [i for i, l in enumerate(lines) if l.startswith(f"| `{{{{{name}}}}}` | ")]
+            if len(rows) != 1:
+                raise ScenarioError(f"pipeline_values: no single row for {{{{{name}}}}}")
+            cells = lines[rows[0]].split(" | ")
+            cells[1] = value
+            lines[rows[0]] = " | ".join(cells)
+        config_file.write_text("\n".join(lines) + "\n")
+    return project
+
+
+def agent_definition(name):
+    """The `--agents` JSON for one agent file: its frontmatter's description, tools and model, and
+    its body as the prompt."""
+    text = (REPO / ".claude" / "agents" / f"{name}.md").read_text()
+    _, front, body = text.split("---\n", 2)
+    fields, key = {}, None
+    for line in front.splitlines():
+        match = re.match(r"^([a-z-]+):\s*(.*)$", line)
+        if match:
+            key, value = match[1], match[2].strip()
+            fields[key] = "" if value in (">", "|") else value
+        elif key:
+            fields[key] = (fields[key] + " " + line.strip()).strip()
+    agent = {"description": fields.get("description", ""), "prompt": body.strip()}
+    if fields.get("tools"):
+        agent["tools"] = [t.strip() for t in fields["tools"].split(",")]
+    if fields.get("model") and fields["model"] != "inherit":
+        agent["model"] = fields["model"]
+    return json.dumps({name: agent})
 
 
 def write_sdk_dir(worktree):
@@ -179,6 +257,10 @@ def write_sdk_dir(worktree):
 
 
 def remove(workspace):
+    if (workspace["worktree"] / ".git").is_dir():  # a clone (stale_base), not a worktree
+        shutil.rmtree(workspace["worktree"], ignore_errors=True)
+        shutil.rmtree(workspace["worktree"].parent / "origin.git", ignore_errors=True)
+        return
     subprocess.run(["git", "worktree", "remove", "--force", str(workspace["worktree"])],
                    cwd=REPO, capture_output=True)
     if workspace.get("branch"):
@@ -215,6 +297,8 @@ def claude_turn(config, workspace, message, transcript, session, first):
         command += ["--resume", session]
     command += ["--model", config["run_model"]]
     if config.get("agent"):
+        if config.get("install") == "elsewhere":
+            command += ["--agents", agent_definition(config["agent"])]
         command += ["--agent", config["agent"]]
     if config.get("tools"):
         command += ["--tools", config["tools"]]
@@ -438,7 +522,7 @@ def nested_git(events):
 def stamp(config, workspace):
     """Whether the committed grade_file records the pipeline version under its title, as the
     SPEC and PLAN templates ask. The version is the one the run was given."""
-    version = (REPO / ".claude" / "PIPELINE_VERSION").read_text().strip()
+    version = (REPO / ".claude" / "skills" / "PIPELINE_VERSION").read_text().strip()
     expected = f"pipeline: v{version}"
     try:
         content = git("show", f"HEAD:{config['grade_file']}", cwd=workspace["worktree"])
@@ -589,7 +673,104 @@ def summarise(config, variant, runs):
     return verdict, "\n".join(lines) + "\n"
 
 
+# ── static checks ─────────────────────────────────────────────────────────────────────────
+# Free checks on the pipeline's own files, run before every suite run. Each returns a list of
+# problems as "path:line: what is wrong".
+
+PIPELINE_DIRS = (REPO / ".claude" / "skills", REPO / ".claude" / "agents")
+
+
+def pipeline_lines():
+    for folder in PIPELINE_DIRS:
+        for path in sorted(folder.rglob("*.md")):
+            if path.name in ("README.md", "CHANGELOG.md"):  # about the pipeline, not read by it
+                continue
+            for number, line in enumerate(path.read_text().splitlines(), 1):
+                yield path.relative_to(REPO), number, line
+
+
+def check_project_paths():
+    """A skill or agent opens its own files from its base directory, and the project's only through
+    `.claude/pipeline.md`. Any other `.claude/…` path resolves only when the pipeline is copied
+    into the project, not when it is installed machine-wide or as a plugin."""
+    found = re.compile(r"\.claude/(?!pipeline\.md)")
+    return [f"{path}:{number}: names a project-relative pipeline path: {line.strip()}"
+            for path, number, line in pipeline_lines() if found.search(line)]
+
+
+def config_names():
+    """{name: may it be `none`?} from `.claude/pipeline.md`'s table."""
+    names = {}
+    for line in (REPO / ".claude" / "pipeline.md").read_text().splitlines():
+        match = re.match(r"^\| `\{\{([a-z-]+)\}\}` \| .*? \| (yes|no) \| ", line)
+        if match:
+            names[match[1]] = match[2] == "yes"
+        elif line.startswith("| `{{"):
+            names[line.split("`")[1].strip("{}")] = None  # a row without a yes/no mark
+    return names
+
+
+def check_config_names():
+    """Every `{{name}}` a skill or agent uses is a row in `.claude/pipeline.md`, and every row says
+    whether it may be `none`."""
+    names = config_names()
+    problems = [f".claude/pipeline.md: {{{{{name}}}}} does not say whether it may be `none`"
+                for name, may in names.items() if may is None]
+    for path, number, line in pipeline_lines():
+        for name in re.findall(r"\{\{([a-z-]+)\}\}", line):
+            if name not in names:
+                problems.append(f"{path}:{number}: {{{{{name}}}}} is not in .claude/pipeline.md's table")
+    return problems
+
+
+def check_lint_named_once():
+    """The lint task and whether warnings fail it are a project fact, `{{lint}}`: a skill names
+    neither `lint` as a task nor `warningsAsErrors`. Prose ("a lint rule") is fine."""
+    found = re.compile(r"`lint`|warningsAsErrors")
+    return [f"{path}:{number}: names the lint task or its warning policy instead of {{{{lint}}}}: {line.strip()}"
+            for path, number, line in pipeline_lines() if found.search(line)]
+
+
+HOSTS = {"GitHub": re.compile(r"(^|[\s`(])gh (api|pr|issue|repo)\b"),
+         "GitLab": re.compile(r"(^|[\s`(])glab (api|mr|issue|repo)\b")}
+
+
+def check_host_sections():
+    """Every `gh` call is inside an **On GitHub** section and every `glab` call inside an **On
+    GitLab** one, so a skill picks its steps by `{{hosting}}` and never runs one host's command on
+    the other. A section starts at its marker and ends at the next marker or heading."""
+    problems, current = [], {}
+    for path, number, line in pipeline_lines():
+        state = current.setdefault(path, {"host": None, "fence": False})
+        if line.lstrip().startswith("```"):
+            state["fence"] = not state["fence"]
+        elif not state["fence"] and line.startswith("#"):
+            state["host"] = None
+        for host in HOSTS:
+            if f"**On {host}" in line:
+                state["host"] = host
+        for host, call in HOSTS.items():
+            if call.search(line) and state["host"] != host:
+                problems.append(f"{path}:{number}: a {host} command outside an **On {host}** section: {line.strip()}")
+    return problems
+
+
+STATIC_CHECKS = (check_project_paths, check_config_names, check_lint_named_once, check_host_sections)
+
+
+def static_problems():
+    return [problem for check in STATIC_CHECKS for problem in check()]
+
+
 # ── commands ──────────────────────────────────────────────────────────────────────────────
+
+
+def cmd_check(_):
+    problems = static_problems()
+    for problem in problems:
+        print(problem)
+    print(f"{len(STATIC_CHECKS)} static checks: " + (f"{len(problems)} problems" if problems else "pass"))
+    return 1 if problems else 0
 
 
 def cmd_list(_):
@@ -626,6 +807,10 @@ def cmd_grade(args):
 
 
 def cmd_run(args):
+    problems = static_problems()
+    if problems:
+        print("\n".join(problems))
+        sys.exit("error: the static checks fail; fix them first (eval.py check)")
     config = load(args.scenario)
     variant, extra = variant_of(config, args.variant)
     config["run_model"] = args.model or config.get("model") or DEFAULT_MODEL
@@ -665,6 +850,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("list").set_defaults(func=cmd_list)
+    sub.add_parser("check").set_defaults(func=cmd_check)
     p = sub.add_parser("run")
     p.add_argument("scenario")
     p.add_argument("--runs", type=int)

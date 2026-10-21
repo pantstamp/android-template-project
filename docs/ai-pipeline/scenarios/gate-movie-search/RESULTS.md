@@ -2,6 +2,31 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-20 — 2.1.0, built in four slices, at `4f73a70` … `923200a` (6 variants, 3 runs each)
+
+**PASS: every variant 3 of 3**, on `claude-opus-5-5`, after one re-run (`stale-base`). Five new or
+changed variants test the fixes from the step-4 dry run (`V2.1.0_FIXES.md`):
+
+| Variant | Tests | Slice a | Slice b | Slices c+d |
+|---|---|---|---|---|
+| `full` | the gate as usual | 3 of 3 | 3 of 3 | 3 of 3 |
+| `elsewhere` | pipeline installed outside the project (entry 1) | 3 of 3 | 3 of 3 | — |
+| `stale-base` | local base two merges behind `origin` (entry 2) | — | 2 of 3, re-run 3 of 3 | — |
+| `no-spec` | no SPEC.md / PLAN.md, a look-alike note (entry 4) | — | 3 of 3 without F1 | — |
+| `none-tools` | formatter and architecture tool `none` (entry 7) | — | 3 of 3 | — |
+
+- **What each fix changed held in every run:** R4 (the report keeps its format with no pipeline
+  files nearby), S1 (fetched, diffed against `origin/master`, no file from the stale range), N1
+  (Checks 1–2 not applicable, the caveat line, the note not used), T1 (no formatter or Konsist
+  step, none invented).
+- **`stale-base` run 2 missed F1 once;** the re-run passed 3 of 3, and F1 passed all 9 runs of
+  `full`, `elsewhere` and `none-tools` in the same slice.
+- **F1 is not graded in `no-spec`.** Without a spec the gate found it in 1 of 3 runs: which events
+  start work, and what they do while one is pending, comes from the spec. The variant tests entry
+  4, not the rule review's reach without a spec. Recorded here as a limit of the gate on work done
+  without the earlier stages.
+- `no-spec` runs took half as long (100–160 s against about 220 s): there is no plan to check.
+
 ## 2026-10-15 — step 3, project facts in `.claude/pipeline.md`, at `32f5662` (variant `full`, 3 + 3 runs)
 
 **PASS on the re-run: 3 of 3 runs passed every required criterion**, bonus included, on
