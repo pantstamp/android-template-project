@@ -2,6 +2,26 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-23 — 3.0.0 plumbing check, the plugin, at `738f417` (2 variants, 1 run each)
+
+**PASS: `full` 1 of 1, `elsewhere` 1 of 1**, on `claude-opus-5-5`. A packaging-only release, run
+on the rule for one (suite README, "Status"): one run of each variant that could break. Both
+loaded the plugin from the run's frozen copy and ran as `--agent ai-pipeline:pre-pr-gate`; every
+criterion passed, B1 included. `elsewhere` now means a project that installs the plugin: only
+`CLAUDE.md`, `pipeline.md` and the Gradle wrapper on disk, with no `--agents` stand-in.
+
+| Variant | Duration | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|
+| `full` | 210 s | 28 | 17,846 | $1.46 | 1 |
+| `elsewhere` | 200 s | 24 | 17,597 | $1.45 | 1 |
+
+- **The denial in each run is the known `W=…; git -C $W` shell variable** (HANDOFF, "Things that
+  bit us"); harmless.
+- **Both runs' first event listed the six skills under their bare names as well** as `ai-pipeline:`.
+  The later runs and every attempt to reproduce it did not; likely a list cached by the desktop
+  session the runs were started from, which began before the move. The gate has no Skill tool, so
+  it cannot have mattered.
+
 ## 2026-10-20 — 2.1.0, built in four slices, at `4f73a70` … `923200a` (6 variants, 3 runs each)
 
 **PASS: every variant 3 of 3**, on `claude-opus-5-5`, after one re-run (`stale-base`). Five new or

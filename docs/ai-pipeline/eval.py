@@ -468,13 +468,16 @@ EVAL_ROOT = Path(tempfile.gettempdir()) / "ai-pipeline-evals"
 def leaks(config, events):
     """Forbidden files or refs the run reached for, whichever tool it used. The runner's own
     output directory is removed first: every worktree path contains it, and a pattern such as
-    `ai-pipeline` would otherwise match every command the run makes."""
+    `ai-pipeline` would otherwise match every command the run makes. So is the plugin's own
+    namespace (`ai-pipeline:phase-implementer`): starting the pipeline's agents is not a leak."""
     patterns = config.get("forbidden_paths", []) + config.get("forbidden_patterns", [])
     own = sorted({str(EVAL_ROOT), str(EVAL_ROOT.resolve())}, key=len, reverse=True)
+    namespace = f"{PLUGIN.name}:"
     found = set()
     for tool_input in tool_inputs(events):
         for root in own:
             tool_input = tool_input.replace(root, "")
+        tool_input = tool_input.replace(namespace, "")
         found.update(p for p in patterns if p in tool_input)
     return sorted(found)
 
