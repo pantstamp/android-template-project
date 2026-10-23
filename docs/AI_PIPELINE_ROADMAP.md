@@ -112,7 +112,8 @@ pinned to the tag, and enables the plugin:
 The committed file documents the pin, but it does not install anything. In a trusted folder,
 Claude Code may offer to install from it. That path was not tested in step 5 (see below), so
 the commands above are the supported way. `--sparse` keeps the template app out of the clone
-(checked in step 5: the checkout held only `.claude-plugin/` and `plugins/`).
+(checked on the real 3.0.0 install: `.claude-plugin/`, `plugins/` and the repository's top-level
+files, 488 KB; git's sparse "cone" mode always keeps top-level files).
 
 **How it updates.** Only when the project chooses: a PR moves `ref` to the new tag, and each
 developer then runs, with the project's tag:
@@ -185,7 +186,7 @@ installed one; `/reload-plugins` picks up edits. `eval.py` loads it the same way
   the trust dialog, `extraKnownMarketplaces` is inert, and `-p` never shows that dialog.
 - **Sources:** `https://…git#<ref>` is accepted. `file://` is not, and a bare path cannot pin a
   ref. A git source is cloned shallow. `marketplace add --sparse .claude-plugin plugins` checks
-  out only the plugin, not the template app.
+  out the plugin and the top-level files, not the template app's modules.
 
 ## 3. Versioning and rollback
 
