@@ -1,0 +1,14 @@
+{
+  "name": "ai-pipeline",
+  "owner": {
+    "name": "Pantelis Stampoulis"
+  },
+  "description": "The AI development pipeline built and tested in this template project.",
+  "plugins": [
+    {
+      "name": "ai-pipeline",
+      "source": "./plugins/ai-pipeline",
+      "description": "Spec, plan, build, gate, review and retro skills for Android projects."
+    }
+  ]
+}

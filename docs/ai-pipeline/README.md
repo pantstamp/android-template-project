@@ -1,6 +1,6 @@
 # Golden scenarios
 
-A suite that says whether a change to the pipeline (`.claude/skills/`, `.claude/agents/`,
+A suite that says whether a change to the pipeline (the plugin in `plugins/ai-pipeline/`,
 `.claude/pipeline.md`, the pipeline sections of `CLAUDE.md`) made it worse. It is step 2 of
 [`AI_PIPELINE_ROADMAP.md`](../AI_PIPELINE_ROADMAP.md); §4 there is the brief.
 
@@ -14,7 +14,7 @@ one scenario costs minutes and well over 100k tokens.
 
 | Decision | Choice | Why |
 |---|---|---|
-| Tooling | `eval.py`, a script around `claude -p` | `claude plugin eval` needs a newer CLI and a plugin manifest, runs each case in an empty workspace, and cannot answer a skill's questions mid-run. Revisit at roadmap step 5, when the skills are a plugin. |
+| Tooling | `eval.py`, a script around `claude -p` | `claude plugin eval` runs each case in an empty workspace and cannot answer a skill's questions mid-run, and the scenarios need a snapshot worktree and a simulated user. Rechecked at step 5, with the plugin in place: still true. |
 | Runs per scenario | 3 | Model output varies. 3 of 3 passes; 2 of 3 is `WARN`, a reason to look; less is `FAIL`. |
 | Order | gate → architect → developer → product owner | Cheapest and best-known baseline first; the architect next, because PR #32's defects started in the plan. |
 | Location | `scenarios/<name>/`, one folder each | Stays in this repo; the plugin ships without it. |
@@ -32,8 +32,14 @@ one scenario costs minutes and well over 100k tokens.
 **Mode** says where the run starts:
 - `outside` — in this repo, pointed at the snapshot worktree by the prompt. Used by the gate,
   which only reads git and files, so the current `CLAUDE.md` and agent are the ones loaded.
-- `inside` — in the worktree, with today's `.claude/skills`, `.claude/agents` and `CLAUDE.md`
-  committed onto the run's branch (see below). Used by the stages that write files.
+- `inside` — in the worktree, with today's `.claude/pipeline.md` and `CLAUDE.md` committed onto
+  the run's branch (see below). Used by the stages that write files.
+
+Either way, the pipeline is loaded as a plugin: every run gets a copy of `plugins/ai-pipeline/`
+taken when it starts, passed with `--plugin-dir`. Editing the working copy cannot change a run
+already going, and a skill that reaches outside the plugin folder fails as it would installed.
+A `prompt.md` invokes a skill as `/ai-pipeline:<skill>`, and `agent` names one as
+`ai-pipeline:<agent>`.
 
 Other `scenario.json` settings:
 - **`seed_files`**: files copied from the scenario folder into the run's tree before it starts, such
@@ -50,17 +56,16 @@ Other `scenario.json` settings:
 - **`judge_references`**: files only the judge reads, as `{"commit", "path", "label"}` read from
   git. The product owner's coverage bonus compares against the real spec this way.
 - **`stamped`**: the `STAMP` check. The committed `grade_file` must have
-  `pipeline: vX.Y.Z` under its title, matching `.claude/skills/PIPELINE_VERSION`.
+  `pipeline: vX.Y.Z` under its title, matching `plugins/ai-pipeline/skills/PIPELINE_VERSION`.
 - **`read_only`** and **`nested_no_git`**: the `READONLY` and `NESTEDGIT` checks. `NESTEDGIT`
   fails a run in which an agent spawned by the session (a phase implementer) ran a git command
   that changes history or undoes edits.
 - **`variants`**: named versions of the scenario. A value is extra prompt text, or
   `{"extra": text, "settings": {...}}` whose settings override the scenario's for that variant. A
   criterion tagged `(required, full/elsewhere)` is graded only in those variants.
-- **`install: "elsewhere"`** (an `outside` setting): the pipeline is not on disk where the run
-  looks, as when it is installed machine-wide or as a plugin. The run starts in a scratch folder
-  holding only the project's `CLAUDE.md`, `.claude/pipeline.md` and Gradle wrapper, and the agent
-  is passed with `--agents`, built from its file in this repo.
+- **`install: "elsewhere"`** (an `outside` setting): the run is in a project that installs the
+  plugin, not in this repo. It starts in a scratch folder holding only the project's `CLAUDE.md`,
+  `.claude/pipeline.md` and Gradle wrapper; the pipeline's files are only in the plugin.
 - **`pipeline_values`** (with `install: "elsewhere"`): `{name: value}` replacing rows of that
   folder's `pipeline.md`, such as a tool set to `none`.
 - **`stale_base`**: the branch is checked out in a separate clone, whose `origin` is a scratch
@@ -108,25 +113,33 @@ the commit they were taken at.
 
 ## Status
 
-`pipeline-v2.1.0` was released on 2026-10-21 on the rule below. Each `RESULTS.md` has the details,
+`pipeline-v3.0.0` was released on 2026-10-23 on the packaging-only rule below; `pipeline-v2.1.0`,
+on 2026-10-21, was the last release run on the full rule. Each `RESULTS.md` has the details,
 newest first. Prefer the `eval.py` numbers over the in-session entries further down.
 
 Models are pinned: `--model` and `--judge-model` default to `claude-opus-5-5`, and `--user-model`
 to `claude-sonnet-5-5`. Every summary records the model that actually ran. Results taken with a
 different model are not comparable.
 
-| # | Scenario | Folder | 2.1.0 | 2.0.0, same day |
-|---|---|---|---|---|
-| 1 | Gate | [`gate-movie-search`](scenarios/gate-movie-search/) | PASS, 3 of 3 in all 6 variants | — |
-| 2 | Architect | [`architect-movie-search`](scenarios/architect-movie-search/) | 2 of 3 (E6) | 1 of 3 (E6 twice) |
-| 3 | Developer | [`developer-dry-run`](scenarios/developer-dry-run/) | PASS, 3 of 3 | — |
-| 4 | Product owner | [`product-owner-movie-search`](scenarios/product-owner-movie-search/) | 4 of 6 (P6) | 3 of 3 |
+| # | Scenario | Folder | 3.0.0 (plugin, 1 run) | 2.1.0 | 2.0.0, same day as 2.1.0 |
+|---|---|---|---|---|---|
+| 1 | Gate | [`gate-movie-search`](scenarios/gate-movie-search/) | PASS, `full` and `elsewhere` | PASS, 3 of 3 in all 6 variants | — |
+| 2 | Architect | [`architect-movie-search`](scenarios/architect-movie-search/) | not run | 2 of 3 (E6) | 1 of 3 (E6 twice) |
+| 3 | Developer | [`developer-dry-run`](scenarios/developer-dry-run/) | PASS | PASS, 3 of 3 | — |
+| 4 | Product owner | [`product-owner-movie-search`](scenarios/product-owner-movie-search/) | PASS | 4 of 6 (P6) | 3 of 3 |
 
 **A release passes when no scenario is worse than the previous release, run the same day.** 3 of 3
 everywhere was the bar until 2026-10-20, when the released 2.0.0 scored 1 of 3 on the architect:
 model behaviour drifts, so an old baseline proves nothing about today. A scenario at 3 of 3 needs
 no comparison; one below it is run on the previous release the same day, and is released only if
 that does no better, or the gap is recorded and accepted.
+
+**That rule is for a release that changes what a skill or agent says or does.** A release that only
+changes packaging or names, as 3.0.0 does, needs **one passing run of each scenario that could break**.
+Those are the gate in its default and `elsewhere` variants, and the developer, for the agents it spawns.
+The suite measures behaviour, which such a release does not touch, so three runs and a same-day
+comparison would mostly measure the model's run-to-run variation. Decided on 2026-10-23; the
+release's CHANGELOG entry says which rule it used.
 
 **When a scenario drops below 3 of 3, compare with the previous release the same day** before
 changing a skill. Model behaviour drifts, and one failing run in three is common for P6 and F5:

@@ -1,0 +1,18 @@
+{
+  "extraKnownMarketplaces": {
+    "ai-pipeline": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/pantstamp/android-template-project.git",
+        "ref": "pipeline-v3.0.0",
+        "sparsePaths": [
+          ".claude-plugin",
+          "plugins"
+        ]
+      }
+    }
+  },
+  "enabledPlugins": {
+    "ai-pipeline@ai-pipeline": true
+  }
+}

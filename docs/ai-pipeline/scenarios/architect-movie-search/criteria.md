@@ -54,7 +54,7 @@ reported but never fail a run.
   first, then the network, and never writes.
 
 The runner adds `COMMITTED` (`PLAN.md` was committed on the branch), `STAMP` (`pipeline: vX.Y.Z`
-under the title, matching `.claude/skills/PIPELINE_VERSION`) and `LEAK` (the run reached for `master`, a
+under the title, matching `plugins/ai-pipeline/skills/PIPELINE_VERSION`) and `LEAK` (the run reached for `master`, a
 remote, the original plan's commit or the retro) itself.
 
 ## Bonus

@@ -2,6 +2,19 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-23 — 3.0.0 plumbing check, the plugin, at `738f417` (1 run)
+
+**PASS: 1 of 1**, on `claude-opus-5-5`, every criterion including P6 and all three bonuses. Run
+for STAMP: the spec carries `pipeline: v2.1.0`, so the skill reads `PIPELINE_VERSION` from the
+plugin's own folder. One run says nothing about P6's rate.
+
+| Run | Duration | Exchanges | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|---|
+| 1 | 506 s | 25 | 54 | 19,651 | $27.41 | 6 |
+
+- **The denials are the known `dontAsk` refusals:** five commit attempts with `$(printf …)` in
+  the message, and one `cat` chained with `;`. The run then committed plainly.
+
 ## 2026-10-20 — 2.1.0 (slices a–d), at `923200a` (3 + 3 runs), and `pipeline-v2.0.0` the same day
 
 **2.1.0: WARN, 2 of 3 twice (4 of 6).** **2.0.0, run the same day: 3 of 3.** Every failure is P6:

@@ -1,14 +1,14 @@
 # AI pipeline roadmap — from this project to a reusable package
 
-Status: steps 1–4 done. Step 3 is `pipeline-v2.0.0`; step 4's fixes are `pipeline-v2.1.0`.
-**Next: step 5**, the plugin. The next session's brief is
+Status: steps 1–5 done. Step 3 is `pipeline-v2.0.0`, step 4's fixes are `pipeline-v2.1.0`, and
+step 5, the plugin, is `pipeline-v3.0.0`. **Next: step 6**, the production project. The next session's brief is
 [`docs/ai-pipeline/HANDOFF.md`](ai-pipeline/HANDOFF.md). Re-planned on 2026-10-15 after a first
 attempt at a platform split regressed two stages (see §5).
 
 **Starting a new session on this roadmap:** read this file, then `CLAUDE.md`,
-`docs/AI_WORKFLOW.md`, `.claude/skills/README.md` and the HANDOFF.
+`docs/AI_WORKFLOW.md`, `plugins/ai-pipeline/skills/README.md` and the HANDOFF.
 
-The pipeline (`.claude/skills/`, guide in [`AI_WORKFLOW.md`](AI_WORKFLOW.md)) was built for this
+The pipeline (`plugins/ai-pipeline/`, guide in [`AI_WORKFLOW.md`](AI_WORKFLOW.md)) was built for this
 Android project. The goals, in order:
 
 1. **Use it on a second, production Android project**, installed and pinned to a version, with
@@ -31,8 +31,8 @@ released versions.
    branch there, and fix in this repo every place a skill still assumes this template. Done on
    2026-10-20; its eleven findings, ten fixed, are `pipeline-v2.1.0`
    ([`V2.1.0_FIXES.md`](ai-pipeline/V2.1.0_FIXES.md)).
-5. **Package as a plugin** (§2), in this repo, and switch this repo and the suite to it. Release as
-   `pipeline-v3.0.0` (the command and agent names change).
+5. ✅ **Package as a plugin** (§2), in this repo, and switch this repo and the suite to it.
+   Released as `pipeline-v3.0.0` on 2026-10-23 (the command and agent names change).
 6. **Install on the production project** (§2), pinned to the tag, and take one real feature
    through the whole pipeline, retro included.
 7. **Flutter**, when a real Flutter project adopts it (§5). Not before: with one platform you
@@ -73,7 +73,7 @@ Fix those here, as a patch release, before packaging.
 
 ## 2. Packaging (steps 5 and 6)
 
-Verified against Claude Code 2.1.296's plugin docs on 2026-10-15.
+Written against Claude Code 2.1.296's plugin docs on 2026-10-15; the open questions were tested in step 5 (end of this section).
 
 **Where it lives.** In this repo: the plugin in `plugins/ai-pipeline/` (skills, agents, templates,
 CHANGELOG, `.claude-plugin/plugin.json` with the version), and `.claude-plugin/marketplace.json` at
@@ -81,25 +81,73 @@ the repo root listing it with source `./plugins/ai-pipeline`. The template app a
 not shipped. A release is a `pipeline-vX.Y.Z` tag. The repo is public, so installing needs no
 token; it can move to its own repo later by changing one line in each consumer.
 
-**How a project installs it.** It commits `.claude/pipeline.md` and a `.claude/settings.json`:
+**How a project installs it.** It writes `.claude/pipeline.md` from the plugin's
+`pipeline.template.md` (every name, whether it may be `none`, and what it means) and commits it.
+Each developer then runs, once, in the project:
+
+```
+claude plugin marketplace add "https://github.com/pantstamp/android-template-project.git#pipeline-v3.0.0" --scope project --sparse .claude-plugin plugins
+claude plugin install ai-pipeline@ai-pipeline --scope project
+```
+
+The first developer commits the `.claude/settings.json` these write. It records the marketplace,
+pinned to the tag, and enables the plugin:
 
 ```json
 {
   "extraKnownMarketplaces": {
     "ai-pipeline": {
-      "source": { "source": "github", "repo": "pantstamp/android-template-project", "ref": "pipeline-v3.0.0" },
-      "autoUpdate": false
+      "source": {
+        "source": "git",
+        "url": "https://github.com/pantstamp/android-template-project.git",
+        "ref": "pipeline-v3.0.0",
+        "sparsePaths": [".claude-plugin", "plugins"]
+      }
     }
   },
   "enabledPlugins": { "ai-pipeline@ai-pipeline": true }
 }
 ```
 
-Each developer runs `claude plugin install ai-pipeline@ai-pipeline --scope project` once, after
-accepting the workspace trust dialog.
+The committed file documents the pin, but it does not install anything. In a trusted folder,
+Claude Code may offer to install from it. That path was not tested in step 5 (see below), so
+the commands above are the supported way. `--sparse` keeps the template app out of the clone
+(checked in step 5: the checkout held only `.claude-plugin/` and `plugins/`).
 
-**How it updates.** Only when the project chooses: a PR moves `ref` to the new tag, then
-`claude plugin update ai-pipeline@ai-pipeline`. Rollback moves it back.
+**How it updates.** Only when the project chooses: a PR moves `ref` to the new tag, and each
+developer then runs, with the project's tag:
+
+```
+claude plugin marketplace add "https://github.com/pantstamp/android-template-project.git#pipeline-vX.Y.Z" --scope project --sparse .claude-plugin plugins
+claude plugin update ai-pipeline@ai-pipeline --scope project
+```
+
+Rollback is the same two commands with the old tag. **Editing `ref` alone does nothing**, and a
+bare `plugin update` follows whatever tag this machine last added (see "Verified in step 5").
+
+**Deferred: a deterministic config check.** Today every skill and agent is told to stop and name a
+missing `pipeline.md` value. That is an instruction, so it depends on the model, and it can fire
+late, when the value is first used. A designed but unbuilt alternative:
+- a script in the plugin that compares the project's `pipeline.md` with the template, and checks
+  `gh` or `glab` and leftover copied skills
+- a `SessionStart` hook that runs it
+- the same check as each skill's first step
+- an `/ai-pipeline:doctor` skill
+
+It was deferred on 2026-10-23: with one consumer project, installed by the person who wrote its
+config, it guards against little and adds a hook to every session. **Build it when** a second
+project or another developer installs the plugin, or when step 6 hits a missing value the skills did
+not stop on.
+
+What a plugin hook can do, tested on 2026-10-23 with a throwaway plugin (Claude Code 2.1.296–2.1.306):
+- A `SessionStart` hook in the plugin's `hooks/hooks.json` runs with `${CLAUDE_PLUGIN_ROOT}` and
+  `CLAUDE_PROJECT_DIR` set.
+- Its JSON `systemMessage` is shown to the person **in the CLI only**, as "SessionStart:startup says:
+  …" among the startup notices, easy to miss. **The desktop app does not show it.**
+- Its `hookSpecificOutput.additionalContext` reaches the model in both. Unprompted, the desktop
+  session added the reported problem to its first reply. So a warning meant for the person is
+  sent through the model, worded as an instruction to tell them.
+- stderr reaches neither.
 
 **Developing it here.** `claude --plugin-dir ./plugins/ai-pipeline` loads the working copy over an
 installed one; `/reload-plugins` picks up edits. `eval.py` loads it the same way.
@@ -116,8 +164,28 @@ installed one; `/reload-plugins` picks up edits. `eval.py` loads it the same way
   that checks its AI-instruction files, for example for paths that do not exist, checks this one
   too; it must pass them.
 
-**Verify before relying on it:** the exact `subagent_type` string for a plugin agent, and that a
-pinned tag is not refetched by auto-update.
+**Verified in step 5** (2026-10-21, Claude Code 2.1.296, throwaway plugins under `claude -p`):
+- **A plugin skill is told its base directory.** The skill receives `Base directory for this
+  skill: <plugin>/skills/<skill>`, so `<base directory>/../PIPELINE_VERSION` resolves.
+  `${CLAUDE_SKILL_DIR}` and `${CLAUDE_PLUGIN_ROOT}` are substituted in `SKILL.md` too.
+- **A plugin agent's `subagent_type` is `<plugin>:<agent>`**: `ai-pipeline:pre-pr-gate`.
+- **A pinned tag is not refetched.** With the marketplace pinned to `v1`, `autoUpdate: true` and
+  `v2` pushed to `main`, the install stayed on v1 through `marketplace update`, `plugin update`
+  and two session starts.
+- **The pin lives in a per-user registry** (`~/.claude/plugins/known_marketplaces.json`), not
+  in settings. That has three consequences:
+  - Settings are copied into the registry only when the marketplace is first added. A changed
+    `ref` in `settings.json` is ignored by `marketplace update`, `plugin update` and session
+    start.
+  - `marketplace add "<url>#<tag>"` re-pins the marketplace. A following `plugin update` then
+    moves the install, forward or back. Both directions were tested.
+  - **One machine has one pin per marketplace name.** If project B adds `#v2`, a later `plugin
+    update` in project A moves A to v2 as well. Installed copies do not move by themselves.
+- **Settings-declared marketplaces need a trusted folder.** In a folder that has never passed
+  the trust dialog, `extraKnownMarketplaces` is inert, and `-p` never shows that dialog.
+- **Sources:** `https://…git#<ref>` is accepted. `file://` is not, and a bare path cannot pin a
+  ref. A git source is cloned shallow. `marketplace add --sparse .claude-plugin plugins` checks
+  out only the plugin, not the template app.
 
 ## 3. Versioning and rollback
 
@@ -130,11 +198,14 @@ Rolling back is easy; **noticing that a change made things worse** is the hard p
 - **Semver in `plugin.json`, a git tag per release, and a CHANGELOG** saying per stage what
   changed and why.
 - **Each project pins a version** through its marketplace entry's git ref. Rollback is moving the
-  pin back.
-- **Until extraction:** commits that touch the pipeline use the `chore(pipeline): …` prefix, and
-  releases are tagged `pipeline-vX.Y.Z`. The version is in `.claude/skills/PIPELINE_VERSION`,
-  the CHANGELOG is `.claude/skills/CHANGELOG.md`, and both move into the plugin's `skills/` at step 5. Roll back with
-  `git checkout pipeline-vX.Y.Z -- .claude/`; the version file goes back with it.
+  pin back, with the commands in §2: editing the ref alone does nothing.
+- **While the plugin lives in this repo:** commits that touch the pipeline use the
+  `chore(pipeline): …` prefix, and releases are tagged `pipeline-vX.Y.Z`. The version is in
+  `plugins/ai-pipeline/skills/PIPELINE_VERSION` and the plugin's `plugin.json` (`eval.py check`
+  fails when they differ), and the CHANGELOG is `plugins/ai-pipeline/skills/CHANGELOG.md`. The tag
+  scheme is kept rather than `claude plugin tag`'s `{name}--v{version}`: the pins and the history
+  already use it. Roll the working copy back with `git checkout pipeline-vX.Y.Z -- plugins/ai-pipeline/`
+  (to 2.1.0 or earlier, `-- .claude/`).
 
 ### Detecting regressions
 

@@ -2,6 +2,22 @@
 
 Newest first. Each entry records the pipeline commit it was taken at.
 
+## 2026-10-23 — 3.0.0 plumbing check, the plugin, at `738f417` (1 run)
+
+**PASS: 1 of 1**, on `claude-opus-5-5`, with no denials, after correcting the LEAK check. The
+skill started `ai-pipeline:phase-implementer` for each of the three phases, the riskiest rename
+in 3.0.0. B1 failed, as it always has.
+
+**LEAK first failed on the rename itself:** `ai-pipeline` is a forbidden pattern (it guards the
+suite in `docs/ai-pipeline/`), and the only matches were the `Agent` calls'
+`subagent_type: "ai-pipeline:phase-implementer"`. `eval.py` now removes the plugin's namespace
+before matching, as it removes its own output directory. Recomputed on the same transcript, LEAK
+passes, and a planted read of `docs/ai-pipeline/README.md` is still caught.
+
+| Run | Duration | Exchanges | Agent turns | Output tokens | Cost | Denials |
+|---|---|---|---|---|---|---|
+| 1 | 303 s | 6 | 36 | 8,131 | $6.10 | 0 |
+
 ## 2026-10-20 — 2.1.0 (slices a–d), at `923200a` (3 runs)
 
 **PASS: 3 of 3 runs passed every required criterion**, on `claude-opus-5-5`, with no denials. B1

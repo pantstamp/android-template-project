@@ -36,7 +36,7 @@ of behaviour (given / when / then, or equivalent), not a goal.
   "quickly", "smoothly" or "user-friendly" without a measure.
 
 The runner adds `COMMITTED` (`SPEC.md` committed on the branch), `STAMP` (`pipeline: vX.Y.Z`
-under the title, matching `.claude/skills/PIPELINE_VERSION`) and `LEAK` (no `master`, remote, issue or
+under the title, matching `plugins/ai-pipeline/skills/PIPELINE_VERSION`) and `LEAK` (no `master`, remote, issue or
 later commit reached for) itself.
 
 ## Bonus

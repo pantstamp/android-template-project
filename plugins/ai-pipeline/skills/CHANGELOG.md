@@ -1,12 +1,41 @@
 # Pipeline CHANGELOG
 
-One version for the whole pipeline: `.claude/skills/`, `.claude/agents/`, the shape of
-`.claude/pipeline.md` and the pipeline sections of `CLAUDE.md`. Each release is tagged
+One version for the whole pipeline: the `ai-pipeline` plugin's `skills/` and `agents/` (until
+2.1.0, `.claude/skills/` and `.claude/agents/`), the shape of `.claude/pipeline.md` and the
+pipeline sections of `CLAUDE.md`. Each release is tagged
 `pipeline-vX.Y.Z` and passes the golden scenarios in `docs/ai-pipeline/` first. How to version and release: [`README.md`](README.md#versions).
 
 Entries are grouped by stage and say what changed and why.
 
 ## Unreleased
+
+## 3.0.0 — 2026-10-23
+
+Roadmap step 5: the pipeline is a plugin. **Released on the packaging-only rule** (suite README,
+"Status"): no skill's process changed, so one run of each scenario the move could break, not
+three runs and a same-day comparison. Gate (`full`, `elsewhere`), developer and product owner each
+passed 1 of 1 on the plugin; the architect was not run. **Major**, because every name a user types or a skill
+spawns changes. **Upgrading a project:** delete its copies of the skills and agents
+(`.claude/skills/`, `.claude/agents/`, or the machine-wide `~/.claude/` ones), keep its
+`.claude/pipeline.md`, checking it has every name in the new `pipeline.template.md`, and install
+the plugin pinned to the tag
+(`docs/AI_PIPELINE_ROADMAP.md` §2). No skill's process changed.
+
+### All stages
+- **Shipped as the `ai-pipeline` plugin** in `plugins/ai-pipeline/`, listed by the repo's
+  `.claude-plugin/marketplace.json`. A project pins it to a `pipeline-vX.Y.Z` tag and moves the
+  pin when it chooses. The skills already found their own files from their base directory
+  (2.1.0), which a plugin skill is also told, so no path changed.
+- **Skills are `/ai-pipeline:<skill>`, agents `ai-pipeline:<agent>`.** The developer spawns
+  `ai-pipeline:phase-implementer`, the pre-PR checklist `ai-pipeline:pre-pr-gate`, and the hand-offs
+  name the prefixed skills. A bare name would find nothing in a project that installs the plugin.
+- **`pipeline.template.md` ships in the plugin**: every config name, whether it may be `none`, and
+  what it means, with **Fill in:** values. A new project starts from it, and an upgrading one
+  compares against it; before, the only copy was this repo's own `pipeline.md`, which is not
+  installed. `eval.py check` now checks the skills' names against the template, and this repo's
+  `pipeline.md` against the template.
+- **The version is in `plugin.json` as well as `PIPELINE_VERSION`.** `eval.py check` fails when
+  they differ, so a project's pin and the `pipeline:` stamp on its SPEC and PLAN agree.
 
 ## 2.1.0 — 2026-10-21
 

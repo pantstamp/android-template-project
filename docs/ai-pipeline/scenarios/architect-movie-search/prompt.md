@@ -1,4 +1,4 @@
-/architect movie-search
+/ai-pipeline:architect movie-search
 
 This session replays a historical point in the project. You are on `{{BRANCH}}`, the feature
 branch the product-owner stage created, with the spec committed. Stay on it: do not switch,

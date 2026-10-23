@@ -46,7 +46,7 @@ starting from. When resuming, `git log --oneline {{base}}..HEAD` shows which pha
 
 ### 2. For each phase
 
-Each phase is implemented by the **`phase-implementer` agent** (Sonnet), not in this
+Each phase is implemented by the **`ai-pipeline:phase-implementer` agent** (Sonnet), not in this
 conversation. Implementation is the bulky part of the work — file reads, build output, fix
 loops — and running it in the agent keeps this conversation down to the plan,
 the reports and the user's decisions for the whole feature. Every phase also starts from PLAN.md
@@ -114,7 +114,7 @@ the next agent.
 After the last phase, offer the gate: "All phases are done. Want me to run the pre-PR quality
 gate? It checks what CI can't — whether the plan was followed, whether the acceptance criteria
 hold, and whether debug leftovers made it in — then runs a CI pre-flight." If the user agrees,
-hand off to the **pre-pr-checklist** skill.
+hand off to the **ai-pipeline:pre-pr-checklist** skill.
 
 ### 5. Create the PR
 
@@ -164,7 +164,7 @@ glab mr create --source-branch {prefix}{feature-name} --target-branch {{base}} \
 EOF
 ```
 
-Do not merge. Tell the user the PR link, that a review is requested with: {{review}}; and that the **review-triage** skill walks through the findings.
+Do not merge. Tell the user the PR link, that a review is requested with: {{review}}; and that the **ai-pipeline:review-triage** skill walks through the findings.
 
 ## Key principles
 

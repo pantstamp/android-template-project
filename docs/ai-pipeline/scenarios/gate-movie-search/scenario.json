@@ -4,7 +4,7 @@
   "snapshot": "dd348bf",
   "base": "3e1577d",
   "mode": "outside",
-  "agent": "pre-pr-gate",
+  "agent": "ai-pipeline:pre-pr-gate",
   "tools": "Read,Grep,Glob,Bash",
   "allowed_tools": [
     "Read",
