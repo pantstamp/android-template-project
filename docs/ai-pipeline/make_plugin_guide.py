@@ -277,8 +277,9 @@ claude plugin marketplace add \\
 
 claude plugin install ai-pipeline@ai-pipeline --scope project
 """)
-s.append(p("The first command clones this repository at the tag, keeping only `.claude-plugin/` and "
-           "`plugins/` (`--sparse`), so the Android template app is never downloaded. The second copies the "
+s.append(p("The first command clones this repository at the tag. With `--sparse` it checks out "
+           "`.claude-plugin/`, `plugins/` and the repository's top-level files, under 1 MB, so the "
+           "Android template app's modules are never downloaded. The second copies the "
            "plugin into the machine's plugin cache. With `--scope project`, both record themselves in the "
            "project's `.claude/settings.json`:"))
 s += code(f"""
