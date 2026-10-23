@@ -1,4 +1,4 @@
-/product-owner Users should be able to search movies by title from the Discover tab.
+/ai-pipeline:product-owner Users should be able to search movies by title from the Discover tab.
 
 This session replays a historical point in the project. The feature branch already exists and
 is checked out: `{{BRANCH}}`. Treat it as the branch for this feature. Stay on it: do not switch,

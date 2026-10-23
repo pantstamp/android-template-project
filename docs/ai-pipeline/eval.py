@@ -36,6 +36,12 @@ REPO = Path(
 # `- [ID] (required|bonus[, variant[/variant…]]) text`
 CRITERION = re.compile(r"^- \[([A-Z0-9]+)\] \((required|bonus)(?:, ([a-z0-9/-]+))?\)")
 REQUIRED_FILES = ("scenario.json", "prompt.md", "criteria.md")
+# The pipeline under test: a plugin, loaded into every run with `--plugin-dir`.
+PLUGIN = REPO / "plugins" / "ai-pipeline"
+MARKETPLACE = REPO / ".claude-plugin" / "marketplace.json"
+# The config contract: every name a project's `.claude/pipeline.md` must have. Shipped in the plugin.
+TEMPLATE = PLUGIN / "pipeline.template.md"
+PROJECT_CONFIG = REPO / ".claude" / "pipeline.md"
 EVAL_GIT = ["-c", "user.name=ai-pipeline-eval", "-c", "user.email=eval@localhost"]
 # Pinned so results compare across machines and CLI versions: the CLI's own default model
 # changes, and the first CLI run silently used an older one than the recorded baselines.
@@ -124,9 +130,10 @@ def git(*args, cwd=REPO):
 
 
 def setup(config, run_dir, extra):
-    """Creates the snapshot worktree. Returns a dict with worktree, branch, cwd, scratch,
-    start (the commit the run begins from) and prompt."""
+    """Creates the snapshot worktree and the run's copy of the plugin. Returns a dict with
+    worktree, branch, cwd, scratch, plugin, start (the commit the run begins from) and prompt."""
     run_dir.mkdir(parents=True, exist_ok=True)
+    plugin = freeze_plugin(run_dir)
     worktree = run_dir / "worktree"
     scratch = run_dir / "scratch"
     scratch.mkdir(exist_ok=True)
@@ -143,16 +150,12 @@ def setup(config, run_dir, extra):
         git("worktree", "add", "--detach", str(worktree), config["snapshot"])
     write_sdk_dir(worktree)
     if config["mode"] == "inside":
-        # The pipeline under test is today's: all of `.claude/` that git tracks or would track,
-        # whatever files it is split into. The snapshot's own copy goes first, so a file the
-        # pipeline has since removed cannot linger. Committed, so the run starts from a clean tree.
+        # The project's side of the pipeline is today's: all of `.claude/` that git tracks or would
+        # track (its `pipeline.md`), and `CLAUDE.md`. The snapshot's own `.claude/` goes first, so
+        # the skills and agents a snapshot from before the plugin still holds cannot load beside
+        # it. Committed, so the run starts from a clean tree.
         shutil.rmtree(worktree / ".claude", ignore_errors=True)
-        pipeline = git("ls-files", "--cached", "--others", "--exclude-standard", ".claude").split("\n")
-        for path in filter(None, pipeline):
-            if not (REPO / path).is_file():
-                continue  # tracked but deleted, and not yet committed
-            (worktree / path).parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(REPO / path, worktree / path)
+        copy_tracked(".claude", worktree)
         shutil.copy2(REPO / "CLAUDE.md", worktree / "CLAUDE.md")
         git("add", "-A", "-f", ".claude", "CLAUDE.md", cwd=worktree)
     for target, source in config.get("seed_files", {}).items():
@@ -179,8 +182,27 @@ def setup(config, run_dir, extra):
     cwd = REPO if config["mode"] == "outside" else worktree
     if config.get("install") == "elsewhere":
         cwd = elsewhere_project(run_dir, config.get("pipeline_values", {}))
-    return {"worktree": worktree, "branch": branch, "cwd": cwd, "scratch": scratch, "start": start,
-            "prompt": prompt}
+    return {"worktree": worktree, "branch": branch, "cwd": cwd, "scratch": scratch, "plugin": plugin,
+            "start": start, "prompt": prompt}
+
+
+def copy_tracked(folder, target_root):
+    """Copies the files under `folder` (repo-relative) that git tracks or would track to the same
+    path under `target_root`, so a gitignored local file never reaches a run."""
+    paths = git("ls-files", "--cached", "--others", "--exclude-standard", folder).split("\n")
+    for path in filter(None, paths):
+        if not (REPO / path).is_file():
+            continue  # tracked but deleted, and not yet committed
+        (target_root / path).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(REPO / path, target_root / path)
+
+
+def freeze_plugin(run_dir):
+    """The run's own copy of the plugin, taken when it starts: editing the working copy during a
+    suite run cannot change a run already going. Only the plugin folder is copied, as an install
+    copies it, so a skill that reaches outside its folder fails here as it would installed."""
+    copy_tracked(PLUGIN.relative_to(REPO).as_posix(), run_dir / "frozen")
+    return run_dir / "frozen" / PLUGIN.relative_to(REPO)
 
 
 def stale_clone(config, run_dir, clone):
@@ -204,10 +226,9 @@ def stale_clone(config, run_dir, clone):
 
 
 def elsewhere_project(run_dir, values=None):
-    """An `outside` run's working directory when the pipeline is installed outside the project, as
-    machine-wide or as a plugin: the project's own files (`CLAUDE.md`, `.claude/pipeline.md`, the
-    Gradle wrapper the pre-flight runs) and none of the pipeline's. The agent is passed with
-    `--agents`, so neither it nor its files are on disk where the run looks."""
+    """An `outside` run's working directory when the project is not this repo, as for a project
+    that installs the plugin: the project's own files (`CLAUDE.md`, `.claude/pipeline.md`, the
+    Gradle wrapper the pre-flight runs) and none of the pipeline's, which only the plugin holds."""
     project = run_dir / "project"
     for path in ("CLAUDE.md", ".claude/pipeline.md", "gradlew", *git("ls-files", "gradle/wrapper").split()):
         (project / path).parent.mkdir(parents=True, exist_ok=True)
@@ -224,27 +245,6 @@ def elsewhere_project(run_dir, values=None):
             lines[rows[0]] = " | ".join(cells)
         config_file.write_text("\n".join(lines) + "\n")
     return project
-
-
-def agent_definition(name):
-    """The `--agents` JSON for one agent file: its frontmatter's description, tools and model, and
-    its body as the prompt."""
-    text = (REPO / ".claude" / "agents" / f"{name}.md").read_text()
-    _, front, body = text.split("---\n", 2)
-    fields, key = {}, None
-    for line in front.splitlines():
-        match = re.match(r"^([a-z-]+):\s*(.*)$", line)
-        if match:
-            key, value = match[1], match[2].strip()
-            fields[key] = "" if value in (">", "|") else value
-        elif key:
-            fields[key] = (fields[key] + " " + line.strip()).strip()
-    agent = {"description": fields.get("description", ""), "prompt": body.strip()}
-    if fields.get("tools"):
-        agent["tools"] = [t.strip() for t in fields["tools"].split(",")]
-    if fields.get("model") and fields["model"] != "inherit":
-        agent["model"] = fields["model"]
-    return json.dumps({name: agent})
 
 
 def write_sdk_dir(worktree):
@@ -295,10 +295,8 @@ def claude_turn(config, workspace, message, transcript, session, first):
         command += ["--session-id", session]
     else:
         command += ["--resume", session]
-    command += ["--model", config["run_model"]]
+    command += ["--model", config["run_model"], "--plugin-dir", str(workspace["plugin"])]
     if config.get("agent"):
-        if config.get("install") == "elsewhere":
-            command += ["--agents", agent_definition(config["agent"])]
         command += ["--agent", config["agent"]]
     if config.get("tools"):
         command += ["--tools", config["tools"]]
@@ -522,7 +520,7 @@ def nested_git(events):
 def stamp(config, workspace):
     """Whether the committed grade_file records the pipeline version under its title, as the
     SPEC and PLAN templates ask. The version is the one the run was given."""
-    version = (REPO / ".claude" / "skills" / "PIPELINE_VERSION").read_text().strip()
+    version = (PLUGIN / "skills" / "PIPELINE_VERSION").read_text().strip()
     expected = f"pipeline: v{version}"
     try:
         content = git("show", f"HEAD:{config['grade_file']}", cwd=workspace["worktree"])
@@ -677,7 +675,7 @@ def summarise(config, variant, runs):
 # Free checks on the pipeline's own files, run before every suite run. Each returns a list of
 # problems as "path:line: what is wrong".
 
-PIPELINE_DIRS = (REPO / ".claude" / "skills", REPO / ".claude" / "agents")
+PIPELINE_DIRS = (PLUGIN / "skills", PLUGIN / "agents")
 
 
 def pipeline_lines():
@@ -698,10 +696,10 @@ def check_project_paths():
             for path, number, line in pipeline_lines() if found.search(line)]
 
 
-def config_names():
-    """{name: may it be `none`?} from `.claude/pipeline.md`'s table."""
+def config_names(path=TEMPLATE):
+    """{name: may it be `none`?} from a config table: the plugin's template by default."""
     names = {}
-    for line in (REPO / ".claude" / "pipeline.md").read_text().splitlines():
+    for line in path.read_text().splitlines():
         match = re.match(r"^\| `\{\{([a-z-]+)\}\}` \| .*? \| (yes|no) \| ", line)
         if match:
             names[match[1]] = match[2] == "yes"
@@ -711,15 +709,30 @@ def config_names():
 
 
 def check_config_names():
-    """Every `{{name}}` a skill or agent uses is a row in `.claude/pipeline.md`, and every row says
-    whether it may be `none`."""
+    """Every `{{name}}` a skill or agent uses is a row in the plugin's config template, and every row
+    says whether it may be `none`."""
     names = config_names()
-    problems = [f".claude/pipeline.md: {{{{{name}}}}} does not say whether it may be `none`"
+    template = TEMPLATE.relative_to(REPO)
+    problems = [f"{template}: {{{{{name}}}}} does not say whether it may be `none`"
                 for name, may in names.items() if may is None]
     for path, number, line in pipeline_lines():
         for name in re.findall(r"\{\{([a-z-]+)\}\}", line):
             if name not in names:
-                problems.append(f"{path}:{number}: {{{{{name}}}}} is not in .claude/pipeline.md's table")
+                problems.append(f"{path}:{number}: {{{{{name}}}}} is not in {template}'s table")
+    return problems
+
+
+def check_project_config():
+    """This repo installs the plugin like any project, so its `.claude/pipeline.md` has exactly the
+    template's names, with the same `none` marks, and every value filled in."""
+    template, project = config_names(), config_names(PROJECT_CONFIG)
+    where = PROJECT_CONFIG.relative_to(REPO)
+    problems = [f"{where}: {{{{{n}}}}} is missing (it is in the template)" for n in template if n not in project]
+    problems += [f"{where}: {{{{{n}}}}} is not in the template" for n in project if n not in template]
+    problems += [f"{where}: {{{{{n}}}}} says `none` is {'allowed' if project[n] else 'not allowed'}, the template "
+                 f"the opposite" for n in template if n in project and project[n] != template[n]]
+    if "Fill in:" in PROJECT_CONFIG.read_text():
+        problems.append(f"{where}: a value still says **Fill in:**")
     return problems
 
 
@@ -755,7 +768,23 @@ def check_host_sections():
     return problems
 
 
-STATIC_CHECKS = (check_project_paths, check_config_names, check_lint_named_once, check_host_sections)
+def check_plugin_manifest():
+    """The plugin's manifest and `skills/PIPELINE_VERSION` hold the same version, which the
+    artifacts stamp and a project pins; and the marketplace lists the plugin at its folder."""
+    problems = []
+    manifest = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())
+    version = (PLUGIN / "skills" / "PIPELINE_VERSION").read_text().strip()
+    if manifest.get("version") != version:
+        problems.append(f"plugin.json version {manifest.get('version')} is not PIPELINE_VERSION {version}")
+    listed = {p["name"]: p.get("source") for p in json.loads(MARKETPLACE.read_text()).get("plugins", [])}
+    source = f"./{PLUGIN.relative_to(REPO).as_posix()}"
+    if listed.get(manifest.get("name")) != source:
+        problems.append(f"{MARKETPLACE.relative_to(REPO)}: {manifest.get('name')} is not listed at {source}")
+    return problems
+
+
+STATIC_CHECKS = (check_project_paths, check_config_names, check_project_config, check_lint_named_once,
+                 check_host_sections, check_plugin_manifest)
 
 
 def static_problems():
@@ -787,9 +816,10 @@ def cmd_setup(args):
     config = load(args.scenario)
     _, extra = variant_of(config, args.variant)
     workspace = setup(config, Path(args.dir).resolve(), extra)
-    for key in ("worktree", "branch", "cwd", "scratch", "start"):
+    for key in ("worktree", "branch", "cwd", "scratch", "plugin", "start"):
         print(f"{key + ':':10}{workspace[key]}")
     print(f"{'prompt:':10}{Path(args.dir).resolve() / 'prompt.md'}")
+    print(f"run with: claude --plugin-dir {workspace['plugin']}")
     print(f"remove with: git worktree remove --force {workspace['worktree']}"
           + (f" && git branch -D {workspace['branch']}" if workspace["branch"] else ""))
 

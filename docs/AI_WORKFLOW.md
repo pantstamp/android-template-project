@@ -1,9 +1,15 @@
 # Implementing a feature with the AI pipeline
 
 This project ships six Claude Code skills that cover a feature or fix from raw idea
-to post-merge retrospective. This is the guide to using them. Two of them hand
-bounded work to an agent (`.claude/agents/`): the developer skill implements each
-phase through one, and the pre-PR gate runs as one.
+to post-merge retrospective, as the `ai-pipeline` plugin in
+[`plugins/ai-pipeline/`](../plugins/ai-pipeline/). This is the guide to using them. Two of them
+hand bounded work to an agent (`ai-pipeline:phase-implementer`, `ai-pipeline:pre-pr-gate`): the
+developer skill implements each phase through one, and the pre-PR gate runs as one.
+
+This repo installs the released plugin, pinned to a tag, as any project would (the commands are
+in [`AI_PIPELINE_ROADMAP.md`](AI_PIPELINE_ROADMAP.md) §2). To work on the pipeline itself, start
+Claude Code with `claude --plugin-dir ./plugins/ai-pipeline`, which loads the working copy over the
+installed one.
 
 The skills are not a replacement for judgment. Each stage ends at a point where
 you decide whether to continue, and the guide calls out what to actually look at
@@ -15,12 +21,12 @@ before you do.
 
 | Stage | Skill | Produces | You decide |
 |---|---|---|---|
-| 1. Spec | `/product-owner` | the branch + `SPEC.md` | Are the acceptance criteria right? |
-| 2. Plan | `/architect` | `PLAN.md` | The design — you propose it first |
-| 3. Build | `/developer` | a commit per phase, then the PR | After **every phase** |
-| 4. Gate | `/pre-pr-checklist` | GO / NO GO | Ship it or fix it |
-| 5. Review | `@claude-review`, then `/review-triage` | PR comments → fixes | Which findings to act on |
-| 6. Learn | `/retrospective` | `RETRO.md` + rule changes | Which lessons to keep |
+| 1. Spec | `/ai-pipeline:product-owner` | the branch + `SPEC.md` | Are the acceptance criteria right? |
+| 2. Plan | `/ai-pipeline:architect` | `PLAN.md` | The design — you propose it first |
+| 3. Build | `/ai-pipeline:developer` | a commit per phase, then the PR | After **every phase** |
+| 4. Gate | `/ai-pipeline:pre-pr-checklist` | GO / NO GO | Ship it or fix it |
+| 5. Review | `@claude-review`, then `/ai-pipeline:review-triage` | PR comments → fixes | Which findings to act on |
+| 6. Learn | `/ai-pipeline:retrospective` | `RETRO.md` + rule changes | Which lessons to keep |
 
 The whole change happens on one branch — `feature/{name}` or `fix/{name}` — created in
 stage 1. Each stage commits its output there, so nothing sits untracked on `master` between
@@ -52,7 +58,7 @@ first run to see what each document looks like when finished.
 ## Stage 1 — Spec it
 
 ```
-/product-owner
+/ai-pipeline:product-owner
 
 Feature: user profiles
 Users should be able to create a profile with a display name,
@@ -88,7 +94,7 @@ screen renders from cache without a network call" is.
 ## Stage 2 — Plan it
 
 ```
-/architect
+/ai-pipeline:architect
 
 Create an implementation plan for the user-profiles feature.
 ```
@@ -189,7 +195,7 @@ that reads only the plan, so a gap in it shows up as soon as that phase starts.
 ## Stage 3 — Build it
 
 ```
-/developer
+/ai-pipeline:developer
 
 Implement the user-profiles feature.
 ```
@@ -250,7 +256,7 @@ would fail lint on a resource that a later phase consumes.
 Every approved phase is a commit, so the branch records the progress:
 
 ```
-/developer
+/ai-pipeline:developer
 
 Implement the user-profiles feature.
 ```
@@ -264,7 +270,7 @@ Claude shows them to you before going on.
 ## Stage 4 — The quality gate
 
 ```
-/pre-pr-checklist
+/ai-pipeline:pre-pr-checklist
 
 Run pre-PR checks for the user-profiles feature.
 ```
@@ -301,7 +307,7 @@ workflow does.)
 
 ### It runs as an independent agent
 
-The checks run in the **`pre-pr-gate` agent**, not in your conversation. That
+The checks run in the **`ai-pipeline:pre-pr-gate` agent**, not in your conversation. That
 conversation just built the feature, and is the one most likely to read the code
 generously. The agent is given the feature name and nothing else, judges the
 branch only from what is on disk and in git, and is read-only: it reports
@@ -365,7 +371,7 @@ It posts inline comments tagged by severity, plus a summary.
 ### Triage the findings
 
 ```
-/review-triage
+/ai-pipeline:review-triage
 
 Go through the review comments on PR #XX.
 ```
@@ -386,7 +392,7 @@ gh api repos/{owner}/{repo}/pulls/{n}/comments \
   --jq '.[] | select(.created_at > "<your last commit time>") | {path, line, body}'
 ```
 
-`/review-triage` runs this check for you before you merge. If it returns anything, it
+`/ai-pipeline:review-triage` runs this check for you before you merge. If it returns anything, it
 is by definition unaddressed. A second review round
 is exactly when attention is lowest — the work feels finished and the new
 comments look like an echo of ones you already handled.
@@ -398,7 +404,7 @@ comments look like an echo of ones you already handled.
 After merging:
 
 ```
-/retrospective
+/ai-pipeline:retrospective
 
 Run a retrospective for the user-profiles feature, PR #XX.
 ```
@@ -437,13 +443,13 @@ baseline numbers a future retrospective is compared against.
 ## The short version
 
 ```
-/product-owner   → SPEC.md      → read the acceptance criteria
-/architect       → PLAN.md      → design it first, then read the plan and explain it back
-/developer       → code         → review after every phase
-/pre-pr-checklist→ GO / NO GO   → act on CONDITIONAL GO
-@claude-review   → PR comments
-/review-triage   → fixes        → decide per finding, check for late ones
-/retrospective   → RETRO.md     → turn lessons into rules
+/ai-pipeline:product-owner    → SPEC.md      → read the acceptance criteria
+/ai-pipeline:architect        → PLAN.md      → design it first, then read the plan and explain it back
+/ai-pipeline:developer        → code         → review after every phase
+/ai-pipeline:pre-pr-checklist → GO / NO GO   → act on CONDITIONAL GO
+@claude-review                → PR comments
+/ai-pipeline:review-triage    → fixes        → decide per finding, check for late ones
+/ai-pipeline:retrospective    → RETRO.md     → turn lessons into rules
 ```
 
 Skipping a stage is allowed and sometimes correct — a one-line fix does not need

@@ -1,4 +1,4 @@
-# Handoff — after 2.1.0, before step 5 (the plugin)
+# Handoff — step 5 (the plugin) in progress
 
 Written 2026-10-21. **Start the next session with:** *"Read docs/ai-pipeline/HANDOFF.md and
 continue."* Then read [`AI_PIPELINE_ROADMAP.md`](../AI_PIPELINE_ROADMAP.md) §2 (packaging) and §3
@@ -42,16 +42,38 @@ previous release, run the same day. The released 2.0.0 scored 1 of 3 on the arch
 
 ## What is left, in order
 
-1. **Step 5: package the pipeline as a plugin** (roadmap §2), in this repo. Verify these three
-   first, each with a throwaway plugin and `claude -p`:
-   - a plugin skill is told its base directory, so `<base directory>/../PIPELINE_VERSION` resolves
-   - the exact `subagent_type` string for a plugin agent (`ai-pipeline:pre-pr-gate`?)
-   - that a pinned tag is not refetched by auto-update
-
-   Then move `.claude/skills/` and `.claude/agents/` into `plugins/ai-pipeline/`, add the manifests,
-   and switch this repo and `eval.py` to `--plugin-dir`. The gate's `elsewhere` variant becomes
-   the run with the pipeline installed as a plugin. Release as `3.0.0`: the skill and agent names
-   change.
+1. **Step 5: package the pipeline as a plugin** (roadmap §2). **In progress on
+   `chore/pipeline-3.0.0`** (2026-10-21):
+   - **Done.** The three checks passed, plus four findings, all in roadmap §2 under "Verified in
+     step 5". The biggest: a pin lives in a per-user registry, so editing `ref` in settings does
+     nothing, and updating means `marketplace add <url>#<tag>` and then `plugin update`.
+   - **Done.** `.claude/skills/` and `.claude/agents/` moved to `plugins/ai-pipeline/`, with
+     `plugin.json` (still `2.1.0`) and the root `.claude-plugin/marketplace.json`. The spawn and
+     hand-off names are prefixed `ai-pipeline:`, and so are the scenario prompts and the gate's
+     `agent`. `eval.py` gives every run a frozen copy of the plugin through `--plugin-dir` (no more
+     `--agents`), and its fifth static check compares `plugin.json` with `PIPELINE_VERSION`. The
+     docs are updated.
+   - **Checked, free or nearly:** `eval.py check` passes, and `claude plugin validate` passes. In
+     a `setup` worktree, a haiku session loads exactly the six `ai-pipeline:` skills and both
+     agents, with no bare duplicates.
+   - **Done on 2026-10-23:**
+     - `pipeline.template.md` ships in the plugin.
+     - `eval.py check` has six checks; the new one keeps this repo's `pipeline.md` in step with the
+       template.
+     - The user guide is [`PLUGIN_GUIDE.pdf`](PLUGIN_GUIDE.pdf). Rebuild it with
+       `make_plugin_guide.py`; never edit the PDF.
+     - Plugin hooks were tested, and a config-check design was **deferred** with a trigger (roadmap
+       §2, "Deferred").
+   - **Left:**
+     - **Plumbing runs, not the full suite** (decided 2026-10-23, suite README "Status"). One
+       run each of the gate in its default and `elsewhere` variants and the developer, about
+       $25–35. Optionally one product-owner run, for its STAMP check.
+     - Then the release commit: `3.0.0` in `PIPELINE_VERSION` and `plugin.json`, the CHANGELOG
+       heading, and this repo's `.claude/settings.json` pinned to `pipeline-v3.0.0`. The user chose
+       on 2026-10-21 that this repo installs the released tag like any consumer, and develops with
+       `--plugin-dir`.
+     - After merge and tagging, install here with the roadmap §2 commands. That is the first real
+       install from GitHub.
 2. **Step 6: install on the production project** (GitLab), pinned to the tag:
    - commit its `pipeline.md`; it then runs under the project's own CI checks
    - take one real feature through the whole pipeline, ending with a retro
