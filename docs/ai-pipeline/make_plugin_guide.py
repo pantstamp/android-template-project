@@ -104,10 +104,9 @@ s += [Spacer(1, 40 * mm), Paragraph("The ai-pipeline plugin", title),
       p("Source: `plugins/ai-pipeline/` in `pantstamp/android-template-project`. Written for "
         "Claude Code 2.1.296 on 2026-10-23."),
       Spacer(1, 10)]
-s += box("**Status when this was written.** The plugin is built on the branch `chore/pipeline-3.0.0` but "
-         "not yet released. The tag `pipeline-v3.0.0` does not exist until the golden-scenario suite passes "
-         "and the release PR is merged. Until then, the install and update commands in sections 5 and 6 have nothing to "
-         "fetch. Everything else here describes how the plugin works now.")
+s += box("**Current version: 3.0.0**, tagged `pipeline-v3.0.0`, the first release as a plugin. Each "
+         "release's changes, and what a project must do to take it, are in "
+         "`plugins/ai-pipeline/skills/CHANGELOG.md`.")
 s += [Spacer(1, 6), p("**Contents**", body)]
 s += steps(["What the plugin is, and where each part lives",
             "Using the pipeline in a project",

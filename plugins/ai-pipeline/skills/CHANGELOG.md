@@ -9,7 +9,12 @@ Entries are grouped by stage and say what changed and why.
 
 ## Unreleased
 
-Roadmap step 5: the pipeline is a plugin. **Major**, because every name a user types or a skill
+## 3.0.0 — 2026-10-23
+
+Roadmap step 5: the pipeline is a plugin. **Released on the packaging-only rule** (suite README,
+"Status"): no skill's process changed, so one run of each scenario the move could break, not
+three runs and a same-day comparison. Gate (`full`, `elsewhere`), developer and product owner each
+passed 1 of 1 on the plugin; the architect was not run. **Major**, because every name a user types or a skill
 spawns changes. **Upgrading a project:** delete its copies of the skills and agents
 (`.claude/skills/`, `.claude/agents/`, or the machine-wide `~/.claude/` ones), keep its
 `.claude/pipeline.md`, checking it has every name in the new `pipeline.template.md`, and install

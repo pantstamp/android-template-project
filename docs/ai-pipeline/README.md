@@ -113,19 +113,20 @@ the commit they were taken at.
 
 ## Status
 
-`pipeline-v2.1.0` was released on 2026-10-21 on the rule below. Each `RESULTS.md` has the details,
+`pipeline-v3.0.0` was released on 2026-10-23 on the packaging-only rule below; `pipeline-v2.1.0`,
+on 2026-10-21, was the last release run on the full rule. Each `RESULTS.md` has the details,
 newest first. Prefer the `eval.py` numbers over the in-session entries further down.
 
 Models are pinned: `--model` and `--judge-model` default to `claude-opus-5-5`, and `--user-model`
 to `claude-sonnet-5-5`. Every summary records the model that actually ran. Results taken with a
 different model are not comparable.
 
-| # | Scenario | Folder | 2.1.0 | 2.0.0, same day |
-|---|---|---|---|---|
-| 1 | Gate | [`gate-movie-search`](scenarios/gate-movie-search/) | PASS, 3 of 3 in all 6 variants | — |
-| 2 | Architect | [`architect-movie-search`](scenarios/architect-movie-search/) | 2 of 3 (E6) | 1 of 3 (E6 twice) |
-| 3 | Developer | [`developer-dry-run`](scenarios/developer-dry-run/) | PASS, 3 of 3 | — |
-| 4 | Product owner | [`product-owner-movie-search`](scenarios/product-owner-movie-search/) | 4 of 6 (P6) | 3 of 3 |
+| # | Scenario | Folder | 3.0.0 (plugin, 1 run) | 2.1.0 | 2.0.0, same day as 2.1.0 |
+|---|---|---|---|---|---|
+| 1 | Gate | [`gate-movie-search`](scenarios/gate-movie-search/) | PASS, `full` and `elsewhere` | PASS, 3 of 3 in all 6 variants | — |
+| 2 | Architect | [`architect-movie-search`](scenarios/architect-movie-search/) | not run | 2 of 3 (E6) | 1 of 3 (E6 twice) |
+| 3 | Developer | [`developer-dry-run`](scenarios/developer-dry-run/) | PASS | PASS, 3 of 3 | — |
+| 4 | Product owner | [`product-owner-movie-search`](scenarios/product-owner-movie-search/) | PASS | 4 of 6 (P6) | 3 of 3 |
 
 **A release passes when no scenario is worse than the previous release, run the same day.** 3 of 3
 everywhere was the bar until 2026-10-20, when the released 2.0.0 scored 1 of 3 on the architect:
