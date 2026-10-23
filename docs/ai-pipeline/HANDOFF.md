@@ -1,21 +1,41 @@
 # Handoff — after 3.0.0, before step 6 (the production project)
 
-Written 2026-10-23. **Start the next session with:** *"Read docs/ai-pipeline/HANDOFF.md and
-continue."* Then read [`AI_PIPELINE_ROADMAP.md`](../AI_PIPELINE_ROADMAP.md) §2 (packaging) and the
-user guide [`PLUGIN_GUIDE.pdf`](PLUGIN_GUIDE.pdf) (built by `make_plugin_guide.py`; never edit the PDF).
+Written 2026-10-23, after `pipeline-v3.0.0` was released and installed in this repo. Read
+[`AI_PIPELINE_ROADMAP.md`](../AI_PIPELINE_ROADMAP.md) §2 (packaging) and the user guide
+[`PLUGIN_GUIDE.pdf`](PLUGIN_GUIDE.pdf) (built by `make_plugin_guide.py`; never edit the PDF).
+
+## Starting the next session
+
+**Step 6 runs on the production project, on another machine**, so the session starts there, not
+in this repo. This HANDOFF is not part of the plugin, so that session reads it from a clone of this
+repo. On the production machine, as in step 4 ([`STEP4_GUIDE.md`](STEP4_GUIDE.md)):
+
+```bash
+git -C ~/src/android-template-project pull    # or: git clone https://github.com/pantstamp/android-template-project.git ~/src/android-template-project
+cd ~/src/the-project && claude --add-dir ~/src/android-template-project
+```
+
+Then say: *"Read `~/src/android-template-project/docs/ai-pipeline/HANDOFF.md` and do step 6."*
+
+**Work on the pipeline itself** (the follow-ups below) starts in this repo with *"Read
+docs/ai-pipeline/HANDOFF.md and continue."*
 
 ## Before you start
 
-- [ ] The 3.0.0 PR is merged, and `pipeline-v3.0.0` is tagged on the merge commit and pushed
-  (`git ls-remote --tags origin pipeline-v3.0.0`).
-- [ ] This repo has the released plugin installed: `claude plugin list` shows
-  `ai-pipeline@ai-pipeline` at 3.0.0. If not, run the install commands in roadmap §2 here.
+On the production machine:
+- [ ] `claude --version` is 2.1.280 or newer, and `claude -p "reply with ok"` answers.
+- [ ] `glab auth status` passes (the project is on GitLab).
+- [ ] `git ls-remote --tags https://github.com/pantstamp/android-template-project.git pipeline-v3.0.0`
+  shows the tag.
+
+In this repo, for pipeline work:
 - [ ] `git worktree list` shows only the main checkout, and `git branch | grep -- -eval-` is empty.
-- [ ] `claude -p "reply with ok" --model claude-opus-5-5` answers, and `python3 docs/ai-pipeline/eval.py check` passes.
+- [ ] `python3 docs/ai-pipeline/eval.py check` passes.
 
 ## Where things stand
 
-**Steps 1–5 are done.** 3.0.0 is the pipeline as a Claude Code plugin:
+**Steps 1–5 are done.** `pipeline-v3.0.0` is tagged on `ed46691`, the merge of PR #49, and
+pushed. 3.0.0 is the pipeline as a Claude Code plugin:
 - **Where it lives.** The source is `plugins/ai-pipeline/` (skills, agents, `pipeline.template.md`,
   `PIPELINE_VERSION`, the CHANGELOG). The repo root's `.claude-plugin/marketplace.json` lists it.
   A release is a `pipeline-vX.Y.Z` tag.
@@ -23,6 +43,16 @@ user guide [`PLUGIN_GUIDE.pdf`](PLUGIN_GUIDE.pdf) (built by `make_plugin_guide.p
   changed.
 - **This repo is a consumer too.** `.claude/settings.json` pins the released tag. Develop with
   `claude --plugin-dir ./plugins/ai-pipeline`, which loads the working copy over the installed one.
+- **The install from GitHub works.** It was done in this repo on 2026-10-23 with the guide's two
+  commands, unchanged. A plain session loads `ai-pipeline@3.0.0` from
+  `~/.claude/plugins/cache/ai-pipeline/ai-pipeline/3.0.0/`, with the six skills and two agents
+  under their `ai-pipeline:` names and none under bare names. Two things it showed:
+  - The install **rewrites `settings.json` with its keys reordered**, with the same content. Commit
+    either form; do not mistake the diff for a change.
+  - The sparse checkout in `~/.claude/plugins/marketplaces/ai-pipeline/` also holds this repo's
+    top-level files (`CLAUDE.md`, `gradlew` …, 488 KB), because of git's cone mode (PR #50). Claude
+    Code never reads them: `CLAUDE.md` is loaded from the working folder and its parents, and the
+    installed plugin holds only the plugin folder.
 - **The suite.** `eval.py` gives every run a frozen copy of the plugin through `--plugin-dir`.
   `eval.py check` has six static checks, including that `plugin.json` matches `PIPELINE_VERSION`
   and that this repo's `pipeline.md` matches the template.
@@ -47,6 +77,8 @@ for step 6:
      2.1.0 added: `{{rules}}`, `{{rules-home}}`, `{{lint}}` and `{{issues}}`.
    - run the two install commands, and commit `pipeline.md` and `settings.json`. They then run under
      the project's own CI checks.
+   - restart Claude Code, check `claude plugin list` shows 3.0.0, and that typing `/ai-pipeline:`
+     lists the six skills
    - take one real feature through the whole pipeline, ending with a retro
    - this is the first run of the GitLab steps, of rules kept outside `CLAUDE.md`, of a flavoured
      project's verification commands, and of an install from GitHub on another machine
